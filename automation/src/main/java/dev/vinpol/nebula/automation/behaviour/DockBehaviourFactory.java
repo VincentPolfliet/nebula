@@ -1,8 +1,11 @@
 package dev.vinpol.nebula.automation.behaviour;
 
+import dev.vinpol.nebula.automation.behaviour.state.FailureReason;
+import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.DockShip200Response;
 import dev.vinpol.spacetraders.sdk.models.OrbitShip200ResponseData;
+import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipNav;
 
 public class DockBehaviourFactory implements ShipBehaviourFactory {
@@ -15,20 +18,28 @@ public class DockBehaviourFactory implements ShipBehaviourFactory {
 
     @Override
     public ShipBehaviour create() {
-        return ship -> {
-            if (ship.isDocked()) {
-                return ShipBehaviourResult.done();
+        return new ShipBehaviour() {
+            @Override
+            public String getName() {
+                return "dock";
             }
 
-            if (ship.isInTransit()) {
+            @Override
+            public ShipBehaviourResult update(Ship ship) {
+                if (ship.isDocked()) {
+                    return ShipBehaviourResult.failure(FailureReason.DOCKED);
+                }
+
+                if (ship.isInTransit()) {
+                    return ShipBehaviourResult.failure(FailureReason.IN_TRANSIT);
+                }
+
+                DockShip200Response dockResponse = fleetApi.dockShip(ship.getSymbol());
+                OrbitShip200ResponseData data = dockResponse.getData();
+                ShipNav nav = data.getNav();
+                ship.setNav(nav);
                 return ShipBehaviourResult.done();
             }
-
-            DockShip200Response dockResponse = fleetApi.dockShip(ship.getSymbol());
-            OrbitShip200ResponseData data = dockResponse.getData();
-            ShipNav nav = data.getNav();
-            ship.setNav(nav);
-            return ShipBehaviourResult.done();
         };
     }
 }

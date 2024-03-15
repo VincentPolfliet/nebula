@@ -27,7 +27,7 @@ class WaypointSymbolTest {
 
     @Test
     void tryParseNoSplittableInThreeThrowsException() {
-        IllegalArgumentException exception = catchIllegalArgumentException(() -> WaypointSymbol.tryParse("X1-DD"));
+        IllegalStateException exception = catchIllegalStateException(() -> WaypointSymbol.tryParse("X1-DD"));
 
         assertThat(exception).isNotNull();
     }

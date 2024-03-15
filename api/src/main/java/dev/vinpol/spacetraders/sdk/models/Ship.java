@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Ship details.
@@ -39,6 +40,12 @@ public class Ship {
         return this;
     }
 
+    public Ship withNav(Consumer<ShipNav> consumer) {
+        ShipNav currentNav = getNav() != null ? getNav() : new ShipNav();
+        consumer.accept(currentNav);
+        return nav(currentNav);
+    }
+
     public boolean isInOrbit() {
         return getNav().isInOrbit();
     }
@@ -49,6 +56,17 @@ public class Ship {
 
     public boolean isDocked() {
         return getNav().isDocked();
+    }
+
+    public boolean isAtLocation(String waypoint) {
+        ShipNavRoute route = nav.getRoute();
+        ShipNavRouteWaypoint destination = route.getDestination();
+
+        if (destination == null) {
+            return false;
+        }
+
+        return waypoint.equals(route.getDestination().getSymbol());
     }
 
     public Ship crew(ShipCrew crew) {
@@ -76,8 +94,14 @@ public class Ship {
         return this;
     }
 
+    public Ship withCooldown(Consumer<Cooldown> consumer) {
+        Cooldown currentCooldown = getCooldown() != null ? getCooldown() : Cooldown.noCooldown(getSymbol());
+        consumer.accept(currentCooldown);
+        return cooldown(currentCooldown);
+    }
+
     public boolean hasActiveCooldown() {
-        return getCooldown().getExpiration() != null;
+        return getCooldown().isActive();
     }
 
     public Ship modules(List<ShipModule> modules) {
@@ -105,6 +129,13 @@ public class Ship {
         return this;
     }
 
+
+    public Ship withCargo(Consumer<ShipCargo> consumer) {
+        ShipCargo currentCargo = getCargo() != null ? getCargo() : new ShipCargo();
+        consumer.accept(currentCargo);
+        return cargo(currentCargo);
+    }
+
     public boolean isCargoFull() {
         return cargo.isFull();
     }
@@ -112,6 +143,12 @@ public class Ship {
     public Ship fuel(ShipFuel fuel) {
         this.fuel = fuel;
         return this;
+    }
+
+    public Ship withFuel(Consumer<ShipFuel> consumer) {
+        ShipFuel currentFuel = getFuel() != null ? getFuel() : new ShipFuel();
+        consumer.accept(currentFuel);
+        return fuel(currentFuel);
     }
 
     public boolean isFuelFull() {

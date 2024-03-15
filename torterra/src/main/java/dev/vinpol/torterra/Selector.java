@@ -1,26 +1,62 @@
 package dev.vinpol.torterra;
 
+import lombok.Getter;
+
+import java.util.Iterator;
 import java.util.Objects;
 
-class Selector<T> extends Leaf<T> {
-	private final Iterable<Leaf<T>> leaves;
+public class Selector<T> extends StatefulLeaf<T> implements IterableLeaf<T>, LeafIterator<T> {
 
-	public Selector(Iterable<Leaf<T>> leaves) {
-        super();
+
+    private final Iterable<Leaf<T>> leaves;
+    private final Iterator<Leaf<T>> iterator;
+    @Getter
+    private Leaf<T> current;
+
+    public Selector(Iterable<Leaf<T>> leaves) {
         this.leaves = Objects.requireNonNull(leaves);
-	}
+        this.iterator = leaves.iterator();
+    }
 
-	@Override
-	public void act(T instance) {
-		for (Leaf<T> leaf : leaves) {
-			leaf.act(instance);
+    @Override
+    public void doAct(T instance) {
+        current = null;
 
-			if (leaf.isSuccess()) {
-				succeed();
-				return;
-			}
-		}
+        if (!isRunning()) {
+            return;
+        }
 
-		fail();
-	}
+        if (isRunning() && iterator.hasNext()) {
+            current = iterator.next();
+            LeafState result = current.act(instance);
+
+            if (result == LeafState.SUCCESS) {
+                succeed();
+            }
+        }
+
+        if (isRunning() && !iterator.hasNext()) {
+            fail();
+        }
+    }
+
+    @Override
+    public LeafIterator<T> leafIterator() {
+        return this;
+    }
+
+    @Override
+    public Iterator<Leaf<T>> iterator() {
+        return leaves.iterator();
+    }
+
+    @Override
+    public boolean hasNext() {
+        return isRunning();
+    }
+
+    @Override
+    public Leaf<T> current() {
+        return current;
+    }
 }

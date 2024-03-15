@@ -1,68 +1,14 @@
 package dev.vinpol.torterra;
 
-public abstract class Leaf<T> {
+@FunctionalInterface
+public interface Leaf<T> {
+    LeafState act(T instance);
 
-    private final String name;
-    protected LeafState state = LeafState.IDLE;
-
-    protected Leaf() {
-        this.name = null;
+    default boolean isFailSafe() {
+        return this instanceof FailSafeLeaf<T>;
     }
 
-    protected Leaf(String name) {
-        this.name = name;
-    }
-
-    public static <T> Leaf<T> newLeaf() {
-        return new Leaf<>() {
-            @Override
-            public void act(T instance) {
-
-            }
-        };
-    }
-
-    public abstract void act(T instance);
-
-    protected void succeed() {
-        this.state = LeafState.SUCCESS;
-    }
-
-    protected void fail() {
-        this.state = LeafState.FAILURE;
-    }
-
-    public boolean isSuccess() {
-        return state.equals(LeafState.SUCCESS);
-    }
-
-    public boolean isFailure() {
-        return state.equals(LeafState.FAILURE);
-    }
-
-    public LeafState getState() {
-        return state;
-    }
-
-    public boolean isRunning() {
-        return state.equals(LeafState.IDLE);
-    }
-
-    public enum LeafState {
-        SUCCESS,
-        FAILURE,
-        IDLE
-    }
-
-    @Override
-    public String toString() {
-        if (name != null) {
-            return name;
-        }
-
-        return "Leaf{" +
-               "name='" + name + '\'' +
-               ", state=" + state +
-               '}';
+    default boolean isIterable() {
+        return this instanceof IterableLeaf<T>;
     }
 }

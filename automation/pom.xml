@@ -26,9 +26,8 @@
         </dependency>
 
         <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.14.0</version>
+            <groupId>dev.vinpol.nebula</groupId>
+            <artifactId>javagoap</artifactId>
         </dependency>
 
         <dependency>
@@ -76,10 +75,10 @@
                 <artifactId>pitest-maven</artifactId>
                 <configuration>
                     <targetClasses>
-                        <param>dev.vinpol.nebula.automation*</param>
+                        <param>dev.vinpol.nebula.automation.behaviour*</param>
                     </targetClasses>
                     <targetTests>
-                        <param>dev.vinpol.nebula.automation*</param>
+                        <param>dev.vinpol.nebula.automation.behaviour*</param>
                     </targetTests>
                 </configuration>
             </plugin>

@@ -11,10 +11,9 @@ class DelegateLeafTest {
         Leaf<Object> innerStep = Torterra.succeed();
         DelegateLeaf<Object> delegate = new DelegateLeaf<>(innerStep);
 
-        delegate.act(new Object());
+        LeafState result = delegate.act(new Object());
 
-        assertThat(delegate.isSuccess()).isTrue();
-        assertThat(innerStep.isSuccess()).isTrue();
+        assertThat(result).isEqualTo(LeafState.SUCCESS);
     }
 
 
@@ -23,9 +22,8 @@ class DelegateLeafTest {
         Leaf<Object> innerStep = Torterra.fail();
         DelegateLeaf<Object> delegate = new DelegateLeaf<>(innerStep);
 
-        delegate.act(new Object());
+        LeafState state = delegate.act(new Object());
 
-        assertThat(delegate.isFailure()).isTrue();
-        assertThat(innerStep.isFailure()).isTrue();
+        assertThat(state).isEqualTo(LeafState.FAILED);
     }
 }

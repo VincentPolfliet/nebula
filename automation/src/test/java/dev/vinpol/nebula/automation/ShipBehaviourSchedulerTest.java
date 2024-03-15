@@ -2,8 +2,9 @@ package dev.vinpol.nebula.automation;
 
 import dev.vinpol.nebula.automation.algorithms.ShipAlgorithm;
 import dev.vinpol.nebula.automation.algorithms.ShipAlgorithmResolver;
+import dev.vinpol.nebula.automation.behaviour.state.Done;
 import dev.vinpol.nebula.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.automation.behaviour.ShipBehaviourResult;
+import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipMother;
 import dev.vinpol.spacetraders.sdk.models.ShipRole;
@@ -18,9 +19,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.atomic.AtomicBoolean;
 
-import static dev.vinpol.nebula.automation.behaviour.ShipBehaviourResult.done;
+import static dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult.done;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.awaitility.Awaitility.await;
@@ -58,19 +58,6 @@ class ShipBehaviourSchedulerTest {
     }
 
     @Test
-    void scheduleTickThrowsExceptionWhenParamsAreNull() {
-        assertThatNullPointerException()
-            .isThrownBy(() -> {
-                sut.scheduleTick(null, new ShipAlgorithmResolver(Collections.emptyMap()));
-            });
-
-        assertThatNullPointerException()
-            .isThrownBy(() -> {
-                sut.scheduleTick(new Ship(), null);
-            });
-    }
-
-    @Test
     void scheduleTick() {
         Ship ship = ShipMother.excavator();
         when(algorithm.decideBehaviour(ship)).thenReturn(ShipBehaviour.ofResult(done()));
@@ -79,7 +66,7 @@ class ShipBehaviourSchedulerTest {
 
         await().until(stage::isDone);
         ShipBehaviourResult result = stage.getNow(null);
-        assertThat(result).isInstanceOf(ShipBehaviourResult.Done.class);
+        assertThat(result).isInstanceOf(Done.class);
         assertThat(sut.isTickScheduled(ship)).isFalse();
     }
 
@@ -93,8 +80,21 @@ class ShipBehaviourSchedulerTest {
 
         await().until(stage::isDone);
         ShipBehaviourResult result = stage.getNow(null);
-        assertThat(result).isInstanceOf(ShipBehaviourResult.Done.class);
+        assertThat(result).isInstanceOf(Done.class);
         assertThat(sut.isTickScheduled(ship)).isFalse();
+    }
+
+    @Test
+    void scheduleTickThrowsExceptionWhenParamsAreNull() {
+        assertThatNullPointerException()
+            .isThrownBy(() -> {
+                sut.scheduleTick(null, new ShipAlgorithmResolver(Collections.emptyMap()));
+            });
+
+        assertThatNullPointerException()
+            .isThrownBy(() -> {
+                sut.scheduleTick(new Ship(), null);
+            });
     }
 
     @Test

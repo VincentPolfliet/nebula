@@ -4,20 +4,22 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static dev.vinpol.torterra.Torterra.succeed;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class SequenceTest {
 
     @Test
     void whenLeafSuccessSequenceAlsoSuccess() {
-        Leaf<Object> failed = Torterra.succeed();
         Sequence<Object> sequence = new Sequence<>(
-            List.of(failed)
+            List.of(succeed())
         );
 
-        sequence.act(new Object());
+        LeafState state = sequence.act(new Object());
 
-        assertThat(sequence.isSuccess()).isTrue();
+        assertThat(state).isEqualTo(LeafState.SUCCESS);
     }
 
     @Test
@@ -27,31 +29,37 @@ class SequenceTest {
             List.of(failed)
         );
 
-        sequence.act(new Object());
+        LeafState result = sequence.act(new Object());
 
-        assertThat(sequence.isFailure()).isTrue();
+        assertThat(result).isEqualTo(LeafState.FAILED);
+    }
+
+    @Test
+    void whenAllLeafSuccessSequenceAlsoSuccess() {
+        Sequence<Object> sequence = new Sequence<>(
+            List.of(succeed(), succeed(), succeed())
+        );
+
+        assertThat(sequence.act(new Object())).isEqualTo(LeafState.RUNNING);
+        assertThat(sequence.act(new Object())).isEqualTo(LeafState.RUNNING);
+        assertThat(sequence.act(new Object())).isEqualTo(LeafState.SUCCESS);
     }
 
     @Test
     void whenLeafFailsNoStepsAfterAreExecuted() {
-        Leaf<Object> lastStep = new Leaf<Object>() {
-            @Override
-            public void act(Object instance) {
-                succeed();
-            }
-        };
+        Leaf<Object> lastStep = mock(Leaf.class);
 
         Sequence<Object> sequence = new Sequence<>(
             List.of(
-                Torterra.succeed(),
+                succeed(),
                 Torterra.fail(),
                 lastStep
             )
         );
 
-        sequence.act(new Object());
+        assertThat(sequence.act(new Object())).isEqualTo(LeafState.RUNNING);
+        assertThat(sequence.act(new Object())).isEqualTo(LeafState.FAILED);
 
-        assertThat(sequence.isFailure()).isTrue();
-        assertThat(lastStep.getState()).isEqualTo(Leaf.LeafState.IDLE);
+        verifyNoInteractions(lastStep);
     }
 }

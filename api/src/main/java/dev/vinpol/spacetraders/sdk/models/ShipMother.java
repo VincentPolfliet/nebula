@@ -26,7 +26,7 @@ public class ShipMother {
             .cargo(
                 new ShipCargo()
                     .units(0)
-                    .capacity(15)
+                    .capacity(16)
             )
             .cooldown(
                 new Cooldown()

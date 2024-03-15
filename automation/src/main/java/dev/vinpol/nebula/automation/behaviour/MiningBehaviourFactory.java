@@ -2,11 +2,12 @@ package dev.vinpol.nebula.automation.behaviour;
 
 import dev.vinpol.nebula.automation.sdk.SystemSymbol;
 import dev.vinpol.nebula.automation.sdk.WaypointSymbol;
-import dev.vinpol.nebula.automation.tree.AutomationLeaf;
-import dev.vinpol.nebula.automation.tree.AutomationTorterra;
-import dev.vinpol.nebula.automation.tree.ShipTreeBehaviour;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
-import dev.vinpol.spacetraders.sdk.models.*;
+import dev.vinpol.spacetraders.sdk.models.GetSystemWaypoints200Response;
+import dev.vinpol.spacetraders.sdk.models.Ship;
+import dev.vinpol.spacetraders.sdk.models.Waypoint;
+import dev.vinpol.spacetraders.sdk.models.WaypointType;
+import dev.vinpol.torterra.Leaf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -14,22 +15,23 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import static dev.vinpol.nebula.automation.tree.ShipLeafs.*;
-import static dev.vinpol.torterra.Torterra.*;
-import static java.util.function.Predicate.not;
+import static dev.vinpol.nebula.automation.behaviour.tree.ShipBehaviourLeafs.*;
+import static dev.vinpol.nebula.automation.behaviour.tree.ShipLeafs.*;
+import static dev.vinpol.torterra.Torterra.predicate;
+import static dev.vinpol.torterra.Torterra.safeSequence;
 
 public class MiningBehaviourFactory implements ShipBehaviourFactory {
 
     private final Logger logger = LoggerFactory.getLogger(MiningBehaviourFactory.class);
 
     private final SystemsApi systemsApi;
-    private final AutomationTorterra torterra;
+    private final BehaviourFactoryRegistry behaviourFactoryRegistry;
     private final SystemSymbol system;
     private final WaypointType waypointType;
 
     public MiningBehaviourFactory(SystemsApi systemsApi, BehaviourFactoryRegistry behaviourFactoryRegistry, SystemSymbol system, WaypointType waypointType) {
         this.systemsApi = systemsApi;
-        this.torterra = new AutomationTorterra(behaviourFactoryRegistry);
+        this.behaviourFactoryRegistry = behaviourFactoryRegistry;
         this.system = system;
         this.waypointType = waypointType;
     }
@@ -39,7 +41,6 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
         return ShipBehaviour.ofFunction(ship -> {
             Objects.requireNonNull(ship);
 
-            // find the nearby engineered asteroid
             Optional<Waypoint> nearbyAsteroidOptional = findInSystem(system, waypointType);
 
             if (nearbyAsteroidOptional.isEmpty()) {
@@ -50,24 +51,26 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
             Waypoint nearbyWaypoint = nearbyAsteroidOptional.get();
             WaypointSymbol nearbyWaypointSymbol = WaypointSymbol.tryParse(nearbyWaypoint.getSymbol());
 
-            return new ShipTreeBehaviour(plant(
+            List<Leaf<Ship>> sequence = List.of(
                 cargoIsNotFull(),
                 hasNoActiveCooldown(),
                 hasFuelLeft(),
                 isNotInTransit(),
                 safeSequence(
-                    predicate(Ship::isDocked),
+                    isDocked(),
                     orbit()
                 ),
                 safeSequence(
                     predicate(inShip -> !isAtLocation(inShip, nearbyWaypoint)),
-                    navigateToWaypoint(nearbyWaypointSymbol),
+                    navigate(nearbyWaypointSymbol),
                     dock(),
                     refuel(),
                     orbit()
                 ),
                 extraction()
-            ));
+            );
+
+            return behaviourFactoryRegistry.sequenceOf(sequence);
         });
     }
 
@@ -80,35 +83,8 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
             .findFirst();
     }
 
-    private AutomationLeaf extraction() {
-        return torterra.extraction();
-    }
-
-    private AutomationLeaf navigateToWaypoint(WaypointSymbol waypoint) {
-        return torterra.navigate(waypoint);
-    }
-
-    private AutomationLeaf orbit() {
-        return torterra.orbit();
-    }
-
-    private AutomationLeaf dock() {
-        return torterra.dock();
-    }
-
-    private AutomationLeaf refuel() {
-        return torterra.refuel();
-    }
-
     private boolean isAtLocation(Ship ship, Waypoint waypoint) {
-        ShipNav nav = ship.getNav();
-        ShipNavRoute route = nav.getRoute();
-        ShipNavRouteWaypoint destination = route.getDestination();
-
-        if (destination == null) {
-            return false;
-        }
-
-        return waypoint.getSymbol().equals(route.getDestination().getSymbol());
+        return ship.isAtLocation(waypoint.getSymbol());
     }
+
 }

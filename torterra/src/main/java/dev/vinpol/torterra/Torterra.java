@@ -1,23 +1,9 @@
 package dev.vinpol.torterra;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public interface Torterra {
-
-    @SafeVarargs
-    static <T> Tree<T> plant(Leaf<T>... leaves) {
-        ListTree<T> listTree = new ListTree<>();
-
-        for (Leaf<T> leaf : leaves) {
-            listTree.add(leaf);
-        }
-
-        return listTree;
-    }
-
     static <T> Leaf<T> succeed() {
         return new SucceedLeaf<>();
     }
@@ -73,34 +59,5 @@ public interface Torterra {
     @SafeVarargs
     static <T> Leaf<T> sequence(Leaf<T>... leaves) {
         return new Sequence<>(List.of(leaves));
-    }
-
-    interface Tree<T> {
-
-        void add(Leaf<T> leaf);
-
-        Optional<Leaf<T>> getFirst();
-
-        Optional<Leaf<T>> getLast();
-
-        Optional<Leaf<T>> get(int index);
-
-        Leaf<T> previous();
-
-        void setIndexOn(int index);
-
-        void tick(T instance);
-
-        Leaf<T> next();
-
-        default boolean hasNext() {
-            return next() != null;
-        }
-
-        Leaf<T> current();
-
-        int size();
-
-        void forEach(Consumer<Leaf<T>> t);
     }
 }

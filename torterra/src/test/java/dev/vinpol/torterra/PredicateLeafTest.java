@@ -17,11 +17,9 @@ class PredicateLeafTest {
             onFailLeaf
         );
 
-        predicate.act(new Object());
+        LeafState state = predicate.act(new Object());
 
-        assertThat(predicate.isSuccess()).isTrue();
-        assertThat(onTrueLeaf.isSuccess()).isTrue();
-        assertThat(onFailLeaf.isRunning()).isTrue();
+        assertThat(state).isEqualTo(LeafState.SUCCESS);
     }
 
     @Test
@@ -35,10 +33,8 @@ class PredicateLeafTest {
             onFailLeaf
         );
 
-        predicate.act(new Object());
+        LeafState state = predicate.act(new Object());
 
-        assertThat(predicate.isFailure()).isTrue();
-        assertThat(onTrueLeaf.isRunning()).isTrue();
-        assertThat(onFailLeaf.isFailure()).isTrue();
+        assertThat(state).isEqualTo(LeafState.FAILED);
     }
 }

@@ -80,7 +80,7 @@
         <dependency>
             <groupId>com.mercateo</groupId>
             <artifactId>test-clock</artifactId>
-            <version>1.0.2</version>
+            <version>1.0.4</version>
             <scope>test</scope>
         </dependency>
 
@@ -94,6 +94,7 @@
         <dependency>
             <groupId>com.squareup.okhttp3</groupId>
             <artifactId>mockwebserver</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 
@@ -102,7 +103,7 @@
             <dependency><!-- Import dependency management from Spring Boot -->
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-dependencies</artifactId>
-                <version>3.2.2</version>
+                <version>${spring-boot.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -122,6 +123,7 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>${spring-boot.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>

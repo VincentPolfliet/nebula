@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.automation;
 
 import dev.vinpol.nebula.automation.algorithms.ShipAlgorithmResolver;
-import dev.vinpol.nebula.automation.behaviour.ShipBehaviourResult;
+import dev.vinpol.nebula.automation.behaviour.state.*;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -49,25 +49,25 @@ public class ShipCommander {
 
     private CompletionStage<?> handlerFuture(Ship ship, CompletionStage<ShipBehaviourResult> future) {
         return future
-            .thenComposeAsync((result) -> handleResult(ship, result));
+            .thenComposeAsync(result -> handleResult(ship, result));
     }
 
     private CompletionStage<?> handleResult(Ship ship, ShipBehaviourResult result) {
         return switch (result) {
             // success means that the tick has been completed without failure, and there are still steps to execute
-            case ShipBehaviourResult.Success success -> {
+            case Success success -> {
                 // reschedule this bad boi
                 yield internalScheduleAndHandle(ship);
             }
-            case ShipBehaviourResult.WaitUntil waitUntil -> {
+            case WaitUntil waitUntil -> {
                 // reschedule it at a given timestamp
                 yield internalAtScheduleAndHandle(ship, waitUntil.waitUntil());
             }
-            case ShipBehaviourResult.Done done -> {
+            case Done done -> {
                 // nothing to do, the behaviour considers itself done
                 yield CompletableFuture.completedStage(null);
             }
-            case ShipBehaviourResult.Failed failed -> {
+            case Failed failed -> {
                 logger.error("Something went wrong with running the behaviour");
                 yield CompletableFuture.failedStage(new RuntimeException());
             }

@@ -1,12 +1,14 @@
 package dev.vinpol.torterra;
 
-class SucceedLeaf<T> extends Leaf<T> {
-    SucceedLeaf() {
-        super();
+class SucceedLeaf<T> implements Leaf<T> {
+
+    @Override
+    public LeafState act(T instance) {
+        return LeafState.SUCCESS;
     }
 
     @Override
-	public void act(T instance) {
-		succeed();
-	}
+    public String toString() {
+        return "succeed";
+    }
 }

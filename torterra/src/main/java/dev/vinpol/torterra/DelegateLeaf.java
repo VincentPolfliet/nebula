@@ -1,22 +1,31 @@
 package dev.vinpol.torterra;
 
-public class DelegateLeaf<T> extends Leaf<T> {
+public class DelegateLeaf<T> implements Leaf<T> {
 
+    private final String name;
     private final Leaf<T> inner;
 
     public DelegateLeaf(String name, Leaf<T> inner) {
-        super(name);
+        this.name = name;
         this.inner = inner;
     }
 
     public DelegateLeaf(Leaf<T> inner) {
+        this.name = null;
         this.inner = inner;
     }
 
     @Override
-    public void act(T instance) {
-        inner.act(instance);
+    public LeafState act(T instance) {
+        return inner.act(instance);
+    }
 
-        TorterraUtils.transferState(inner, this);
+    @Override
+    public String toString() {
+        if (name != null) {
+            return name;
+        }
+
+        return inner.toString();
     }
 }

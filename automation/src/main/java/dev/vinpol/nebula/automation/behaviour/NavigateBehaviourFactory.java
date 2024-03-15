@@ -1,10 +1,13 @@
 package dev.vinpol.nebula.automation.behaviour;
 
 import dev.vinpol.nebula.automation.ShipEventNotifier;
+import dev.vinpol.nebula.automation.behaviour.state.FailureReason;
+import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.automation.sdk.WaypointSymbol;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.NavigateShip200ResponseData;
 import dev.vinpol.spacetraders.sdk.models.NavigateShipRequest;
+import dev.vinpol.spacetraders.sdk.models.Ship;
 
 import java.time.OffsetDateTime;
 
@@ -22,24 +25,42 @@ public class NavigateBehaviourFactory implements ShipBehaviourFactory {
 
     @Override
     public ShipBehaviour create() {
-        return (ship) -> {
-            NavigateShip200ResponseData navigationResponse = fleetApi.navigateShip(
-                ship.getSymbol(),
-                new NavigateShipRequest()
-                    .waypointSymbol(waypointSymbol.waypoint())
-            ).getData();
-
-            ship.setFuel(navigationResponse.getFuel());
-
-            if (ship.isFuelEmpty() || ship.considerFuelEmpty(0.2)) {
-                shipEventNotifier.setFuelIsAlmostEmpty(ship.getSymbol());
+        return new ShipBehaviour() {
+            @Override
+            public String getName() {
+                return "navigate";
             }
 
-            ship.setNav(navigationResponse.getNav());
+            @Override
+            public ShipBehaviourResult update(Ship ship) {
+                if (!ship.isInOrbit()) {
+                    return ShipBehaviourResult.failure(FailureReason.NOT_IN_ORBIT);
+                }
 
-            OffsetDateTime arrival = ship.getNav().getRoute().getArrival();
-            shipEventNotifier.setWaitUntilArrival(ship.getSymbol(), arrival);
-            return ShipBehaviourResult.waitUntil(arrival);
+                String waypointSymbolString = NavigateBehaviourFactory.this.waypointSymbol.waypoint();
+                if (ship.isAtLocation(waypointSymbolString)) {
+                    return ShipBehaviourResult.failure(FailureReason.ALREADY_AT_LOCATION);
+                }
+
+                NavigateShip200ResponseData navigationResponse = fleetApi.navigateShip(
+                    ship.getSymbol(),
+                    new NavigateShipRequest()
+                        .waypointSymbol(waypointSymbolString)
+                ).getData();
+
+                ship.setFuel(navigationResponse.getFuel());
+
+                // TODO: get consider value from config
+                if (ship.isFuelEmpty() || ship.considerFuelEmpty(0.2)) {
+                    shipEventNotifier.setFuelIsAlmostEmpty(ship.getSymbol());
+                }
+
+                ship.setNav(navigationResponse.getNav());
+
+                OffsetDateTime arrival = ship.getNav().getRoute().getArrival();
+                shipEventNotifier.setWaitUntilArrival(ship.getSymbol(), arrival);
+                return ShipBehaviourResult.waitUntil(arrival);
+            }
         };
     }
 }

@@ -2,14 +2,17 @@ package dev.vinpol.nebula.automation;
 
 import dev.vinpol.nebula.automation.algorithms.ShipAlgorithmResolver;
 import dev.vinpol.nebula.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.automation.behaviour.ShipBehaviourResult;
+import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipRole;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
@@ -60,27 +63,11 @@ public class ShipBehaviourScheduler {
     public CompletionStage<ShipBehaviourResult> scheduleTickAt(Ship ship, ShipAlgorithmResolver resolver, OffsetDateTime at) {
         futuresScheduled.add(ship.getSymbol());
 
-        CompletableFuture<ShipBehaviourResult> future = new CompletableFuture<>();
-
-        timer.scheduleAt(() -> {
-            futuresScheduled.remove(ship.getSymbol());
-            scheduleTick(ship, resolver)
-                .handle((result, throwable) -> {
-                    if (throwable != null) {
-                        future.completeExceptionally(throwable);
-                        return null;
-                    }
-
-                    if (result != null) {
-                        future.complete(result);
-                        return null;
-                    }
-
-                    return null;
-                });
-        }, at);
-
-        return future;
+        return CompletableFuture
+            .runAsync(() -> {
+                futuresScheduled.remove(ship.getSymbol());
+            }, command -> timer.scheduleAt(command, at))
+            .thenCompose(unused -> scheduleTick(ship, resolver));
     }
 
     public boolean isTickScheduled(Ship ship) {

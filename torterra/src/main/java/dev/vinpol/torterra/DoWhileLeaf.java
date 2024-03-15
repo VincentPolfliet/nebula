@@ -2,7 +2,7 @@ package dev.vinpol.torterra;
 
 import java.util.function.Predicate;
 
-public class DoWhileLeaf<T> extends Leaf<T> {
+public class DoWhileLeaf<T> extends StatefulLeaf<T> {
     private final Predicate<T> predicate;
     private final Leaf<T> leaf;
 
@@ -13,24 +13,16 @@ public class DoWhileLeaf<T> extends Leaf<T> {
     }
 
     @Override
-    public void act(T instance) {
+    public void doAct(T instance) {
         while (predicate.test(instance)) {
-            leaf.act(instance);
+            LeafState state = leaf.act(instance);
 
-            if (leaf.isFailure()) {
+            if (state == LeafState.FAILED) {
                 fail();
                 return;
             }
         }
 
         succeed();
-    }
-
-    public Predicate<T> getPredicate() {
-        return predicate;
-    }
-
-    public Leaf<T> getLeaf() {
-        return leaf;
     }
 }

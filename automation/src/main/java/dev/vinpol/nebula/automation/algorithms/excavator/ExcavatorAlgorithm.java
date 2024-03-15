@@ -31,6 +31,7 @@ public class ExcavatorAlgorithm implements ShipAlgorithm {
 
         ShipNavRouteWaypoint target = ship.getNav().getRoute().getDestination();
         MiningBehaviourFactory miningBehaviourFactory = behaviourFactoryRegistry.miningAutomation(SystemSymbol.tryParse(target.getSystemSymbol()), WaypointType.ENGINEERED_ASTEROID);
+
         return miningBehaviourFactory.create();
     }
 }

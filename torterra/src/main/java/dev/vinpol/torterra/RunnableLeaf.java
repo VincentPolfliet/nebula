@@ -2,7 +2,7 @@ package dev.vinpol.torterra;
 
 import java.util.Objects;
 
-final class RunnableLeaf extends Leaf<Void> implements Runnable {
+final class RunnableLeaf extends StatefulLeaf<Void> implements Runnable {
 
     private final Runnable runnable;
 
@@ -12,7 +12,7 @@ final class RunnableLeaf extends Leaf<Void> implements Runnable {
     }
 
     @Override
-    public void act(Void instance) {
+    public void doAct(Void instance) {
         run();
     }
 

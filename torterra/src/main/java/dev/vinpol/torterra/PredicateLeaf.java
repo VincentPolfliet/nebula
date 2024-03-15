@@ -2,9 +2,7 @@ package dev.vinpol.torterra;
 
 import java.util.function.Predicate;
 
-import static dev.vinpol.torterra.TorterraUtils.transferState;
-
-class PredicateLeaf<T> extends Leaf<T> {
+class PredicateLeaf<T> implements Leaf<T> {
 
     private final Predicate<T> predicate;
     private final Leaf<T> onTrue;
@@ -18,16 +16,12 @@ class PredicateLeaf<T> extends Leaf<T> {
     }
 
     @Override
-    public void act(T instance) {
-        Leaf<T> leafToExecute = null;
+    public LeafState act(T instance) {
+        return predicate.test(instance) ? onTrue.act(instance) : onFalse.act(instance);
+    }
 
-        if (predicate.test(instance)) {
-            leafToExecute = onTrue;
-        } else {
-            leafToExecute = onFalse;
-        }
-
-        leafToExecute.act(instance);
-        transferState(leafToExecute, this);
+    @Override
+    public String toString() {
+        return "test(onTrue: '%s', onFalse: '%s')".formatted(onTrue, onFalse);
     }
 }

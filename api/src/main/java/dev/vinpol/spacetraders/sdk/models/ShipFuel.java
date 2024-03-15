@@ -40,7 +40,7 @@ public class ShipFuel {
 
     public boolean shouldConsiderEmpty(double minPercentage, double maxPercentage) {
         double currentPercentage = (double) current / capacity;
-        return currentPercentage >= minPercentage && currentPercentage < maxPercentage;
+        return currentPercentage >= minPercentage && currentPercentage <= maxPercentage;
     }
 }
 

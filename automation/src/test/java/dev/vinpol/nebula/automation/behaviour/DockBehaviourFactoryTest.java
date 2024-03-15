@@ -1,6 +1,8 @@
 package dev.vinpol.nebula.automation.behaviour;
 
 import dev.vinpol.nebula.automation.ShipCloner;
+import dev.vinpol.nebula.automation.behaviour.state.FailureReason;
+import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +33,8 @@ class DockBehaviourFactoryTest {
 
         ShipBehaviourResult result = behaviour.update(dockedShip);
 
-        assertThat(result.isDone()).isTrue();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.hasFailedWithReason(FailureReason.DOCKED)).isTrue();
         verifyNoInteractions(fleetApi);
     }
 
@@ -45,7 +48,8 @@ class DockBehaviourFactoryTest {
 
         ShipBehaviourResult result = behaviour.update(transitShip);
 
-        assertThat(result.isDone()).isTrue();
+        assertThat(result.isFailure()).isTrue();
+        assertThat(result.hasFailedWithReason(FailureReason.IN_TRANSIT)).isTrue();
         verifyNoInteractions(fleetApi);
     }
 

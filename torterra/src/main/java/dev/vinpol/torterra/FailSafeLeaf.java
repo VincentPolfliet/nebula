@@ -8,7 +8,7 @@ import org.slf4j.LoggerFactory;
  *
  * @param <T> The type of data that this class operates on.
  */
-class FailSafeLeaf<T> extends Leaf<T> {
+public class FailSafeLeaf<T> implements Leaf<T> {
 
     private final Logger logger = LoggerFactory.getLogger(FailSafeLeaf.class);
 
@@ -20,13 +20,27 @@ class FailSafeLeaf<T> extends Leaf<T> {
     }
 
     @Override
-    public void act(T instance) {
+    public LeafState act(T instance) {
         try {
-            leaf.act(instance);
-        } catch (RuntimeException e) {
-            logger.warn(e.getMessage());
-        }
+            LeafState state = leaf.act(instance);
 
-        succeed();
+            if (state == LeafState.FAILED) {
+                return LeafState.SUCCESS;
+            }
+
+            return state;
+        } catch (RuntimeException e) {
+            logger.warn("Something went wrong with executing '{}'", leaf, e);
+            return LeafState.SUCCESS;
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "safe(%s)".formatted(leaf);
+    }
+
+    public Leaf<T> getInner() {
+        return leaf;
     }
 }

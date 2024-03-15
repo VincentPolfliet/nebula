@@ -11,7 +11,7 @@ import java.util.function.Consumer;
 public class ShipNav {
     private String systemSymbol;
     private String waypointSymbol;
-    private ShipNavRoute route;
+    private ShipNavRoute route = new ShipNavRoute();
     private ShipNavStatus status;
     private ShipNavFlightMode flightMode = ShipNavFlightMode.CRUISE;
 
@@ -31,9 +31,9 @@ public class ShipNav {
     }
 
     public ShipNav withRoute(Consumer<ShipNavRoute> consumer) {
-        ShipNavRoute route = new ShipNavRoute();
-        consumer.accept(route);
-        return route(route);
+        ShipNavRoute currentRoute = route != null ? route : new ShipNavRoute();
+        consumer.accept(currentRoute);
+        return route(currentRoute);
     }
 
     public ShipNav status(ShipNavStatus status) {

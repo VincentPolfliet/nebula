@@ -1,6 +1,7 @@
 package dev.vinpol.nebula.automation.behaviour;
 
-import dev.vinpol.nebula.automation.behaviour.ShipBehaviourFactory;
+import dev.vinpol.nebula.automation.behaviour.state.FailureReason;
+import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.OrbitShip200Response;
 import dev.vinpol.spacetraders.sdk.models.Ship;
@@ -15,19 +16,23 @@ public final class OrbitBehaviourFactory implements ShipBehaviourFactory {
 
     @Override
     public ShipBehaviour create() {
-        return (ship) -> {
-            // orbit ship, so that it can fly to asteroid or mine the asteroid
-            if (OrbitBehaviourFactory.this.isInOrbit(ship)) {
-                return ShipBehaviourResult.done();
+        return new ShipBehaviour() {
+            @Override
+            public String getName() {
+                return "orbit";
             }
 
-            OrbitShip200Response orbit = fleetApi.orbitShip(ship.getSymbol());
-            ship.setNav(orbit.getData().getNav());
-            return ShipBehaviourResult.done();
-        };
-    }
+            @Override
+            public ShipBehaviourResult update(Ship ship) {
+                // orbit ship, so that it can fly to asteroid or mine the asteroid
+                if (!ship.isDocked()) {
+                    return ShipBehaviourResult.failure(FailureReason.NOT_DOCKED);
+                }
 
-    private boolean isInOrbit(Ship ship) {
-        return ship.getNav().isInOrbit();
+                OrbitShip200Response orbit = fleetApi.orbitShip(ship.getSymbol());
+                ship.setNav(orbit.getData().getNav());
+                return ShipBehaviourResult.done();
+            }
+        };
     }
 }

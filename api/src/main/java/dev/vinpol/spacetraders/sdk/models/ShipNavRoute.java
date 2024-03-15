@@ -37,9 +37,9 @@ public class ShipNavRoute {
     }
 
     public ShipNavRoute withDestination(Consumer<ShipNavRouteWaypoint> consumer) {
-        ShipNavRouteWaypoint waypoint = new ShipNavRouteWaypoint();
-        consumer.accept(waypoint);
-        return this;
+        ShipNavRouteWaypoint dest = this.destination != null ? this.destination : new ShipNavRouteWaypoint();
+        consumer.accept(dest);
+        return destination(dest);
     }
 }
 

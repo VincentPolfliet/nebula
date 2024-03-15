@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.automation.behaviour;
 
+import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 
 import java.util.Objects;
@@ -26,6 +27,10 @@ public interface ShipBehaviour {
 
     static ShipBehaviour ofFunction(Function<Ship, ShipBehaviour> function) {
         return new LazyLoadShipBehaviour(function);
+    }
+
+    default String getName() {
+        return this.getClass().getSimpleName();
     }
 
     class FinishedBehaviour implements ShipBehaviour {

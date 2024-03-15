@@ -6,8 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dev.vinpol.torterra.Torterra.fail;
+import static dev.vinpol.torterra.Torterra.succeed;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
 
 class SelectorTest {
 
@@ -22,27 +23,31 @@ class SelectorTest {
     @Test
     void actSucceedOnFirstSuccess() {
         List<Leaf<Object>> leafs = new ArrayList<>();
-        leafs.add(spy(Torterra.fail()));
-        leafs.add(spy(Torterra.succeed()));
-        leafs.add(spy(Torterra.succeed()));
-        leafs.add(spy(Torterra.fail()));
+        leafs.add(fail());
+        leafs.add(succeed());
+        leafs.add(succeed());
+        leafs.add(fail());
 
         Selector<Object> selector = new Selector<>(leafs);
 
         Object instance = new Object();
-        selector.act(instance);
 
+        selector.act(instance);
+        assertThat(selector.isRunning()).isTrue();
+
+        selector.act(instance);
         assertThat(selector.isSuccess()).isTrue();
 
-        verify(leafs.get(0)).act(instance);
-        verify(leafs.get(1)).act(instance);
-        verifyNoInteractions(leafs.get(2));
-        verifyNoInteractions(leafs.get(3));
+        selector.act(instance);
+        assertThat(selector.isSuccess()).isTrue();
+
+        selector.act(instance);
+        assertThat(selector.isSuccess()).isTrue();
     }
 
     @Test
     void actSucceed() {
-        Selector<Object> selector = new Selector<>(List.of(Torterra.succeed()));
+        Selector<Object> selector = new Selector<>(List.of(succeed()));
 
         Object instance = new Object();
         selector.act(instance);
@@ -53,7 +58,7 @@ class SelectorTest {
 
     @Test
     void actFailed() {
-        Selector<Object> selector = new Selector<>(List.of(Torterra.fail()));
+        Selector<Object> selector = new Selector<>(List.of(fail()));
 
         Object instance = new Object();
         selector.act(instance);
