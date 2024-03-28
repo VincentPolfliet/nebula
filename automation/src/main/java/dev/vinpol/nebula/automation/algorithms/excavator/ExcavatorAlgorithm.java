@@ -1,9 +1,9 @@
 package dev.vinpol.nebula.automation.algorithms.excavator;
 
 import dev.vinpol.nebula.automation.algorithms.ShipAlgorithm;
-import dev.vinpol.nebula.automation.behaviour.BehaviourFactoryRegistry;
 import dev.vinpol.nebula.automation.behaviour.MiningBehaviourFactory;
 import dev.vinpol.nebula.automation.behaviour.ShipBehaviour;
+import dev.vinpol.nebula.automation.behaviour.ShipBehaviourFactoryCreator;
 import dev.vinpol.nebula.automation.sdk.SystemSymbol;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipNavRouteWaypoint;
@@ -14,10 +14,10 @@ import java.util.Objects;
 
 public class ExcavatorAlgorithm implements ShipAlgorithm {
 
-    private final BehaviourFactoryRegistry behaviourFactoryRegistry;
+    private final ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
 
-    public ExcavatorAlgorithm(BehaviourFactoryRegistry behaviourFactoryRegistry) {
-        this.behaviourFactoryRegistry = behaviourFactoryRegistry;
+    public ExcavatorAlgorithm(ShipBehaviourFactoryCreator shipBehaviourFactoryCreator) {
+        this.shipBehaviourFactoryCreator = shipBehaviourFactoryCreator;
     }
 
     @Override
@@ -29,9 +29,20 @@ public class ExcavatorAlgorithm implements ShipAlgorithm {
     public ShipBehaviour decideBehaviour(Ship ship) {
         Objects.requireNonNull(ship);
 
-        ShipNavRouteWaypoint target = ship.getNav().getRoute().getDestination();
-        MiningBehaviourFactory miningBehaviourFactory = behaviourFactoryRegistry.miningAutomation(SystemSymbol.tryParse(target.getSystemSymbol()), WaypointType.ENGINEERED_ASTEROID);
+        if (ship.hasActiveCooldown()) {
+            return shipBehaviourFactoryCreator.cooldownActive(ship.getCooldown().getExpiration());
+        }
 
-        return miningBehaviourFactory.create();
+        if (ship.isInTransit()) {
+            return shipBehaviourFactoryCreator.inTransit(ship.getNav().getRoute().getArrival());
+        }
+
+        if (ship.isCargoFull()) {
+            // TODO: lookup closest market and sell of our cargo we no longer needed
+            return shipBehaviourFactoryCreator.navigateToClosestMarket();
+        }
+
+        ShipNavRouteWaypoint target = ship.getNav().getRoute().getDestination();
+        return shipBehaviourFactoryCreator.miningAutomation(SystemSymbol.tryParse(target.getSystemSymbol()), WaypointType.ENGINEERED_ASTEROID);
     }
 }

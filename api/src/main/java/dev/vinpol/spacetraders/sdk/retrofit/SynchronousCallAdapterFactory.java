@@ -11,9 +11,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 public class SynchronousCallAdapterFactory extends CallAdapter.Factory {
-    private SynchronousCallAdapterFactory() {
+    SynchronousCallAdapterFactory() {
     }
-
 
     public static SynchronousCallAdapterFactory create() {
         return new SynchronousCallAdapterFactory();

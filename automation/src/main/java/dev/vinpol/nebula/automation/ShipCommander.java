@@ -53,24 +53,26 @@ public class ShipCommander {
     }
 
     private CompletionStage<?> handleResult(Ship ship, ShipBehaviourResult result) {
-        return switch (result) {
+        switch (result) {
             // success means that the tick has been completed without failure, and there are still steps to execute
             case Success success -> {
                 // reschedule this bad boi
-                yield internalScheduleAndHandle(ship);
+                return internalScheduleAndHandle(ship);
             }
             case WaitUntil waitUntil -> {
                 // reschedule it at a given timestamp
-                yield internalAtScheduleAndHandle(ship, waitUntil.waitUntil());
+                return internalAtScheduleAndHandle(ship, waitUntil.waitUntil());
             }
             case Done done -> {
                 // nothing to do, the behaviour considers itself done
-                yield CompletableFuture.completedStage(null);
+                return CompletableFuture.completedStage(null);
             }
             case Failed failed -> {
                 logger.error("Something went wrong with running the behaviour");
-                yield CompletableFuture.failedStage(new RuntimeException());
+                return CompletableFuture.failedStage(new RuntimeException());
             }
-        };
+
+            default -> throw new IllegalArgumentException();
+        }
     }
 }

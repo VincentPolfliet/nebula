@@ -10,12 +10,14 @@ public class ShipSymbolGenerator {
     }
 
     public static String generate() {
-        StringBuilder callsign = new StringBuilder();
+        StringBuilder strb = new StringBuilder();
+
         for (int i = 0; i < 14; i++) {
             int index = ThreadLocalRandom.current().nextInt(ALLOWED_CHARACTERS.length());
-            callsign.append(ALLOWED_CHARACTERS.charAt(index));
+            strb.append(ALLOWED_CHARACTERS.charAt(index));
         }
-        return callsign.toString();
+
+        return strb.toString();
     }
 
     public static String generateFromString(String input) {
@@ -30,22 +32,23 @@ public class ShipSymbolGenerator {
         }
 
         // Replace letters with random characters and vice versa
-        StringBuilder callsign = new StringBuilder();
+        StringBuilder strb = new StringBuilder();
         for (char c : input.toCharArray()) {
+
             if (Character.isLetter(c)) {
                 // Replace letter with random character or keep it
                 if (random.nextBoolean()) {
                     int index = random.nextInt(ALLOWED_CHARACTERS.length());
-                    callsign.append(ALLOWED_CHARACTERS.charAt(index));
+                    strb.append(ALLOWED_CHARACTERS.charAt(index));
                 } else {
-                    callsign.append(c);
+                    strb.append(c);
                 }
             } else if (ALLOWED_CHARACTERS.contains(String.valueOf(c))) {
                 // Keep digit or allowed special character
-                callsign.append(c);
+                strb.append(c);
             }
         }
 
-        return callsign.toString();
+        return strb.toString();
     }
 }

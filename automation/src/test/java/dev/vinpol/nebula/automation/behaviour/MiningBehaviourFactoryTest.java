@@ -11,10 +11,7 @@ import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.lang.System;
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static dev.vinpol.nebula.automation.sdk.ShipCargoUtil.cargo;
 import static dev.vinpol.nebula.automation.sdk.ShipCargoUtil.cargoItem;
@@ -26,13 +23,13 @@ import static org.mockito.Mockito.when;
 
 class MiningBehaviourFactoryTest {
 
-    private BehaviourFactoryRegistry registry;
+    private ShipBehaviourFactoryCreator registry;
     private ApiClientStub apiClient;
 
     @BeforeEach
     void setup() {
         apiClient = new ApiClientStub();
-        registry = new DefaultBehaviourFactoryRegistry(apiClient, mock(ShipEventNotifier.class));
+        registry = new DefaultShipBehaviourFactoryCreator(apiClient, mock(ShipEventNotifier.class));
     }
 
     @Test

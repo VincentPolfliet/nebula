@@ -1,12 +1,9 @@
-package dev.vinpol.nebula.dragonship.shared.time;
-
-import org.springframework.stereotype.Component;
+package dev.vinpol.nebula.dragonship.time;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 
-@Component
 public record TimeWizard(Clock clock) {
     public OffsetDateTime now() {
         return OffsetDateTime.now(clock);

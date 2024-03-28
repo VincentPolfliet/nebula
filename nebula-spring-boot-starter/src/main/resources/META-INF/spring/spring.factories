@@ -1,0 +1,5 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+dev.vinpol.nebula.dragonship.automation.sdk.ApiConfig,\
+dev.vinpol.nebula.dragonship.automation.AutomationConfig,\
+dev.vinpol.nebula.dragonship.automation.AlgorithmConfig
+

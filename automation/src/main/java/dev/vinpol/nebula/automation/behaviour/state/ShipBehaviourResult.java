@@ -12,8 +12,8 @@ public sealed interface ShipBehaviourResult permits Failed, Done, Success, WaitU
         return new Done();
     }
 
-    static ShipBehaviourResult waitUntil(OffsetDateTime expiration) {
-        return new WaitUntil(expiration);
+    static ShipBehaviourResult waitUntil(OffsetDateTime waitUntil) {
+        return new WaitUntil(waitUntil);
     }
 
     static ShipBehaviourResult failure() {

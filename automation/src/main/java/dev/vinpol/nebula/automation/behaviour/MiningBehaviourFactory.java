@@ -25,13 +25,13 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
     private final Logger logger = LoggerFactory.getLogger(MiningBehaviourFactory.class);
 
     private final SystemsApi systemsApi;
-    private final BehaviourFactoryRegistry behaviourFactoryRegistry;
+    private final ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
     private final SystemSymbol system;
     private final WaypointType waypointType;
 
-    public MiningBehaviourFactory(SystemsApi systemsApi, BehaviourFactoryRegistry behaviourFactoryRegistry, SystemSymbol system, WaypointType waypointType) {
+    public MiningBehaviourFactory(SystemsApi systemsApi, ShipBehaviourFactoryCreator shipBehaviourFactoryCreator, SystemSymbol system, WaypointType waypointType) {
         this.systemsApi = systemsApi;
-        this.behaviourFactoryRegistry = behaviourFactoryRegistry;
+        this.shipBehaviourFactoryCreator = shipBehaviourFactoryCreator;
         this.system = system;
         this.waypointType = waypointType;
     }
@@ -70,7 +70,7 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
                 extraction()
             );
 
-            return behaviourFactoryRegistry.sequenceOf(sequence);
+            return shipBehaviourFactoryCreator.sequenceOf(sequence);
         });
     }
 

@@ -1,6 +1,6 @@
 package dev.vinpol.nebula.automation.behaviour.tree;
 
-import dev.vinpol.nebula.automation.behaviour.BehaviourFactoryRegistry;
+import dev.vinpol.nebula.automation.behaviour.ShipBehaviourFactoryCreator;
 import dev.vinpol.nebula.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.torterra.Leaf;
@@ -11,14 +11,14 @@ import java.util.Objects;
 public final class ShipBehaviourRefLeaf implements Leaf<Ship> {
 
     private final ShipBehaviourRef ref;
-    private BehaviourFactoryRegistry behaviourFactory;
+    private ShipBehaviourFactoryCreator behaviourFactory;
     private ShipBehaviourLeaf inner;
 
     public ShipBehaviourRefLeaf(ShipBehaviourRef ref) {
         this.ref = Objects.requireNonNull(ref);
     }
 
-    public void setBehaviourFactory(BehaviourFactoryRegistry behaviourFactory) {
+    public void setBehaviourFactory(ShipBehaviourFactoryCreator behaviourFactory) {
         this.behaviourFactory = behaviourFactory;
     }
 

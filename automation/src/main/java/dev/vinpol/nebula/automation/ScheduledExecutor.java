@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.automation;
 
+import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -16,6 +17,23 @@ public interface ScheduledExecutor {
     void scheduleAt(Runnable runnable, OffsetDateTime timestamp);
 
     static ScheduledExecutor ofScheduledExecutorService(ScheduledExecutorService executor) {
-        return (runnable, timestamp) -> executor.schedule(runnable, ThreadUtils.calculateWaitUntil(timestamp).toSeconds(), TimeUnit.SECONDS);
+        return new ScheduledExecutorAdapter(executor);
+    }
+
+    class ScheduledExecutorAdapter implements ScheduledExecutor {
+        private final ScheduledExecutorService executor;
+
+        private ScheduledExecutorAdapter(ScheduledExecutorService executor) {
+            this.executor = executor;
+        }
+
+        @Override
+        public void scheduleAt(Runnable runnable, OffsetDateTime timestamp) {
+            executor.schedule(runnable, calculateWaitUntil(timestamp).toSeconds(), TimeUnit.SECONDS);
+        }
+
+        private static Duration calculateWaitUntil(OffsetDateTime timestamp) {
+            return Duration.between(OffsetDateTime.now(timestamp.getOffset()), timestamp);
+        }
     }
 }

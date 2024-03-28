@@ -1,25 +1,17 @@
 package dev.vinpol.nebula.automation.behaviour;
 
 import dev.vinpol.nebula.automation.ShipEventNotifier;
-import dev.vinpol.nebula.automation.behaviour.tree.ShipBehaviourRefLeaf;
-import dev.vinpol.nebula.automation.behaviour.tree.ShipSequenceBehaviour;
 import dev.vinpol.nebula.automation.sdk.SystemSymbol;
 import dev.vinpol.nebula.automation.sdk.WaypointSymbol;
 import dev.vinpol.spacetraders.sdk.ApiClient;
-import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.WaypointType;
-import dev.vinpol.torterra.IterableLeaf;
-import dev.vinpol.torterra.Leaf;
-import dev.vinpol.torterra.TorterraUtils;
 
-import java.util.List;
-
-public class DefaultBehaviourFactoryRegistry implements BehaviourFactoryRegistry {
+public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryCreator {
 
     private final ApiClient apiClient;
     private final ShipEventNotifier eventNotifier;
 
-    public DefaultBehaviourFactoryRegistry(ApiClient apiClient, ShipEventNotifier eventNotifier) {
+    public DefaultShipBehaviourFactoryCreator(ApiClient apiClient, ShipEventNotifier eventNotifier) {
         this.apiClient = apiClient;
         this.eventNotifier = eventNotifier;
     }
@@ -52,5 +44,10 @@ public class DefaultBehaviourFactoryRegistry implements BehaviourFactoryRegistry
     @Override
     public RefuelBehaviour refuel() {
         return new RefuelBehaviour(apiClient.fleetApi());
+    }
+
+    @Override
+    public NavigateToClosestMarket navigateToClosestMarket() {
+        return new NavigateToClosestMarket();
     }
 }
