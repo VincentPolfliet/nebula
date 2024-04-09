@@ -1,0 +1,20 @@
+{
+    "name": "frontend",
+    "private": true,
+    "version": "0.0.0",
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "@popperjs/core": "^2.11.8",
+        "bootstrap": "^5.3.3",
+        "htmx.org": "^1.9.11"
+    },
+    "devDependencies": {
+        "vite": "^5.2.0",
+        "sass": "^1.72.0"
+    }
+}

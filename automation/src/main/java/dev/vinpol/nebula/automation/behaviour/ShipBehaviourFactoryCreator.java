@@ -58,6 +58,6 @@ public interface ShipBehaviourFactoryCreator {
         }
     }
 
-    ShipBehaviour navigateToClosestMarket();
+    FindMarketAndSellBehaviour navigateToClosestMarket();
 
 }

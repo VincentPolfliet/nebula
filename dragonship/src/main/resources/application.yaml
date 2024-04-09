@@ -1,0 +1,18 @@
+nebula:
+    sync-on-boot: ${NEBULA_SYNC_ON_BOOT:false}
+    st:
+        url: http://localhost:1337/
+        token: token
+
+spring:
+    groovy:
+        template:
+            check-template-location: false
+
+vite:
+    baseUrl: http://localhost:5173/
+
+gg:
+    jte:
+        developmentMode: true
+        templateLocation: src/main/jte

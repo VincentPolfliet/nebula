@@ -1,14 +1,16 @@
 package dev.vinpol.nebula.dragonship.web.ships;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.vinpol.nebula.dragonship.shared.time.TimeWizard;
 import dev.vinpol.nebula.dragonship.ships.CommandShipEvent;
 import dev.vinpol.nebula.dragonship.ships.ShipStorage;
+import dev.vinpol.nebula.dragonship.time.TimeWizard;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.time.Clock;
 
 @RestController
 public class AutomationController {
@@ -17,9 +19,9 @@ public class AutomationController {
     private final TimeWizard timeWizard;
     private final ApplicationEventPublisher eventPublisher;
 
-    public AutomationController(ShipStorage shipStorage, TimeWizard timeWizard, ApplicationEventPublisher eventPublisher) {
+    public AutomationController(ShipStorage shipStorage, Clock clock, ApplicationEventPublisher eventPublisher) {
         this.shipStorage = shipStorage;
-        this.timeWizard = timeWizard;
+        this.timeWizard = new TimeWizard(clock);
         this.eventPublisher = eventPublisher;
     }
 

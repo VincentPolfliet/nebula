@@ -47,7 +47,7 @@ public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryC
     }
 
     @Override
-    public NavigateToClosestMarket navigateToClosestMarket() {
-        return new NavigateToClosestMarket();
+    public FindMarketAndSellBehaviour navigateToClosestMarket() {
+        return new FindMarketAndSellBehaviour(this, apiClient.systemsApi());
     }
 }

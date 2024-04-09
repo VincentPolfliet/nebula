@@ -1,7 +1,6 @@
 package dev.vinpol.nebula.automation.algorithms.excavator;
 
 import dev.vinpol.nebula.automation.algorithms.ShipAlgorithm;
-import dev.vinpol.nebula.automation.behaviour.MiningBehaviourFactory;
 import dev.vinpol.nebula.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.automation.behaviour.ShipBehaviourFactoryCreator;
 import dev.vinpol.nebula.automation.sdk.SystemSymbol;
@@ -38,11 +37,10 @@ public class ExcavatorAlgorithm implements ShipAlgorithm {
         }
 
         if (ship.isCargoFull()) {
-            // TODO: lookup closest market and sell of our cargo we no longer needed
-            return shipBehaviourFactoryCreator.navigateToClosestMarket();
+            return shipBehaviourFactoryCreator.navigateToClosestMarket().create();
         }
 
         ShipNavRouteWaypoint target = ship.getNav().getRoute().getDestination();
-        return shipBehaviourFactoryCreator.miningAutomation(SystemSymbol.tryParse(target.getSystemSymbol()), WaypointType.ENGINEERED_ASTEROID);
+        return shipBehaviourFactoryCreator.miningAutomation(SystemSymbol.tryParse(target.getSystemSymbol()), WaypointType.ENGINEERED_ASTEROID).create();
     }
 }
