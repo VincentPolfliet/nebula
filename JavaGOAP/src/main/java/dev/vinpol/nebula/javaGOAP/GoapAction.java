@@ -7,20 +7,20 @@ import java.util.HashSet;
  *
  * @author P H - 28.01.2017
  */
-public abstract class GoapAction {
+public abstract class GoapAction<T> {
 
-	protected Object target = null;
+	protected T target;
 
-	private HashSet<GoapState> preconditions = new HashSet<GoapState>();
-	private HashSet<GoapState> effects = new HashSet<GoapState>();
+	private final HashSet<GoapState> preconditions = new HashSet<GoapState>();
+	private final HashSet<GoapState> effects = new HashSet<GoapState>();
 
 	/**
 	 * @param target
 	 *            the target of the action. Since "Object" is being used this is
 	 *            NOT type safe!
 	 */
-	public GoapAction(Object target) {
-		this.target = target;
+	public GoapAction(T target) {
+        this.target = target;
 	}
 
 	// -------------------- Functions
@@ -92,7 +92,9 @@ public abstract class GoapAction {
 	 * @return true or false depending if the action can be taken in the first
 	 *         place.
 	 */
-	protected abstract boolean checkProceduralPrecondition(IGoapUnit goapUnit);
+	protected boolean checkProceduralPrecondition(IGoapUnit goapUnit) {
+        return true;
+    }
 
 	/**
 	 * Defines if the unit needs to be in a certain range in relation to the

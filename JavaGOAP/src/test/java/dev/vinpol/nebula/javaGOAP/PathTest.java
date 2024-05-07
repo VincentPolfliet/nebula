@@ -4,12 +4,12 @@ import dev.vinpol.nebula.javaGOAP.graph.DirectedGraph;
 import dev.vinpol.nebula.javaGOAP.graph.Edge;
 import dev.vinpol.nebula.javaGOAP.graph.Path;
 import dev.vinpol.nebula.javaGOAP.graph.PathFactory;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * dev.vinpol.nebula.javaGOAP.PathTest.java --- Path TestFile.

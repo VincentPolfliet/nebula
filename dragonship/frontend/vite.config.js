@@ -1,16 +1,14 @@
 import {defineConfig} from "vite";
 import * as path from "path";
+import vue from '@vitejs/plugin-vue'
+
 
 export default defineConfig({
     root: path.resolve(__dirname, 'src'),
-    resolve: {
-        alias: {
-            '~bootstrap': path.resolve(__dirname, 'node_modules/bootstrap'),
-        }
-    },
     server: {
-        hot: true
+        hot: true // 🥵
     },
+    plugins: [vue()],
     build: {
         // generate .vite/manifest.json in outDir
         manifest: true,

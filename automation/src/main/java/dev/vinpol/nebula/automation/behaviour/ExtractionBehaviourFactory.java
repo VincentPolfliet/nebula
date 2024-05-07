@@ -34,7 +34,7 @@ public class ExtractionBehaviourFactory implements ShipBehaviourFactory {
                     return ShipBehaviourResult.failure(FailureReason.CARGO_IS_FULL);
                 }
 
-                if (!ship.isInOrbit()) {
+                if (ship.isNotInOrbit()) {
                     return ShipBehaviourResult.failure(FailureReason.NOT_IN_ORBIT);
                 }
 

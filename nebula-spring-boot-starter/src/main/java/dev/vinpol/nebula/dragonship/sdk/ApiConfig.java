@@ -16,6 +16,7 @@ import okhttp3.logging.HttpLoggingInterceptor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,14 +24,15 @@ import java.time.Duration;
 import java.util.List;
 
 @Configuration
+@EnableConfigurationProperties({NebulaProperties.class})
 public class ApiConfig {
 
     @Bean
     @ConditionalOnMissingBean
-    public ApiClient apiClient(@Value("${nebula.st.token}") String token, @Value("${nebula.st.url}") String url, List<Interceptor> interceptors) {
+    public ApiClient apiClient(NebulaProperties nebulaProperties, List<Interceptor> interceptors) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         // api currently needs an authorization token until auto registration is created
-        builder.addInterceptor(new HttpBearerAuth("Bearer", token));
+        builder.addInterceptor(new HttpBearerAuth("Bearer", nebulaProperties.token()));
 
         // follow order used by spring @Order
         for (Interceptor interceptor : interceptors) {
@@ -40,14 +42,13 @@ public class ApiConfig {
         // api is always rate limited
         builder.addInterceptor(new RateLimitInterceptor(RateLimiter.smoothBuilder(2, Duration.ofSeconds(1)).build()));
 
-        return new RetrofitApiClient(builder.build(), url);
+        return new RetrofitApiClient(builder.build(), nebulaProperties.url());
     }
 
     @Bean
     @ConditionalOnClass(HttpLoggingInterceptor.class)
     Interceptor providesLoggingInterceptor() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
-        // TODO: make configurable
         logging.redactHeader("Authorization");
         logging.level(HttpLoggingInterceptor.Level.BASIC);
 

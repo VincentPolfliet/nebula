@@ -10,31 +10,35 @@ import static org.mockito.Mockito.mock;
 
 public class ApiClientStub implements ApiClient {
 
-    private final FleetApi fleetApi;
-    private final SystemsApi systemsApi;
+    private final FleetApi fleets;
+    private final SystemsApi systems;
+    private final ContractsApi contracts;
+    private final AgentsApi agents;
 
     public ApiClientStub() {
-        fleetApi = mock(FleetApi.class);
-        systemsApi = mock(SystemsApi.class);
+        fleets = mock(FleetApi.class);
+        systems = mock(SystemsApi.class);
+        contracts = mock(ContractsApi.class);
+        agents = mock(AgentsApi.class);
     }
 
     @Override
     public AgentsApi agentsApi() {
-        return null;
+        return agents;
     }
 
     @Override
     public FleetApi fleetApi() {
-        return fleetApi;
+        return fleets;
     }
 
     @Override
     public SystemsApi systemsApi() {
-        return systemsApi;
+        return systems;
     }
 
     @Override
     public ContractsApi contractsApi() {
-        return null;
+        return contracts;
     }
 }

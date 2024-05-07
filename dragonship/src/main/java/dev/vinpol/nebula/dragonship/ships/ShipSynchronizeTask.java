@@ -1,25 +1,19 @@
 package dev.vinpol.nebula.dragonship.ships;
 
-import dev.failsafe.RateLimiter;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
-import dev.vinpol.spacetraders.sdk.models.GetMyShips200Response;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import java.time.Duration;
-
 @Component
 public class ShipSynchronizeTask implements Runnable {
 
-    private final ShipStorage shipStorage;
+    private final ShipCache shipCache;
     private final FleetApi fleetApi;
-    private final RateLimiter<Object> rateLimiter;
 
-    public ShipSynchronizeTask(ShipStorage shipStorage, FleetApi fleetApi) {
-        this.shipStorage = shipStorage;
+    public ShipSynchronizeTask(ShipCache shipCache, FleetApi fleetApi) {
+        this.shipCache = shipCache;
         this.fleetApi = fleetApi;
-        this.rateLimiter = RateLimiter.burstyBuilder(1, Duration.ofSeconds(5)).build();
     }
 
     @EventListener(classes = SyncEvent.class)
@@ -29,14 +23,8 @@ public class ShipSynchronizeTask implements Runnable {
 
     @Override
     public void run() {
-        if (!rateLimiter.tryAcquirePermit()) {
-            return;
-        }
-
-        GetMyShips200Response myShips200Response = fleetApi.getMyShips(1, 10);
-
-        for (Ship ship : myShips200Response.getData()) {
-            shipStorage.store(ship.getSymbol(), ship);
+        for (Ship ship : fleetApi.getMyShips()) {
+            shipCache.store(ship.getSymbol(), ship);
         }
     }
 }

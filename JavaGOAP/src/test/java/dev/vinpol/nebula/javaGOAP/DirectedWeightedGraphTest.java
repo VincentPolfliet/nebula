@@ -1,11 +1,12 @@
 package dev.vinpol.nebula.javaGOAP;
 
-import static org.junit.Assert.*;
 
-import org.junit.Test;
 
 import dev.vinpol.nebula.javaGOAP.graph.DirectedWeightedGraph;
 import dev.vinpol.nebula.javaGOAP.graph.WeightedEdge;
+import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
  * WeightedGraphTest.java --- WeightedGraph TestFile.

@@ -9,18 +9,18 @@ import org.springframework.stereotype.Component;
 public class ShipEventListener {
 
     private final ShipCommander shipCommander;
-    private final ShipStorage shipStorage;
+    private final ShipCache shipCache;
 
-    public ShipEventListener(ShipCommander shipCommander, ShipStorage shipStorage) {
+    public ShipEventListener(ShipCommander shipCommander, ShipCache shipCache) {
         this.shipCommander = shipCommander;
-        this.shipStorage = shipStorage;
+        this.shipCache = shipCache;
     }
 
     @EventListener
     public void onCommandShipEvent(CommandShipEvent event) {
         String shipSymbol = event.shipSymbol();
 
-        Ship ship = shipStorage.retrieve(shipSymbol);
+        Ship ship = shipCache.retrieve(shipSymbol);
         shipCommander.command(ship);
     }
 }

@@ -1,0 +1,9 @@
+{
+    "properties": [
+        {
+            "name": "nebula.ext.sync-on-boot",
+            "type": "java.lang.Boolean",
+            "description": "Description for nebula.ext.sync-on-boot."
+        }
+    ]
+}

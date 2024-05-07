@@ -17,16 +17,16 @@ import static org.mockito.Mockito.*;
 
 class ShipSynchronizeTaskTest {
 
-    private ShipStorage shipStorage;
+    private ShipCache shipCache;
     private FleetApi fleetApi;
 
     ShipSynchronizeTask sut;
 
     @BeforeEach
     void setup() {
-        shipStorage = mock(ShipStorage.class);
+        shipCache = mock(ShipCache.class);
         fleetApi = mock(FleetApi.class);
-        sut = new ShipSynchronizeTask(shipStorage, fleetApi);
+        sut = new ShipSynchronizeTask(shipCache, fleetApi);
     }
 
     @Test
@@ -48,7 +48,7 @@ class ShipSynchronizeTaskTest {
         when(fleetApi.getMyShips(1, 10)).thenReturn(shipsResponse);
 
         sut.run();
-        verify(shipStorage).store(excavator.getSymbol(), excavator);
+        verify(shipCache).store(excavator.getSymbol(), excavator);
     }
 
     @Test
@@ -68,7 +68,7 @@ class ShipSynchronizeTaskTest {
         when(fleetApi.getMyShips(1, 10)).thenReturn(shipsResponse);
 
         sut.run();
-        verifyNoInteractions(shipStorage);
+        verifyNoInteractions(shipCache);
     }
 
 
@@ -85,8 +85,8 @@ class ShipSynchronizeTaskTest {
 
         shipsResponse.meta(
             new Meta()
-                .limit(1)
-                .page(10)
+                .limit(10)
+                .page(1)
                 .total(3)
         );
 
@@ -95,7 +95,7 @@ class ShipSynchronizeTaskTest {
         sut.run();
 
         ArgumentCaptor<Ship> shipArgumentCaptor = ArgumentCaptor.forClass(Ship.class);
-        verify(shipStorage, times(3)).store(anyString(), shipArgumentCaptor.capture());
+        verify(shipCache, times(3)).store(anyString(), shipArgumentCaptor.capture());
 
         List<Ship> allShips = shipArgumentCaptor.getAllValues();
         assertThat(allShips).containsAll(shipsResponse.getData());

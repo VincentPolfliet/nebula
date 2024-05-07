@@ -1,9 +1,11 @@
 package dev.vinpol.torterra;
 
+import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 
+@NotThreadSafe
 public interface LeafIterator<T> {
     boolean hasNext();
 
@@ -26,14 +28,6 @@ public interface LeafIterator<T> {
 
     static <T> LeafIterator<T> safe(LeafIterator<T> original) {
         return new SafeLeafIterator<>(original);
-    }
-
-    static <T> LeafIterator<T> tryWrap(Leaf<T> leaf) {
-        boolean isWrappedInFailSafe = leaf.isFailSafe();
-        Leaf<T> innerLeaf = TorterraUtils.unwrap(leaf);
-
-        LeafIterator<T> iteratorToUse = innerLeaf instanceof IterableLeaf<T> iterable ? iterable.leafIterator() : LeafIterator.singleton(innerLeaf);
-        return isWrappedInFailSafe ? LeafIterator.safe(iteratorToUse) : iteratorToUse;
     }
 
     class SingletonLeafIterator<T> implements LeafIterator<T> {

@@ -1,9 +1,5 @@
 package dev.vinpol.nebula.javaGOAP;
 
-import dev.vinpol.nebula.javaGOAP.GoapAction;
-import dev.vinpol.nebula.javaGOAP.GoapState;
-import dev.vinpol.nebula.javaGOAP.IGoapUnit;
-
 /**
  * dev.vinpol.nebula.javaGOAP.TestActionOne.java --- First TestAction.
  *

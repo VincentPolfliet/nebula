@@ -50,6 +50,10 @@ public class Ship {
         return getNav().isInOrbit();
     }
 
+    public boolean isNotInOrbit() {
+        return !isInOrbit();
+    }
+
     public boolean isInTransit() {
         return getNav().isInTransit();
     }

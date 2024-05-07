@@ -33,7 +33,7 @@ public class NavigateBehaviourFactory implements ShipBehaviourFactory {
 
             @Override
             public ShipBehaviourResult update(Ship ship) {
-                if (!ship.isInOrbit()) {
+                if (ship.isNotInOrbit()) {
                     return ShipBehaviourResult.failure(FailureReason.NOT_IN_ORBIT);
                 }
 

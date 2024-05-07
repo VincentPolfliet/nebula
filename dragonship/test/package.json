@@ -1,0 +1,16 @@
+{
+    "name": "api",
+    "version": "1.0.0",
+    "description": "",
+    "type": "module",
+    "main": "index.js",
+    "scripts": {
+
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "express": "^4.19.2",
+        "@http-util/status-i18n": "^0.8.1"
+    }
+}

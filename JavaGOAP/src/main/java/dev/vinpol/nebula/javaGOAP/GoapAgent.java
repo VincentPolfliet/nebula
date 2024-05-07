@@ -1,7 +1,10 @@
 package dev.vinpol.nebula.javaGOAP;
 
-import java.util.HashSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Queue;
+import java.util.Set;
 
 /**
  * GoapAgent.java --- The Agent which controls a units actions
@@ -9,94 +12,98 @@ import java.util.Queue;
  * @author P H - 28.01.2017
  */
 public abstract class GoapAgent
-		implements ImportantUnitChangeEventListener, PlanCreatedEventListener, FSMPlanEventListener {
+    implements ImportantUnitChangeEventListener, PlanCreatedEventListener, FSMPlanEventListener {
 
-	private FSM fsm = new FSM();
-	private IdleState idleState;
-	private IGoapUnit assignedGoapUnit;
+    protected Logger logger;
 
-	/**
-	 * @param assignedUnit
-	 *            the GoapUnit the agent works with.
-	 */
-	public GoapAgent(IGoapUnit assignedUnit) {
-		this.assignedGoapUnit = assignedUnit;
-		this.idleState = new IdleState(this.generatePlannerObject());
+    private final FSM fsm = new FSM();
+    private final IdleState idleState;
+    private final IGoapUnit assignedGoapUnit;
 
-		// Only subclasses of the own GoapUnit are able to emit events
-		if (this.assignedGoapUnit instanceof GoapUnit) {
-			((GoapUnit) this.assignedGoapUnit).addImportantUnitGoalChangeListener(this);
-		}
-		this.idleState.addPlanCreatedListener(this);
-		this.fsm.addPlanEventListener(this);
-	}
+    /**
+     * @param assignedUnit the GoapUnit the agent works with.
+     */
+    public GoapAgent(IGoapUnit assignedUnit) {
+        logger = LoggerFactory.getLogger(GoapAgent.class);
 
-	// -------------------- Functions
+        this.assignedGoapUnit = assignedUnit;
+        this.idleState = new IdleState(this.generatePlannerObject());
 
-	public void update() {
-		if (!this.fsm.hasStates()) {
-			this.fsm.pushStack(this.idleState);
-		}
+        // Only subclasses of the own GoapUnit are able to emit events
+        if (this.assignedGoapUnit instanceof GoapUnit) {
+            ((GoapUnit) this.assignedGoapUnit).addImportantUnitGoalChangeListener(this);
+        }
 
-		this.assignedGoapUnit.update();
-		this.fsm.update(this.assignedGoapUnit);
-	}
+        this.idleState.addPlanCreatedListener(this);
+        this.fsm.addPlanEventListener(this);
+    }
 
-	/**
-	 * Function for subclasses to provide an instance of an planner which is
-	 * going to be used to create the action Queue.
-	 *
-	 * @return the used planner instance implementing the IGoapPlanner
-	 *         interface.
-	 */
-	protected abstract IGoapPlanner generatePlannerObject();
+    // -------------------- Functions
 
-	// ------------------------------ Getter / Setter
+    public void update() {
+        if (!this.fsm.hasStates()) {
+            this.fsm.pushStack(this.idleState);
+        }
 
-	public IGoapUnit getAssignedGoapUnit() {
-		return this.assignedGoapUnit;
-	}
+        this.assignedGoapUnit.update();
+        this.fsm.update(this.assignedGoapUnit);
+    }
 
-	// -------------------- Eventlisteners
+    /**
+     * Function for subclasses to provide an instance of an planner which is
+     * going to be used to create the action Queue.
+     *
+     * @return the used planner instance implementing the IGoapPlanner
+     * interface.
+     */
+    protected abstract IGoapPlanner generatePlannerObject();
 
-	// ------------------------------ IdleState
-	@Override
-	public void onPlanCreated(Queue<GoapAction> plan) {
-		this.assignedGoapUnit.goapPlanFound(plan);
+    // ------------------------------ Getter / Setter
 
-		this.fsm.popStack();
-		this.fsm.pushStack(new RunActionState(this.fsm, plan));
-	}
+    public IGoapUnit getAssignedGoapUnit() {
+        return this.assignedGoapUnit;
+    }
 
-	// ------------------------------ GoapUnit
-	@Override
-	public void onImportantUnitGoalChange(GoapState newGoalState) {
-		newGoalState.importance = Integer.MAX_VALUE;
+    // -------------------- Eventlisteners
 
-		this.fsm.pushStack(this.idleState);
-	}
+    // ------------------------------ IdleState
+    @Override
+    public void onPlanCreated(Queue<GoapAction> plan) {
+        this.assignedGoapUnit.goapPlanFound(plan);
 
-	@Override
-	public void onImportantUnitStackResetChange() {
-		HashSet<GoapAction> actions = this.assignedGoapUnit.getAvailableActions();
+        this.fsm.popStack();
+        this.fsm.pushStack(new RunActionState(this.fsm, plan));
+    }
 
-		// Reset all actions of the IGoapUnit.
-		for (GoapAction goapAction : actions) {
-			goapAction.reset();
-		}
+    // ------------------------------ GoapUnit
+    @Override
+    public void onImportantUnitGoalChange(GoapState newGoalState) {
+        newGoalState.importance = Integer.MAX_VALUE;
 
-		this.fsm.clearStack();
-		this.fsm.pushStack(this.idleState);
-	}
+        this.fsm.pushStack(this.idleState);
+    }
 
-	// ------------------------------ FSM
-	@Override
-	public void onPlanFailed(Queue<GoapAction> actions) {
-		this.assignedGoapUnit.goapPlanFailed(actions);
-	}
+    @Override
+    public void onImportantUnitStackResetChange() {
+        Set<GoapAction> actions = this.assignedGoapUnit.getAvailableActions();
 
-	@Override
-	public void onPlanFinished() {
-		this.assignedGoapUnit.goapPlanFinished();
-	}
+        // Reset all actions of the IGoapUnit.
+        for (GoapAction goapAction : actions) {
+            goapAction.reset();
+        }
+
+        this.fsm.clearStack();
+        this.fsm.pushStack(this.idleState);
+    }
+
+    // ------------------------------ FSM
+    @Override
+    public void onPlanFailed(Queue<GoapAction> actions) {
+        this.assignedGoapUnit.goapPlanFailed(actions);
+    }
+
+    @Override
+    public void onPlanFinished() {
+        this.assignedGoapUnit.goapPlanFinished();
+    }
 }

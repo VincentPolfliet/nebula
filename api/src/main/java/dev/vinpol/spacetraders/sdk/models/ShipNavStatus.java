@@ -3,7 +3,7 @@ package dev.vinpol.spacetraders.sdk.models;
 import lombok.Getter;
 
 /**
- * The current status of the ship
+ * The current navigation status of the ship
  */
 @Getter
 public enum ShipNavStatus {

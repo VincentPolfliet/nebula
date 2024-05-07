@@ -34,6 +34,7 @@ class ShipBehaviourSchedulerTest {
     ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
     ScheduledExecutor timer = ScheduledExecutor.ofScheduledExecutorService(scheduler);
     ExecutorService worker = Executors.newSingleThreadExecutor();
+
     ShipAlgorithmResolver resolver;
     ShipAlgorithm algorithm;
     ShipBehaviourScheduler sut;

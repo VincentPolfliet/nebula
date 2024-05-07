@@ -3,6 +3,7 @@ package dev.vinpol.nebula.javaGOAP;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 /**
  * GoapUnit.java --- The Superclass for a unit using the GoapAgent
@@ -11,183 +12,175 @@ import java.util.List;
  */
 public abstract class GoapUnit implements IGoapUnit {
 
-	private List<GoapState> goalState = new ArrayList<GoapState>();
-	private HashSet<GoapState> worldState = new HashSet<GoapState>();
-	private HashSet<GoapAction> availableActions = new HashSet<GoapAction>();
+    private List<GoapState> goalState = new ArrayList<>();
+    private Set<GoapState> worldState = new HashSet<>();
+    private Set<GoapAction> availableActions = new HashSet<>();
 
-	private List<Object> importantUnitGoalChangeListeners = new ArrayList<Object>();
+    private List<Object> importantUnitGoalChangeListeners = new ArrayList<Object>();
 
-	public GoapUnit() {
+    // -------------------- Functions
 
-	}
+    /**
+     * This function can be called by a subclass if the efforts of the unit
+     * trying to archive a specific goal should be paused to fulfill a more
+     * urgent goal. The GoapState is added to the main goal HashSet and changed
+     * by the GoapAgent.
+     * <p>
+     * IMPORTANT:
+     * <p>
+     * The function must only be called once per two update cycles. The reason
+     * for this is that the function pushes an IdleState on the FSM Stack which
+     * is transformed into an GoapAction Queue in the current cycle. Calling the
+     * function again in the next one pushes a new IdleState on top of this
+     * generated action Queue, which renders the Queue obsolete and causes the
+     * Unit to not perform any action since the RunActionState is now beneath
+     * the newly pushed IdleState.
+     *
+     * @param newGoapState the new goal the unit tries to archive.
+     */
+    protected final void changeGoalImmediatly(GoapState newGoapState) {
+        this.goalState.add(newGoapState);
 
-	// -------------------- Functions
+        this.dispatchNewImportantUnitGoalChangeEvent(newGoapState);
+    }
 
-	/**
-	 * This function can be called by a subclass if the efforts of the unit
-	 * trying to archive a specific goal should be paused to fulfill a more
-	 * urgent goal. The GoapState is added to the main goal HashSet and changed
-	 * by the GoapAgent.
-	 * <p>
-	 * IMPORTANT:
-	 * <p>
-	 * The function must only be called once per two update cycles. The reason
-	 * for this is that the function pushes an IdleState on the FSM Stack which
-	 * is transformed into an GoapAction Queue in the current cycle. Calling the
-	 * function again in the next one pushes a new IdleState on top of this
-	 * generated action Queue, which renders the Queue obsolete and causes the
-	 * Unit to not perform any action since the RunActionState is now beneath
-	 * the newly pushed IdleState.
-	 *
-	 * @param newGoapState
-	 *            the new goal the unit tries to archive.
-	 */
-	protected final void changeGoalImmediatly(GoapState newGoapState) {
-		this.goalState.add(newGoapState);
-
-		this.dispatchNewImportantUnitGoalChangeEvent(newGoapState);
-	}
-
-	/**
-	 * Can be called to remove any existing GoapActions and start fresh.
-	 */
-	protected void resetActions() {
-		this.dispatchNewImportantUnitStackResetEvent();
-	}
+    /**
+     * Can be called to remove any existing GoapActions and start fresh.
+     */
+    protected void resetActions() {
+        this.dispatchNewImportantUnitStackResetEvent();
+    }
 
 
+    // ------------------------------ Getter / Setter
 
-	// ------------------------------ Getter / Setter
+    // ---------------------------------------- WorldState
+    protected void setWorldState(HashSet<GoapState> worldState) {
+        this.worldState = worldState;
+    }
 
-	// ---------------------------------------- WorldState
-	protected void setWorldState(HashSet<GoapState> worldState) {
-		this.worldState = worldState;
-	}
+    protected void addWorldState(GoapState newWorldState) {
+        boolean missing = true;
 
-	protected void addWorldState(GoapState newWorldState) {
-		boolean missing = true;
+        for (GoapState state : this.worldState) {
+            if (newWorldState.effect.equals(state.effect)) {
+                missing = false;
 
-		for (GoapState state : this.worldState) {
-			if (newWorldState.effect.equals(state.effect)) {
-				missing = false;
+                break;
+            }
+        }
 
-				break;
-			}
-		}
+        if (missing) {
+            this.worldState.add(newWorldState);
+        }
+    }
 
-		if (missing) {
-			this.worldState.add(newWorldState);
-		}
-	}
+    protected void removeWorldState(String effect) {
+        GoapState marked = null;
 
-	protected void removeWorldState(String effect) {
-		GoapState marked = null;
+        for (GoapState state : this.worldState) {
+            if (effect.equals(state.effect)) {
+                marked = state;
 
-		for (GoapState state : this.worldState) {
-			if (effect.equals(state.effect)) {
-				marked = state;
+                break;
+            }
+        }
 
-				break;
-			}
-		}
+        if (marked != null) {
+            this.worldState.remove(marked);
+        }
+    }
 
-		if (marked != null) {
-			this.worldState.remove(marked);
-		}
-	}
+    protected void removeWorldState(GoapState goapState) {
+        this.worldState.remove(goapState);
+    }
 
-	protected void removeWorldState(GoapState goapState) {
-		this.worldState.remove(goapState);
-	}
+    public Set<GoapState> getWorldState() {
+        return this.worldState;
+    }
 
-	public HashSet<GoapState> getWorldState() {
-		return this.worldState;
-	}
+    // ---------------------------------------- GoalState
+    protected void setGoalState(List<GoapState> list) {
+        this.goalState = list;
+    }
 
-	// ---------------------------------------- GoalState
-	protected void setGoalState(List<GoapState> list) {
-		this.goalState = list;
-	}
+    protected void addGoalState(GoapState newGoalState) {
+        boolean missing = true;
 
-	protected void addGoalState(GoapState newGoalState) {
-		boolean missing = true;
+        for (GoapState state : this.goalState) {
+            if (newGoalState.equals(state.effect)) {
+                missing = false;
 
-		for (GoapState state : this.goalState) {
-			if (newGoalState.equals(state.effect)) {
-				missing = false;
+                break;
+            }
+        }
 
-				break;
-			}
-		}
+        if (missing) {
+            this.goalState.add(newGoalState);
+        }
+    }
 
-		if (missing) {
-			this.goalState.add(newGoalState);
-		}
-	}
+    protected void removeGoalState(String effect) {
+        GoapState marked = null;
 
-	protected void removeGoalState(String effect) {
-		GoapState marked = null;
+        for (GoapState state : this.goalState) {
+            if (effect.equals(state.effect)) {
+                marked = state;
 
-		for (GoapState state : this.goalState) {
-			if (effect.equals(state.effect)) {
-				marked = state;
+                break;
+            }
+        }
 
-				break;
-			}
-		}
+        if (marked != null) {
+            this.goalState.remove(marked);
+        }
+    }
 
-		if (marked != null) {
-			this.goalState.remove(marked);
-		}
-	}
+    protected void removeGoalStat(GoapState goapState) {
+        this.goalState.remove(goapState);
+    }
 
-	protected void removeGoalStat(GoapState goapState) {
-		this.goalState.remove(goapState);
-	}
+    public List<GoapState> getGoalState() {
+        return this.goalState;
+    }
 
-	public List<GoapState> getGoalState() {
-		return this.goalState;
-	}
+    // ---------------------------------------- Available Actions
+    protected void setAvailableActions(HashSet<GoapAction> availableActions) {
+        this.availableActions = availableActions;
+    }
 
-	// ---------------------------------------- Available Actions
-	protected void setAvailableActions(HashSet<GoapAction> availableActions) {
-		this.availableActions = availableActions;
-	}
+    protected void addAvailableAction(GoapAction action) {
+        this.availableActions.add(action);
+    }
 
-	protected void addAvailableAction(GoapAction action) {
-		if (!this.availableActions.contains(action)) {
-			this.availableActions.add(action);
-		}
-	}
+    protected void removeAvailableAction(GoapAction action) {
+        this.availableActions.remove(action);
+    }
 
-	protected void removeAvailableAction(GoapAction action) {
-		this.availableActions.remove(action);
-	}
+    public Set<GoapAction> getAvailableActions() {
+        return this.availableActions;
+    }
 
-	public HashSet<GoapAction> getAvailableActions() {
-		return this.availableActions;
-	}
+    // -------------------- Events
 
-	// -------------------- Events
+    // ------------------------------ Important unit changes
+    synchronized void addImportantUnitGoalChangeListener(Object listener) {
+        this.importantUnitGoalChangeListeners.add(listener);
+    }
 
-	// ------------------------------ Important unit changes
-	synchronized void addImportantUnitGoalChangeListener(Object listener) {
-		this.importantUnitGoalChangeListeners.add(listener);
-	}
+    synchronized void removeImportantUnitGoalChangeListener(Object listener) {
+        this.importantUnitGoalChangeListeners.remove(listener);
+    }
 
-	synchronized void removeImportantUnitGoalChangeListener(Object listener) {
-		this.importantUnitGoalChangeListeners.remove(listener);
-	}
+    private synchronized void dispatchNewImportantUnitGoalChangeEvent(GoapState newGoalState) {
+        for (Object listener : this.importantUnitGoalChangeListeners) {
+            ((ImportantUnitChangeEventListener) listener).onImportantUnitGoalChange(newGoalState);
+        }
+    }
 
-	private synchronized void dispatchNewImportantUnitGoalChangeEvent(GoapState newGoalState) {
-		for (Object listener : this.importantUnitGoalChangeListeners) {
-			((ImportantUnitChangeEventListener) listener).onImportantUnitGoalChange(newGoalState);
-		}
-	}
-
-	private synchronized void dispatchNewImportantUnitStackResetEvent() {
-		for (Object listener : this.importantUnitGoalChangeListeners) {
-			((ImportantUnitChangeEventListener) listener).onImportantUnitStackResetChange();
-		}
-	}
+    private synchronized void dispatchNewImportantUnitStackResetEvent() {
+        for (Object listener : this.importantUnitGoalChangeListeners) {
+            ((ImportantUnitChangeEventListener) listener).onImportantUnitStackResetChange();
+        }
+    }
 }

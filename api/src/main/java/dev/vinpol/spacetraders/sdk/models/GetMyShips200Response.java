@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class GetMyShips200Response {
+public class GetMyShips200Response implements ApiPageable<Ship> {
     private List<Ship> data = new ArrayList<>();
     private Meta meta;
 

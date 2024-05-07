@@ -36,5 +36,5 @@ public interface AgentsApi {
      * @return Call&lt;GetMyAgent200Response&gt;
      */
     @GET("my/agent")
-    Call<GetMyAgent200Response> getMyAgent();
+    GetMyAgent200Response getMyAgent();
 }

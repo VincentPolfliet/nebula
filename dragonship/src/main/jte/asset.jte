@@ -1,5 +1,10 @@
-@import static dev.vinpol.nebula.dragonship.web.support.jte.JteManifestSupport.asset
+@import static dev.vinpol.nebula.dragonship.web.config.support.vite.jte.JteManifestSupport.asset
 
 @param String name
+@param boolean local = false
 
-${asset(name)}
+@if(!local)
+    ${asset(name)}
+@else
+    <script src="${name}"></script>
+@endif

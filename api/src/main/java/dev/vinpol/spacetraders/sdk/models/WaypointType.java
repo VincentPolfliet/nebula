@@ -13,9 +13,12 @@
 
 package dev.vinpol.spacetraders.sdk.models;
 
+import lombok.Getter;
+
 /**
  * The type of waypoint.
  */
+@Getter
 public enum WaypointType {
 
     PLANET("PLANET"),
@@ -50,10 +53,6 @@ public enum WaypointType {
 
     WaypointType(String value) {
         this.value = value;
-    }
-
-    public String getValue() {
-        return value;
     }
 
     @Override

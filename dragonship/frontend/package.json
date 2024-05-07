@@ -9,12 +9,13 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "@popperjs/core": "^2.11.8",
-        "bootstrap": "^5.3.3",
-        "htmx.org": "^1.9.11"
+        "bulma": "^1.0.0",
+        "htmx.org": "^1.9.11",
+        "vue": "^3.4.26",
+        "leaflet": "^1.9.4"
     },
     "devDependencies": {
         "vite": "^5.2.0",
-        "sass": "^1.72.0"
+        "@vitejs/plugin-vue": "^5.0.4"
     }
 }

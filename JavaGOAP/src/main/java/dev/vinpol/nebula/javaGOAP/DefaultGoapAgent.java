@@ -5,17 +5,16 @@ package dev.vinpol.nebula.javaGOAP;
  * the IGoapUnit has to be assigned.
  *
  * @author P H - 15.03.2017
- *
  */
 public class DefaultGoapAgent extends GoapAgent {
 
-	public DefaultGoapAgent(IGoapUnit assignedUnit) {
-		super(assignedUnit);
-	}
+    public DefaultGoapAgent(IGoapUnit assignedUnit) {
+        super(assignedUnit);
+    }
 
-	@Override
-	protected IGoapPlanner generatePlannerObject() {
-		return new DefaultGoapPlanner();
-	}
-
+    @Override
+    protected IGoapPlanner generatePlannerObject() {
+        logger.trace("Generating planner object");
+        return new DefaultGoapPlanner();
+    }
 }
