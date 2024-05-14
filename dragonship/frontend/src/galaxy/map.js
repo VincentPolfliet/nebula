@@ -1,6 +1,7 @@
 import 'vite/modulepreload-polyfill';
 
 import 'bulma'
+import '../index.scss'
 
 import {createApp} from 'vue'
 import Map from './Map.vue'

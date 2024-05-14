@@ -3,6 +3,7 @@ package dev.vinpol.spacetraders.sdk.models;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.function.Consumer;
 
 /**
@@ -21,7 +22,6 @@ public class ShipNavRoute {
     }
 
     public ShipNavRoute origin(ShipNavRouteWaypoint origin) {
-
         this.origin = origin;
         return this;
     }
@@ -40,6 +40,10 @@ public class ShipNavRoute {
         ShipNavRouteWaypoint dest = this.destination != null ? this.destination : new ShipNavRouteWaypoint();
         consumer.accept(dest);
         return destination(dest);
+    }
+
+    public long getDurationInSeconds() {
+        return ChronoUnit.SECONDS.between(getDepartureTime(), getArrival());
     }
 }
 

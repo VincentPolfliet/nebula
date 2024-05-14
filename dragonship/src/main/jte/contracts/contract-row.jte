@@ -1,4 +1,4 @@
-@import static dev.vinpol.nebula.dragonship.web.config.support.vite.ViteEnv.isDev
+@import static dev.vinpol.nebula.dragonship.web.config.support.vite.StaticViteEnv.isDev
 
 @param dev.vinpol.spacetraders.sdk.models.Contract contract
 

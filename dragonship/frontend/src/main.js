@@ -2,4 +2,7 @@ import 'vite/modulepreload-polyfill'
 
 import "htmx.org"
 import 'bulma'
-import './index.css'
+
+import './icons.css'
+import './index.scss'
+

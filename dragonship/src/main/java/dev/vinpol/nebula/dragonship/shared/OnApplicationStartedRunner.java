@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.shared;
 
-import dev.vinpol.nebula.dragonship.shared.kv.KVStore;
 import dev.vinpol.nebula.dragonship.sdk.NebulaProperties;
+import dev.vinpol.nebula.dragonship.shared.kv.KVStore;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 

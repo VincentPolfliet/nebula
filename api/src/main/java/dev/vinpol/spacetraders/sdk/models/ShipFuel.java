@@ -26,8 +26,13 @@ public class ShipFuel {
         return this;
     }
 
+    public boolean isInfinite() {
+        // fuel should be considered infinite if the capacity and current volume are both 0
+        return current == 0 && capacity == 0;
+    }
+
     public boolean isFull() {
-        return current == capacity && !isEmpty();
+        return current == capacity;
     }
 
     public boolean isEmpty() {

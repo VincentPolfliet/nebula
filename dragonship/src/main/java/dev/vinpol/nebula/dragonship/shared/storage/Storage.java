@@ -8,5 +8,9 @@ public interface Storage<K, T> {
 
     T retrieve(K key);
 
+    default boolean hasItem(K key) {
+        return retrieve(key) != null;
+    }
+
     Stream<T> stream();
 }

@@ -56,9 +56,9 @@ public class ManifestChunkRenderer {
 
             if (renderOptions.includeModulePreload()) {
                 link()
-                    .withRel("modulepreload")
-                    .attr("src",  importedChunk.getFile())
-                    .render(builder);
+                        .withRel("modulepreload")
+                        .attr("src", importedChunk.getFile())
+                        .render(builder);
             }
         }
     }
@@ -66,9 +66,9 @@ public class ManifestChunkRenderer {
     private static void renderCss(Chunk chunk, HtmlBuilder<?> result) throws IOException {
         for (String css : chunk.getCss()) {
             link()
-                .withRel("stylesheet")
-                .withHref(css)
-                .render(result);
+                    .withRel("stylesheet")
+                    .withHref(css)
+                    .render(result);
         }
     }
 

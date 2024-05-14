@@ -17,8 +17,8 @@ public class StringHtmlBuilder implements HtmlBuilder<StringBuilder> {
 
     public static StringHtmlBuilder pretty() {
         Config config = Config.defaults()
-            .withEmptyTagsClosed(true)
-            .withIndenter((level, text) -> "   ".repeat(level) + text);
+                .withEmptyTagsClosed(true)
+                .withIndenter((level, text) -> "   ".repeat(level) + text);
 
         return new StringHtmlBuilder(IndentedHtml.inMemory(config));
     }

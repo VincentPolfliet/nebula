@@ -1,101 +1,147 @@
 <script setup>
-import {computed, h, onMounted, onUpdated, ref, render} from "vue";
-import FilterPanel from "./FilterPanel.vue";
+import {onMounted, ref} from "vue";
 
 const props = defineProps({
-    waypoints: Array
+    waypoints: Array,
+    types: Array,
+    target: String
 })
 
-const innerWaypointTypes = [...new Set(props.waypoints.map(w => w.type))].map(w => {
+const waypointTypes = ref([...props.types].map(w => {
     return {
-        "active": true,
-        "iconClass": w.toLowerCase(),
-        "title": w
+        "title": w.title,
+        "type": w.type,
+        "menuActive": false,
+        "filterActive": true,
+        "iconClass": w.type.toLowerCase(),
     }
-});
+}));
 
-const waypointTypes = ref(innerWaypointTypes)
+const getWaypointsByType = function (type) {
+    return props.waypoints
+        .filter(w => w.type === type);
+}
+
+const onFilterClicked = function (item) {
+    fillMarkers();
+}
+
+const onTypeClicked = function (item) {
+    item.menuActive = !item.menuActive;
+}
+
+const navigateToWaypoint = function (symbol) {
+    const marker = markersPerWaypoint[symbol];
+
+    if (marker) {
+        map.flyTo(marker.getLatLng(), 5);
+        marker.openPopup()
+    }
+}
+
+function resetAllFilters() {
+    for (const waypointType of waypointTypes.value) {
+        waypointType.filterActive = true;
+    }
+
+    fillMarkers();
+}
 
 let map;
 let markersFeatureGroup
+let markersPerWaypoint = []
 
 onMounted(() => {
-    function makeFilterPanel(element, data) {
-        const vueComponent = h(FilterPanel, data);
-
-        render(vueComponent, element)
-    }
-
     map = L.map('galaxy-map', {
         crs: L.CRS.Simple
     });
 
-    L.Control.Filter = L.Control.extend({
-        options: {
-            position: 'topright'
-        },
-        onAdd: function (map) {
-            const container = document.createElement("div");
-            container.classList.add("leaflet-control");
+    fillMarkers();
 
-            // https://vuejs.org/guide/extras/render-function
-            // TODO: event listener or a way to have a callback so that we can render the markers again		
-	    // https://stackoverflow.com/questions/66781022/how-to-add-listener-in-setup-render-function-to-event-updatemyprop ???
-            makeFilterPanel(container, {types: waypointTypes.value});
-            return container;
-        },
-        onRemove: function (map) {
-        },
-    });
+    if (markersFeatureGroup) {
+        map.fitBounds(markersFeatureGroup.getBounds());
 
-    const filter = new L.Control.Filter()
-    filter.addTo(map);
+        if (props.target) {
+            navigateToWaypoint(props.target)
+        }
+    }
+})
 
+function fillMarkers() {
     if (markersFeatureGroup) {
         map.removeLayer(markersFeatureGroup);
     }
 
+    markersPerWaypoint = []
     const markers = [];
 
-    for (const waypoint of props.waypoints) {
-        const waypoinLatLng = L.latLng([waypoint.y, waypoint.x]);
+    for (const waypointType of waypointTypes.value) {
+        if (waypointType.filterActive) {
+            for (const waypoint of getWaypointsByType(waypointType.type)) {
+                // using priority as alt to order markers
+                // this looks to work, but I have no idea if it actually does
+                const waypointLatLng = L.latLng([waypoint.y, waypoint.x, waypoint.priority]);
 
-        const marker = L.marker(waypoinLatLng, {
-            icon: L.divIcon({
-                className: `system ${waypoint.type.toLowerCase()}`,
-                html: '<span></span>'
-            })
-        }).bindPopup(`<p>${waypoint.symbol} (${waypoint.type}) </p>`);
+                const marker = L.marker(waypointLatLng, {
+                    icon: L.divIcon({
+                        className: `system ${waypoint.type.toLowerCase()}`,
+                        html: '<span></span>'
+                    })
+                });
 
-        markers.push(marker);
+                const isShipType = waypointType.type === 'SHIP';
+                const displayX = isShipType ? Math.floor(waypoint.x) : waypoint.x;
+                const displayY = isShipType ? Math.floor(waypoint.y) : waypoint.y;
+
+                marker.bindPopup(`<p>${waypoint.symbol} [${displayX}, ${displayY}]</p>`);
+
+                markers.push(marker);
+                markersPerWaypoint[waypoint.symbol] = marker;
+            }
+        }
     }
 
-    markersFeatureGroup = L.featureGroup(markers);
-    markersFeatureGroup.addTo(map);
-
-    map.fitBounds(markersFeatureGroup.getBounds());
-})
-
-onUpdated(() => {
-    console.log("map updated")
-})
+    if (markers.length !== 0) {
+        markersFeatureGroup = L.featureGroup(markers);
+        markersFeatureGroup.addTo(map);
+    }
+}
 
 </script>
 
 <template>
-    <div id="galaxy-container" class="galaxy-map__container">
-        <div id="galaxy-map" class="galaxy-map__map">
+    <div class="columns">
+        <div class="column is-one-fifth galaxy-map__column">
+            <aside class="menu galaxy-map__controls">
+                <p class="menu-label" @click="resetAllFilters()">Legend</p>
+                <ul class="menu-list">
+                    <li v-for="type in waypointTypes">
+                        <!-- TODO: fix this not taking the entire bar -->
+                        <a class="level-item" @click="onTypeClicked(type)">
+                            <span> <span :class="type.iconClass"></span> {{ type.title }}</span>
+                        </a>
 
+                        <ul v-bind:class="{ 'is-hidden': !type.menuActive }">
+                            <li v-for="waypoint in getWaypointsByType(type.type)"
+                                @click="navigateToWaypoint(waypoint.symbol)">
+                                <a>{{ waypoint.symbol }}</a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </aside>
+        </div>
+        <div class="column galaxy-map__column">
+            <div id="galaxy-container" class="galaxy-map__container">
+                <div id="galaxy-map" class="galaxy-map__map">
+
+                </div>
+            </div>
         </div>
     </div>
 </template>
 
 <style>
-:root {
-    --space-black: rgb(22, 23, 81);
-    --header-height: var(--bulma-navbar-height);
-}
-
 .leaflet-container {
     background: var(--space-black);
 }
@@ -114,6 +160,15 @@ onUpdated(() => {
     display: block;
 }
 
+.galaxy-map__controls {
+    padding: 0.75em;
+    overflow: auto;
+}
+
+.galaxy-map__column {
+    padding-bottom: 0;
+}
+
 .galaxy-map__filter-control {
     background: var(--bulma-background);
 }
@@ -124,8 +179,18 @@ onUpdated(() => {
     font-size: 2em;
 }
 
-.asteroid::after {
+.asteroid::after, .engineered_asteroid::after, .asteroid_base::after {
     content: "☄️";
+}
+
+.asteroid_base {
+    color: transparent;
+    text-shadow: 0 0 0 mediumvioletred;
+}
+
+.engineered_asteroid {
+    color: transparent;
+    text-shadow: 0 0 0 cornflowerblue;
 }
 
 .planet::after {
@@ -149,6 +214,10 @@ onUpdated(() => {
 }
 
 .jump_gate::after {
+    content: "✈️";
+}
+
+.ship::after {
     content: "🚀";
 }
 

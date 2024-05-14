@@ -39,7 +39,7 @@ public class SynchronousCallAdapterFactory extends CallAdapter.Factory {
                     assert response.body() != null;
                     return response.body();
                 } else {
-                    throw new RuntimeException("Response not successful: " + response.code());
+                    throw new RuntimeException("Response not successful: " + response.code() + response.errorBody().string());
                 }
             } catch (IOException e) {
                 throw new RuntimeException("Error executing call synchronously", e);

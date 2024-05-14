@@ -4,10 +4,12 @@ import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.Manifes
 import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.ManifestLoaderImpl;
 import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.ManifestParser;
 import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.ViteEnv;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
+@EnableConfigurationProperties({ViteProperties.class})
 public class ViteConfig {
 
     @Bean

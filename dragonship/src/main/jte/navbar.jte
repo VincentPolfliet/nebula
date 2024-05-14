@@ -13,8 +13,8 @@
             <a href="/" class="navbar-item">🏠 Home</a>
 
             <a href="/fleet" class="navbar-item">🚀 Fleet</a>
-            <a href="/contracts" class="navbar-item">📦 Contracts</a>
             <a href="/galaxy" class="navbar-item">🌌 Galaxy</a>
+            <a href="/contracts" class="navbar-item">📦 Contracts</a>
         </div>
 
         <div class="navbar-end">

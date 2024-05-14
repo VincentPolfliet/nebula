@@ -2,18 +2,17 @@ package dev.vinpol.nebula.dragonship.web.config.support.vite;
 
 import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.ViteEnv;
 import gg.jte.springframework.boot.autoconfigure.JteProperties;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 @Component
-public record SpringViteEnv(JteProperties properties, @Value("${vite.baseUrl}") String baseUrl) implements ViteEnv {
+public record SpringViteEnv(JteProperties jteProperties, ViteProperties viteProperties) implements ViteEnv {
     @Override
     public boolean isProd() {
-        return !properties.isDevelopmentMode();
+        return !jteProperties.isDevelopmentMode();
     }
 
     @Override
     public String getBaseUrl() {
-        return baseUrl;
+        return viteProperties.baseUrl();
     }
 }

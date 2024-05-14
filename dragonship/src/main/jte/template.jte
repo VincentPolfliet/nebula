@@ -36,6 +36,7 @@
 
 <!-- FIXME for prod: this should be removed -->
 @template.asset(name = "@vite/client")
+@template.asset(name = "modal.js", local= true)
 
 @if(scripts != null)
     ${scripts}

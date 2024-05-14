@@ -7,12 +7,12 @@ import java.util.stream.Stream;
 
 public abstract class CacheStorage<K, T> implements Storage<K, T> {
 
-    protected Cache<K, T> cache;
+    protected final Cache<K, T> cache;
 
     protected CacheStorage(Class<K> keyType, Class<T> valueType) {
         cache = Cache2kBuilder.of(keyType, valueType)
-                .eternal(true)
-                .build();
+            .eternal(true)
+            .build();
     }
 
     protected CacheStorage(Cache<K, T> cache) {

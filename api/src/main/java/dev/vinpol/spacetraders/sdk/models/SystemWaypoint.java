@@ -35,6 +35,10 @@ public class SystemWaypoint {
         return orbits != null && !orbits.isEmpty();
     }
 
+    public boolean hasOrbitals() {
+        return orbitals != null && !orbitals.isEmpty();
+    }
+
     public SystemWaypoint symbol(String symbol) {
         this.symbol = symbol;
         return this;

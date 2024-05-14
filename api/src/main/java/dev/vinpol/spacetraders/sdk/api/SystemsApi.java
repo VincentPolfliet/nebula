@@ -100,9 +100,7 @@ public interface SystemsApi {
      * @return Call&lt;GetWaypoint200Response&gt;
      */
     @GET("systems/{systemSymbol}/waypoints/{waypointSymbol}")
-    Call<GetWaypoint200Response> getWaypoint(
-        @Path("systemSymbol") String systemSymbol, @Path("waypointSymbol") String waypointSymbol
-    );
+    GetWaypoint200Response getWaypoint(@Path("systemSymbol") String systemSymbol, @Path("waypointSymbol") String waypointSymbol);
 
     /**
      * Supply Construction Site

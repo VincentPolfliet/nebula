@@ -13,10 +13,10 @@ public interface Manifest {
             @Override
             public Iterator<Chunk> iterator() {
                 return getChunk(name)
-                    .getImports()
-                    .stream()
-                    .map(inName -> getChunk(inName))
-                    .iterator();
+                        .getImports()
+                        .stream()
+                        .map(inName -> getChunk(inName))
+                        .iterator();
             }
         };
     }

@@ -133,7 +133,6 @@ public class Ship {
         return this;
     }
 
-
     public Ship withCargo(Consumer<ShipCargo> consumer) {
         ShipCargo currentCargo = getCargo() != null ? getCargo() : new ShipCargo();
         consumer.accept(currentCargo);

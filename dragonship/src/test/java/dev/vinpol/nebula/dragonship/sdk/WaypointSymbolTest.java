@@ -1,6 +1,5 @@
 package dev.vinpol.nebula.dragonship.sdk;
 
-import dev.vinpol.nebula.automation.sdk.WaypointSymbol;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.*;

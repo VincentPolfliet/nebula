@@ -24,7 +24,7 @@ public class JacksonManifestParser implements ManifestParser {
     public Manifest parse(Reader reader) {
         try {
             JsonNode jsonNode = objectMapper.reader()
-                .readTree(reader);
+                    .readTree(reader);
 
             return new JsonNodeManifest(jsonNode, objectMapper);
         } catch (IOException e) {

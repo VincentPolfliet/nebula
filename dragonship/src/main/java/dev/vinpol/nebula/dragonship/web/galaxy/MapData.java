@@ -1,34 +1,57 @@
 package dev.vinpol.nebula.dragonship.web.galaxy;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import dev.vinpol.spacetraders.sdk.models.System;
-import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
-@Data
 public class MapData {
+
+    private final static Map<String, Integer> PRIORITY_MAP = new HashMap<>();
+
+    static {
+        PRIORITY_MAP.put("SHIP", 100);
+    }
+
+    @JsonProperty("target")
+    private String target;
 
     @JsonProperty("waypoints")
     private List<WayPoint> waypoints = new ArrayList<>();
 
-    void addWayPoint(WayPoint wayPoint) {
+    public void addWayPoint(WayPoint wayPoint) {
         Objects.requireNonNull(wayPoint);
 
         waypoints.add(wayPoint);
     }
 
-    public static MapData ofSystem(System system) {
-        MapData mapData = new MapData();
-        mapData.setWaypoints(
-            system.getWaypoints()
-                .stream()
-                .map(s -> new WayPoint(s.getSymbol(), s.getType().getValue(), s.getX(), s.getY()))
-                .toList()
-        );
+    public void setWaypoints(List<WayPoint> waypoints) {
+        this.waypoints.clear();
+        this.waypoints.addAll(waypoints);
+    }
 
-        return mapData;
+    public List<WayPoint> getWaypoints() {
+        return waypoints;
+    }
+
+    public String getTarget() {
+        return target;
+    }
+
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    @JsonProperty("types")
+    public Set<WayPointType> getTypes() {
+        return waypoints.stream()
+            .map(w -> new WayPointType(w.type(), w.type()))
+            .sorted((o1, o2) -> {
+                Integer leftPriority = PRIORITY_MAP.getOrDefault(o1.type(), 0);
+                Integer rightPriority = PRIORITY_MAP.getOrDefault(o2.type(), 0);
+
+                return Integer.compare(rightPriority, leftPriority);
+            })
+            .collect(Collectors.toCollection(LinkedHashSet::new));
     }
 }

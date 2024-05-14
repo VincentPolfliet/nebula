@@ -4,6 +4,16 @@
             "name": "nebula.ext.sync-on-boot",
             "type": "java.lang.Boolean",
             "description": "Description for nebula.ext.sync-on-boot."
+        },
+        {
+            "name": "gg.jte.classLocation",
+            "type": "java.lang.String",
+            "description": "The location where JTE will put the compiled classes, defaults to ./jte-classes."
+        },
+        {
+            "name": "vite.baseUrl",
+            "type": "java.lang.String",
+            "description": "BaseUrl of the Vite DEV server, is only applicable is running in DEV mode."
         }
     ]
 }

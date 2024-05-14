@@ -131,7 +131,7 @@ public interface FleetApi {
      * @return Call&lt;GetMyShip200Response&gt;
      */
     @GET("my/ships/{shipSymbol}")
-    Call<GetMyShip200Response> getMyShip(
+    GetMyShip200Response getMyShip(
         @Path("shipSymbol") String shipSymbol
     );
 
@@ -284,7 +284,7 @@ public interface FleetApi {
         "Content-Type:application/json"
     })
     @PATCH("my/ships/{shipSymbol}/nav")
-    Call<GetShipNav200Response> patchShipNav(
+    GetShipNav200Response patchShipNav(
         @Path("shipSymbol") String shipSymbol, @Body PatchShipNavRequest patchShipNavRequest
     );
 
