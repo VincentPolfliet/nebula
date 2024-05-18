@@ -30,7 +30,7 @@ public class Selector<T> extends StatefulLeaf<T> implements IterableLeaf<T>, Lea
             current = iterator.next();
             LeafState result = current.act(instance);
 
-            if (result == LeafState.SUCCESS) {
+            if (result instanceof SuccessState) {
                 succeed();
             }
         }

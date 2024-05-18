@@ -6,7 +6,7 @@ import lombok.Getter;
 public abstract class StatefulLeaf<T> implements Leaf<T> {
 
     @Getter(AccessLevel.PROTECTED)
-    private LeafState state = LeafState.RUNNING;
+    private LeafState state = LeafState.running();
 
     @Override
     public final LeafState act(T instance) {
@@ -21,22 +21,22 @@ public abstract class StatefulLeaf<T> implements Leaf<T> {
     protected abstract void doAct(T instance);
 
     protected void succeed() {
-        state = LeafState.SUCCESS;
+        state = LeafState.success();
     }
 
     protected void fail() {
-        state = LeafState.FAILED;
+        state = LeafState.failed();
     }
 
     public boolean isFailure() {
-        return state == LeafState.FAILED;
+        return state instanceof FailedState;
     }
 
     public boolean isSuccess() {
-        return state == LeafState.SUCCESS;
+        return state instanceof SuccessState;
     }
 
     public boolean isRunning() {
-        return state == LeafState.RUNNING;
+        return state instanceof RunningState;
     }
 }

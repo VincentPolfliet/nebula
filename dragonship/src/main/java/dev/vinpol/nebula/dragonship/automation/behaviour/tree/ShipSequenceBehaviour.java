@@ -46,14 +46,24 @@ public class ShipSequenceBehaviour implements ShipBehaviour {
         logger.debug("current: {}", current);
         logger.debug("current instance: {}", current);
 
-        ShipBehaviourResult innerResult = switch (state) {
-            // Running is handled as a "getInnerResult" because else things like 'Sequence' or 'Selector' wouldn't work
-            case SUCCESS, RUNNING -> getInnerResult(current);
-            case FAILED -> ShipBehaviourResult.failure("Leaf '%s' has result FAILED".formatted(current.toString()));
-        };
+
+        ShipBehaviourResult innerResult = extractInnerResult(state);
 
         logger.debug("innerResult: {}", innerResult);
         return innerResult;
+    }
+
+    private ShipBehaviourResult extractInnerResult(LeafState state) {
+        if (state.isRunning() || state.isSuccess()) {
+            // Running is handled as a "getInnerResult" because else things like 'Sequence' or 'Selector' wouldn't work
+            return getInnerResult(current);
+        }
+
+        if (state.isFailure()) {
+            return ShipBehaviourResult.failure("Leaf '%s' has result FAILED".formatted(current.toString()));
+        }
+
+        throw new IllegalStateException("'%s' is not supported".formatted(state));
     }
 
     private ShipBehaviourResult getInnerResult(Leaf<Ship> leaf) {

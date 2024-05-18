@@ -25,7 +25,7 @@ public class Sequence<T> extends StatefulLeaf<T> implements IterableLeaf<T>, Lea
             current = iterator.next();
             LeafState currentStepState = current.act(instance);
 
-            if (currentStepState == LeafState.FAILED) {
+            if (currentStepState instanceof FailedState) {
                 fail();
             }
         }

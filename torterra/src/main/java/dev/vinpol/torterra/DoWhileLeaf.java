@@ -17,7 +17,7 @@ public class DoWhileLeaf<T> extends StatefulLeaf<T> {
         while (predicate.test(instance)) {
             LeafState state = leaf.act(instance);
 
-            if (state == LeafState.FAILED) {
+            if (state instanceof FailedState) {
                 fail();
                 return;
             }

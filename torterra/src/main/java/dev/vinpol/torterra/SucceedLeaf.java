@@ -4,7 +4,7 @@ class SucceedLeaf<T> implements Leaf<T> {
 
     @Override
     public LeafState act(T instance) {
-        return LeafState.SUCCESS;
+        return LeafState.success();
     }
 
     @Override

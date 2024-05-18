@@ -19,7 +19,7 @@ class ComboLeafIteratorTest {
         );
 
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.SUCCESS);
+        assertThat(iterator.act(new Object()).isSuccess()).isTrue();
         assertThat(iterator.hasNext()).isFalse();
     }
 
@@ -30,7 +30,7 @@ class ComboLeafIteratorTest {
         );
 
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.FAILED);
+        assertThat(iterator.act(new Object()).isFailure()).isTrue();
         assertThat(iterator.hasNext()).isFalse();
     }
 
@@ -53,11 +53,11 @@ class ComboLeafIteratorTest {
         ));
 
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.SUCCESS);
+        assertThat(iterator.act(new Object()).isSuccess()).isTrue();
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.FAILED);
+        assertThat(iterator.act(new Object()).isFailure()).isTrue();
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.SUCCESS);
+        assertThat(iterator.act(new Object()).isSuccess()).isTrue();
         assertThat(iterator.hasNext()).isFalse();
     }
 
@@ -77,13 +77,13 @@ class ComboLeafIteratorTest {
         );
 
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.SUCCESS);
+        assertThat(iterator.act(new Object()).isSuccess()).isTrue();
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.FAILED);
+        assertThat(iterator.act(new Object()).isFailure()).isTrue();
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.SUCCESS);
+        assertThat(iterator.act(new Object()).isSuccess()).isTrue();
         assertThat(iterator.hasNext()).isTrue();
-        assertThat(iterator.act(new Object())).isEqualTo(LeafState.FAILED);
+        assertThat(iterator.act(new Object()).isFailure()).isTrue();
         assertThat(iterator.hasNext()).isFalse();
     }
 }

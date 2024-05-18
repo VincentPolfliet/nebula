@@ -19,7 +19,7 @@ class PredicateLeafTest {
 
         LeafState state = predicate.act(new Object());
 
-        assertThat(state).isEqualTo(LeafState.SUCCESS);
+        assertThat(state.isSuccess()).isTrue();
     }
 
     @Test
@@ -35,6 +35,6 @@ class PredicateLeafTest {
 
         LeafState state = predicate.act(new Object());
 
-        assertThat(state).isEqualTo(LeafState.FAILED);
+        assertThat(state.isFailure()).isTrue();
     }
 }

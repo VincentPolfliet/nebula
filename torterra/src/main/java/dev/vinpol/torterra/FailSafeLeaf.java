@@ -24,14 +24,14 @@ public class FailSafeLeaf<T> implements Leaf<T> {
         try {
             LeafState state = leaf.act(instance);
 
-            if (state == LeafState.FAILED) {
-                return LeafState.SUCCESS;
+            if (state.isFailure()) {
+                return LeafState.success();
             }
 
             return state;
         } catch (RuntimeException e) {
             logger.warn("Something went wrong with executing '{}'", leaf, e);
-            return LeafState.SUCCESS;
+            return LeafState.success();
         }
     }
 

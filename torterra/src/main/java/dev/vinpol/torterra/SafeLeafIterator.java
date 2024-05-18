@@ -24,8 +24,8 @@ public class SafeLeafIterator<T> implements LeafIterator<T> {
     public LeafState act(T instance) {
         LeafState state = iterator.act(instance);
 
-        if (state == LeafState.FAILED) {
-            return LeafState.SUCCESS;
+        if (state instanceof FailedState) {
+            return LeafState.success();
         }
 
         return state;

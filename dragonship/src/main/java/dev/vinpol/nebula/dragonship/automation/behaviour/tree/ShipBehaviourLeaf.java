@@ -35,10 +35,10 @@ public final class ShipBehaviourLeaf implements Leaf<Ship> {
 
     private LeafState handleLeafState(ShipBehaviourResult result) {
         if (result.isFailure()) {
-            return LeafState.FAILED;
+            return LeafState.success();
         }
 
-        return LeafState.SUCCESS;
+        return LeafState.success();
     }
 
     public ShipBehaviourResult getResult() {
