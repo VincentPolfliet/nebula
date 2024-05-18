@@ -1,5 +1,5 @@
 @import dev.vinpol.nebula.dragonship.web.Page
-@import static dev.vinpol.nebula.dragonship.web.config.support.jte.RawContent.raw
+@import static dev.vinpol.nebula.dragonship.web.support.jte.RawContent.raw
 
 @param String map
 

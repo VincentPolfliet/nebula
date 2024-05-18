@@ -5,48 +5,50 @@
 @param Ship ship
 @param System system
 
-@template.modal(
-title = @`<h1 class="title is-3">Navigation</h1>`,
-content = @`
-    <form class="form" hx-target="#ship-row-${ship.getSymbol()}" hx-post="/fleet/${ship.getSymbol()}/navigate"
-          hx-swap="outerHTML">
-        <div class="field">
-            <div class="control has-icons-left">
-                <input id="origin-waypoint" class="input" type="text" value="${ship.getNav().getWaypointSymbol()}"
-                       disabled>
-                <span class="icon is-small is-left">
-                    <label for="origin-waypoint">🛫</label>
-                </span>
-            </div>
-        </div>
+<div class="modal is-active">
+    <div class="modal-background"></div>
+    <div class="modal-content">
+        <form class="form" hx-target="#ship-row-${ship.getSymbol()}" hx-post="/fleet/${ship.getSymbol()}/navigate">
+            <header class="modal-card-head">
+                <span class="modal-card-title"><h1 class="title is-3">Navigation</h1></span>
+                <button class="delete" aria-label="close" id="closeModalBtn"></button>
+            </header>
 
-        <div class="field">
-            <div class="control has-icons-left is-expanded">
-                <div class="select is-fullwidth">
-                    <select id="navigation-target-select" class="select" name="target">
-                        <option selected></option>
-                        @for(var waypoint : system.getWaypoints()))
-                            @if(!Objects.equals(waypoint.getSymbol(), ship.getNav().getWaypointSymbol()))
-                                <option value="${waypoint.getSymbol()}"
-                                        hx-get="/fleet/fuel/estimation?ship=${ship.getSymbol()}&system=${waypoint.getSymbol().substring(0, 7)}&origin=${ship.getNav().getWaypointSymbol()}&target=${waypoint.getSymbol()}"
-                                        hx-target="#fuel-estimation"
-                                        hx-swap="innerHTML">${waypoint.getSymbol()}</option>
-                            @endif
-                        @endfor
-                    </select>
+            <section class="modal-card-body">
+                <div class="field">
+                    <div class="control has-icons-left">
+                        <input id="origin-waypoint" class="input" type="text"
+                               value="${ship.getNav().getWaypointSymbol()}"
+                               disabled>
+                        <span class="icon is-small is-left"><label for="origin-waypoint">🛫</label></span>
+                    </div>
+                </div>
 
-                    <span class="icon is-small is-left">
+                <div class="field">
+                    <div class="control has-icons-left is-expanded">
+                        <div class="select is-fullwidth">
+                            <select id="navigation-target-select" class="select" name="target">
+                                <option selected></option>
+                                @for(var waypoint : system.getWaypoints()))
+                                    @if(!Objects.equals(waypoint.getSymbol(), ship.getNav().getWaypointSymbol()))
+                                        <option value="${waypoint.getSymbol()}"
+                                                hx-swap="innerHTML">${waypoint.getSymbol()}
+                                            (${waypoint.getType().name()})
+                                        </option>
+                                    @endif
+                                @endfor
+                            </select>
+
+                            <span class="icon is-small is-left">
                         <label for="navigation-target-select">🛬</label>
                     </span>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </form>
-
-    <div id="fuel-estimation" class="pt-5">
-        @template.fleet.fuel-estimation()
+            </section>
+            <footer class="modal-card-foot">
+                <button class="is-primary button" type="submit">Navigate</button>
+            </footer>
+        </form>
     </div>
-`,
-footer = @`
-    <button class="is-primary button">Navigate</button>
-`)
+</div>

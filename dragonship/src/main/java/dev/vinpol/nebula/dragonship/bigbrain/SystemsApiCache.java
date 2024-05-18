@@ -41,18 +41,18 @@ public class SystemsApiCache implements SystemsApi {
     @Override
     public GetSystem200Response getSystem(String systemSymbol) {
         return systemCache.getByIdAsOptional(systemSymbol)
-                .map(system -> new GetSystem200Response().data(system))
-                .orElseGet(() -> {
-                    GetSystem200Response shipResponse = systemsApi.getSystem(systemSymbol);
+            .map(system -> new GetSystem200Response().data(system))
+            .orElseGet(() -> {
+                GetSystem200Response shipResponse = systemsApi.getSystem(systemSymbol);
 
-                    System system = shipResponse.getData();
-                    systemCache.updateOrInsert(systemSymbol, system);
-                    return shipResponse;
-                });
+                System system = shipResponse.getData();
+                systemCache.updateOrInsert(systemSymbol, system);
+                return shipResponse;
+            });
     }
 
     @Override
-    public GetSystemWaypoints200Response getSystemWaypoints(String systemSymbol, Integer page, Integer limit, WaypointType type, String[] traits) {
+    public GetSystemWaypoints200Response getSystemWaypoints(String systemSymbol, Integer page, Integer limit, WaypointType type, WaypointTraitSymbol... traits) {
         return systemsApi.getSystemWaypoints(systemSymbol, page, limit, type, traits);
     }
 
@@ -63,16 +63,14 @@ public class SystemsApiCache implements SystemsApi {
 
     @Override
     public GetWaypoint200Response getWaypoint(String systemSymbol, String waypointSymbol) {
-        String cacheId = systemSymbol + "-" + waypointSymbol;
-
-        return waypointsPerSystemCache.getByIdAsOptional(cacheId)
-                .map(waypoint -> new GetWaypoint200Response().data(waypoint))
-                .orElseGet(() -> {
-                    GetWaypoint200Response shipResponse = systemsApi.getWaypoint(systemSymbol, waypointSymbol);
-                    Waypoint waypoint = shipResponse.getData();
-                    waypointsPerSystemCache.updateOrInsert(cacheId, waypoint);
-                    return shipResponse;
-                });
+        return waypointsPerSystemCache.getByIdAsOptional(waypointSymbol)
+            .map(waypoint -> new GetWaypoint200Response().data(waypoint))
+            .orElseGet(() -> {
+                GetWaypoint200Response shipResponse = systemsApi.getWaypoint(systemSymbol, waypointSymbol);
+                Waypoint waypoint = shipResponse.getData();
+                waypointsPerSystemCache.updateOrInsert(waypointSymbol, waypoint);
+                return shipResponse;
+            });
     }
 
     @Override

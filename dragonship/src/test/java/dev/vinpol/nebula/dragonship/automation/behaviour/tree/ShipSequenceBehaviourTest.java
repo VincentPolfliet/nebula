@@ -4,7 +4,9 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.state.Done;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.Failed;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.Success;
+import dev.vinpol.spacetraders.sdk.models.MotherShip;
 import dev.vinpol.spacetraders.sdk.models.Ship;
+import dev.vinpol.spacetraders.sdk.models.ShipNavStatus;
 import dev.vinpol.torterra.StatefulLeaf;
 import dev.vinpol.torterra.Leaf;
 import dev.vinpol.torterra.Torterra;
@@ -14,6 +16,8 @@ import org.junit.jupiter.api.Test;
 import java.util.Collections;
 import java.util.List;
 
+import static dev.vinpol.torterra.Torterra.safeSequence;
+import static dev.vinpol.torterra.Torterra.sequence;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class ShipSequenceBehaviourTest {
@@ -104,5 +108,32 @@ class ShipSequenceBehaviourTest {
 
         assertThat(result).isInstanceOf(Success.class);
         assertThat(result.isSuccess()).isTrue();
+    }
+
+    @Test
+    void testSafeSequenceSupport() {
+        ShipSequenceBehaviour behaviour = new ShipSequenceBehaviour(
+            List.of(
+                safeSequence(
+                    ShipLeafs.isDocked(),
+                    Torterra.fail()
+                ),
+                Torterra.succeed()
+            )
+        );
+
+        Ship ship = MotherShip.excavator()
+            .withNav(nav -> {
+                nav.setStatus(ShipNavStatus.DOCKED);
+            });
+
+        // dock check
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // succeed step
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // actually done
+        assertThat(behaviour.update(ship).isDone()).isTrue();
     }
 }

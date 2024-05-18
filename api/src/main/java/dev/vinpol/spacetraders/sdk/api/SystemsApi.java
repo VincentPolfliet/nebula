@@ -78,7 +78,7 @@ public interface SystemsApi {
      * @return Call&lt;GetSystemWaypoints200Response&gt;
      */
     @GET("systems/{systemSymbol}/waypoints")
-    GetSystemWaypoints200Response getSystemWaypoints(@Path("systemSymbol") String systemSymbol, @Query("page") Integer page, @Query("limit") Integer limit, @Query("type") WaypointType type, @Query("traits") String[] traits);
+    GetSystemWaypoints200Response getSystemWaypoints(@Path("systemSymbol") String systemSymbol, @Query("page") Integer page, @Query("limit") Integer limit, @Query("type") WaypointType type, @Query("traits") WaypointTraitSymbol... traits);
 
     /**
      * List Systems

@@ -35,39 +35,41 @@ public abstract class GoapPlanner implements IGoapPlanner {
      * generated.
      */
     public Queue<GoapAction> plan(IGoapUnit goapUnit) {
+        List<GoapState> availableStates = goapUnit.getGoalState();
+
+        if (availableStates.isEmpty()) {
+            return null;
+        }
+
         Queue<GoapAction> createdPlan = null;
         this.goapUnit = goapUnit;
         this.startNode = new GraphNode(null);
         this.endNodes = new ArrayList<GraphNode>();
 
-        try {
-            sortGoalStates();
+        sortGoalStates();
 
-            GoapState goapState = this.goapUnit.getGoalState().get(0);
+        GoapState goapState = this.goapUnit.getGoalState().getFirst();
 
-            // The Integer.MaxValue indicates that the goal was passed by the
-            // changeGoalImmediatly function. An empty Queue is returned instead
-            // of null because null would result in the IdleState to call this
-            // function again. An empty Queue is finished in one cycle with no
-            // effect at all.
-            if (goapState.importance == Integer.MAX_VALUE) {
-                List<GoapState> goalState = new ArrayList<GoapState>();
+        // The Integer.MaxValue indicates that the goal was passed by the
+        // changeGoalImmediatly function. An empty Queue is returned instead
+        // of null because null would result in the IdleState to call this
+        // function again. An empty Queue is finished in one cycle with no
+        // effect at all.
+        if (goapState.importance == Integer.MAX_VALUE) {
+            List<GoapState> goalState = new ArrayList<GoapState>();
 
-                goalState.add(goapState);
+            goalState.add(goapState);
 
-                createdPlan = searchGraphForActionQueue(createGraph(goalState));
+            createdPlan = searchGraphForActionQueue(createGraph(goalState));
 
-                if (createdPlan == null) {
-                    createdPlan = new LinkedList<GoapAction>();
-                }
-
-                this.goapUnit.getGoalState().remove(0);
-            } else {
-                IWeightedGraph<GraphNode, WeightedEdge> graph = createGraph();
-                createdPlan = searchGraphForActionQueue(graph);
+            if (createdPlan == null) {
+                createdPlan = new LinkedList<>();
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+
+            this.goapUnit.getGoalState().removeFirst();
+        } else {
+            IWeightedGraph<GraphNode, WeightedEdge> graph = createGraph();
+            createdPlan = searchGraphForActionQueue(graph);
         }
 
         return createdPlan;
@@ -227,7 +229,7 @@ public abstract class GoapPlanner implements IGoapPlanner {
         // graphNode.action != null -> start and ends
         for (GraphNode graphNode : graph.getVertices()) {
             if (!this.startNode.equals(graphNode) && graphNode.action != null && (graphNode.preconditions.isEmpty()
-                                                                                  || areAllPreconditionsMet(graphNode.preconditions, this.startNode.effects))) {
+                || areAllPreconditionsMet(graphNode.preconditions, this.startNode.effects))) {
                 addEgdeWithWeigth(graph, this.startNode, graphNode, new WeightedEdge(), 0);
                 if (!nodesToWorkOn.contains(graphNode)) {
                     nodesToWorkOn.add(graphNode);

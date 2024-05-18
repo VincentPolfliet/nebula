@@ -27,7 +27,7 @@ class RefuelBehaviourTest {
 
     @Test
     void shipIsDockedAndHasFuelSpace() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(new ShipNav().status(ShipNavStatus.DOCKED))
             .fuel(new ShipFuel().current(69).capacity(100));
 
@@ -62,7 +62,7 @@ class RefuelBehaviourTest {
 
     @Test
     void shipIsDockedAndHasNoFuelSpace() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(new ShipNav().status(ShipNavStatus.DOCKED))
             .fuel(new ShipFuel().current(100).capacity(100));
 
@@ -74,7 +74,7 @@ class RefuelBehaviourTest {
 
     @Test
     void shipIsInOrbit() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(new ShipNav().status(ShipNavStatus.IN_ORBIT))
             .fuel(new ShipFuel().current(100).capacity(100));
 
@@ -86,7 +86,7 @@ class RefuelBehaviourTest {
 
     @Test
     void shipIsInTransit() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(new ShipNav().status(ShipNavStatus.IN_TRANSIT))
             .fuel(new ShipFuel().current(100).capacity(100));
 

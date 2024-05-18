@@ -6,8 +6,7 @@ import java.util.List;
 
 import static dev.vinpol.torterra.Torterra.succeed;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.*;
 
 class SequenceTest {
 
@@ -43,11 +42,17 @@ class SequenceTest {
         assertThat(sequence.act(new Object())).isEqualTo(LeafState.RUNNING);
         assertThat(sequence.act(new Object())).isEqualTo(LeafState.RUNNING);
         assertThat(sequence.act(new Object())).isEqualTo(LeafState.SUCCESS);
+        assertThat(sequence.act(new Object())).isEqualTo(LeafState.SUCCESS);
     }
 
     @Test
     void whenLeafFailsNoStepsAfterAreExecuted() {
-        Leaf<Object> lastStep = mock(Leaf.class);
+        Leaf<Object> lastStep = spy(new Leaf<Object>() {
+            @Override
+            public LeafState act(Object instance) {
+                return LeafState.SUCCESS;
+            }
+        });
 
         Sequence<Object> sequence = new Sequence<>(
             List.of(
@@ -59,7 +64,10 @@ class SequenceTest {
 
         assertThat(sequence.act(new Object())).isEqualTo(LeafState.RUNNING);
         assertThat(sequence.act(new Object())).isEqualTo(LeafState.FAILED);
+        assertThat(sequence.act(new Object())).isEqualTo(LeafState.FAILED);
 
         verifyNoInteractions(lastStep);
     }
+
+
 }

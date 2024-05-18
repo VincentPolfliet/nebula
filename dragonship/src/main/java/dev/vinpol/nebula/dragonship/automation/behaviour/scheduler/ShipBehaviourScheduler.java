@@ -3,6 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.scheduler;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmResolver;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipRole;
 import org.slf4j.Logger;
@@ -17,6 +18,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
+import java.util.function.BiConsumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public class ShipBehaviourScheduler {
@@ -26,31 +29,79 @@ public class ShipBehaviourScheduler {
     private final Map<String, ShipBehaviourTask> activeBehaviours = new ConcurrentHashMap<>();
     private final Set<String> futuresScheduled = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
+    private final FleetApi fleetApi;
     private final ScheduledExecutor timer;
     private final Executor worker;
 
-    public ShipBehaviourScheduler(ScheduledExecutor timer, Executor worker) {
+    public ShipBehaviourScheduler(FleetApi fleetApi, ScheduledExecutor timer, Executor worker) {
+        this.fleetApi = fleetApi;
         this.timer = timer;
         this.worker = worker;
     }
 
-    public CompletionStage<ShipBehaviourResult> scheduleTick(Ship ship, ShipAlgorithmResolver resolver) {
-        Objects.requireNonNull(ship);
-        logger.debug("command: {}", resolver);
-        Objects.requireNonNull(resolver);
+    public CompletionStage<ShipBehaviourResult> scheduleTickAt(String shipSymbol, Function<Ship, ShipBehaviour> behaviourResolver, OffsetDateTime at) {
+        Objects.requireNonNull(shipSymbol);
+        Objects.requireNonNull(behaviourResolver);
+        Objects.requireNonNull(at);
 
-        ShipRole role = ship.getRegistration().getRole();
-        logger.debug("role: {}", role);
+        logger.debug("adding {} to futuresScheduled", shipSymbol);
+        futuresScheduled.add(shipSymbol);
 
-        ShipBehaviourTask task = new ShipBehaviourTask(
-            ship,
-            resolver
-        );
+        return timer.scheduleAtAsCompletableFuture(() -> {
+            // do nothing but schedule
+        }, at).thenCompose(unused -> {
+            logger.debug("scheduling {}", shipSymbol);
 
-        activeBehaviours.put(ship.getSymbol(), task);
+            return internalScheduleTick(new ShipBehaviourTask(
+                shipSymbol,
+                fleetApi,
+                behaviourResolver
+            ));
+        });
+    }
+
+    public boolean isTickScheduled(Ship ship) {
+        if (ship == null) {
+            return false;
+        }
+
+        return isTickScheduled(ship.getSymbol());
+    }
+
+    public boolean isTickScheduled(String shipSymbol) {
+        if (shipSymbol == null) {
+            return false;
+        }
+
+        return activeBehaviours.containsKey(shipSymbol) || futuresScheduled.contains(shipSymbol);
+    }
+
+    public CompletionStage<ShipBehaviourResult> scheduleTick(String shipSymbol, Function<Ship, ShipBehaviour> behaviourResolver) {
+        Objects.requireNonNull(shipSymbol);
+        Objects.requireNonNull(behaviourResolver);
+
+        return internalScheduleTick(new ShipBehaviourTask(
+            shipSymbol,
+            fleetApi,
+            behaviourResolver
+        ));
+    }
+
+    private CompletionStage<ShipBehaviourResult> internalScheduleTick(ShipBehaviourTask task) {
+        String shipSymbol = task.getShipSymbol();
+
+        logger.debug("adding {} to active", shipSymbol);
+        activeBehaviours.put(shipSymbol, task);
+
+        // futures get removed here so isTickScheduled doesn't return false when another thread would call that method during this period
+        if (futuresScheduled.contains(shipSymbol)) {
+            logger.debug("removing {} from futures", shipSymbol);
+            futuresScheduled.remove(shipSymbol);
+        }
+
         return CompletableFuture.supplyAsync(task, worker)
             .handle((ShipBehaviourResult result, Throwable throwable) -> {
-                activeBehaviours.remove(ship.getSymbol());
+                activeBehaviours.remove(shipSymbol);
 
                 if (throwable != null) {
                     throw new RuntimeException(throwable);
@@ -60,35 +111,29 @@ public class ShipBehaviourScheduler {
             });
     }
 
-    public CompletionStage<ShipBehaviourResult> scheduleTickAt(Ship ship, ShipAlgorithmResolver resolver, OffsetDateTime at) {
-        futuresScheduled.add(ship.getSymbol());
-
-        return CompletableFuture
-            .runAsync(() -> {
-                futuresScheduled.remove(ship.getSymbol());
-            }, command -> timer.scheduleAt(command, at))
-            .thenCompose(unused -> scheduleTick(ship, resolver));
-    }
-
-    public boolean isTickScheduled(Ship ship) {
-        if (ship == null) {
-            return false;
-        }
-
-        String shipSymbol = ship.getSymbol();
-        return activeBehaviours.containsKey(shipSymbol) || futuresScheduled.contains(shipSymbol);
-    }
-
     static class ShipBehaviourTask implements Supplier<ShipBehaviourResult> {
 
-        private final Ship ship;
-        private final ShipAlgorithmResolver resolver;
+        private final Logger logger = LoggerFactory.getLogger(ShipBehaviourTask.class);
+
+        private final String shipSymbol;
+        private final FleetApi fleetApi;
+
+        private final Function<Ship, ShipBehaviour> shipBehaviourFunction;
         private ShipBehaviour currentBehaviour;
         private Thread runnerThread;
 
-        public ShipBehaviourTask(Ship ship, ShipAlgorithmResolver resolver) {
-            this.ship = ship;
-            this.resolver = resolver;
+        public ShipBehaviourTask(String shipSymbol, FleetApi fleetApi, Function<Ship, ShipBehaviour> resolver) {
+            this.fleetApi = fleetApi;
+            this.shipSymbol = shipSymbol;
+            this.shipBehaviourFunction = resolver;
+        }
+
+        public String getShipSymbol() {
+            return shipSymbol;
+        }
+
+        public ShipBehaviour getCurrentBehaviour() {
+            return currentBehaviour;
         }
 
         public Thread getRunnerThread() {
@@ -99,11 +144,14 @@ public class ShipBehaviourScheduler {
         public ShipBehaviourResult get() {
             runnerThread = Thread.currentThread();
 
-            if (currentBehaviour == null) {
-                currentBehaviour = resolver.resolve(ship.getRole()).decideBehaviour(ship);
-            }
-
             try {
+                Ship ship = fleetApi.getMyShip(shipSymbol).getData();
+
+                if (currentBehaviour == null) {
+                    currentBehaviour = shipBehaviourFunction.apply(ship);
+                    logger.debug("currentBehaviour for {}: {}", shipSymbol, currentBehaviour.getName());
+                }
+
                 return currentBehaviour.update(ship);
             } finally {
                 runnerThread = null;

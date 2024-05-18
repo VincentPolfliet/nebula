@@ -7,7 +7,6 @@
         <h1 class="title is-1">${ship.getSymbol()}</h1>
         <h3 class="subtitle is-3">${ship.getRole()}</h3>
 
-
         <div>
             <h2 class="title is-2">Reactor</h2>
             !{var reactor = ship.getReactor();}

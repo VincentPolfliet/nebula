@@ -13,9 +13,11 @@ import java.util.function.Consumer;
 
 final class NitriteApiCache<K, R> {
 
+    private final Nitrite db;
     private final ObjectRepository<R> collection;
 
     NitriteApiCache(Nitrite db, Class<R> clazz, String idField) {
+        this.db = db;
         this.collection = db.getRepository(new CacheEntityDecorator(clazz, idField));
     }
 
@@ -26,7 +28,9 @@ final class NitriteApiCache<K, R> {
     }
 
     Optional<R> getByIdAsOptional(K key) {
-        return Optional.ofNullable(getById(key));
+        R byId = getById(key);
+
+        return Optional.ofNullable(byId);
     }
 
     void updateOrInsert(K key, R record) {
@@ -34,6 +38,7 @@ final class NitriteApiCache<K, R> {
         Objects.requireNonNull(record);
 
         collection.update(record, true);
+        db.commit();
     }
 
     void updateIfExists(K key, Consumer<R> modifier) {

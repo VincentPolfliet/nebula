@@ -9,9 +9,12 @@
     </div>
 
     <div id="navbar-content" class="navbar-menu">
-        <div class="navbar-start navbar__navbar-center">
-            <a href="/" class="navbar-item">🏠 Home</a>
+        <div class="navbar-start">
+            <a href="https://docs.spacetraders.io/" class="navbar-item">📄 Docs</a>
+        </div>
 
+        <div class="navbar-center">
+            <a href="/" class="navbar-item">🏠 Home</a>
             <a href="/fleet" class="navbar-item">🚀 Fleet</a>
             <a href="/galaxy" class="navbar-item">🌌 Galaxy</a>
             <a href="/contracts" class="navbar-item">📦 Contracts</a>

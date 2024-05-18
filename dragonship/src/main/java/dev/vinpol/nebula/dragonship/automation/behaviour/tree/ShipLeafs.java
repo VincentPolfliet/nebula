@@ -3,6 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.torterra.DelegateLeaf;
 import dev.vinpol.torterra.Leaf;
+import dev.vinpol.torterra.LeafState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +37,9 @@ public class ShipLeafs {
     }
 
     public static Leaf<Ship> isDocked() {
-        return new DelegateLeaf<>("Ship is docked", predicate(Ship::isDocked));
+        return new DelegateLeaf<>("Ship is docked", predicate(ship -> {
+            logger.debug("ship docked: {}", ship.isDocked());
+            return ship.isDocked();
+        }));
     }
 }

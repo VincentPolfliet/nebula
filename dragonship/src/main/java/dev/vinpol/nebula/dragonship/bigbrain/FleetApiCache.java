@@ -66,14 +66,14 @@ public class FleetApiCache implements FleetApi {
     @Override
     public GetMyShip200Response getMyShip(String shipSymbol) {
         return cache.getByIdAsOptional(shipSymbol)
-                .map(shipRecord -> new GetMyShip200Response().data(shipRecord))
-                .orElseGet(() -> {
-                    GetMyShip200Response shipResponse = fleetApi.getMyShip(shipSymbol);
+            .map(shipRecord -> new GetMyShip200Response().data(shipRecord))
+            .orElseGet(() -> {
+                GetMyShip200Response shipResponse = fleetApi.getMyShip(shipSymbol);
 
-                    Ship ship = shipResponse.getData();
-                    cache.updateOrInsert(shipSymbol, ship);
-                    return shipResponse;
-                });
+                Ship ship = shipResponse.getData();
+                cache.updateOrInsert(shipSymbol, ship);
+                return shipResponse;
+            });
     }
 
     @Override
@@ -131,7 +131,9 @@ public class FleetApiCache implements FleetApi {
 
     @Override
     public GetShipNav200Response patchShipNav(String shipSymbol, PatchShipNavRequest patchShipNavRequest) {
-        return fleetApi.patchShipNav(shipSymbol, patchShipNavRequest);
+        GetShipNav200Response response = fleetApi.patchShipNav(shipSymbol, patchShipNavRequest);
+        cache.updateIfExists(shipSymbol, response);
+        return response;
     }
 
     @Override
@@ -146,7 +148,9 @@ public class FleetApiCache implements FleetApi {
 
     @Override
     public RefuelShip200Response refuelShip(String shipSymbol, RefuelShipRequest refuelShipRequest) {
-        return fleetApi.refuelShip(shipSymbol, refuelShipRequest);
+        RefuelShip200Response refuelResponse = fleetApi.refuelShip(shipSymbol, refuelShipRequest);
+        cache.updateIfExists(shipSymbol, refuelResponse);
+        return refuelResponse;
     }
 
     @Override

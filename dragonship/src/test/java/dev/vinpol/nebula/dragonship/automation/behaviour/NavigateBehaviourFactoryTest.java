@@ -35,7 +35,7 @@ class NavigateBehaviourFactoryTest {
     void test() {
         OffsetDateTime arrival = OffsetDateTime.now();
 
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .withNav(
                 nav ->
                     nav
@@ -76,7 +76,7 @@ class NavigateBehaviourFactoryTest {
     void testWithLowFuel() {
         OffsetDateTime arrival = OffsetDateTime.now();
 
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .withNav(
                 nav ->
                     nav
@@ -118,7 +118,7 @@ class NavigateBehaviourFactoryTest {
     void testWithEmptyFuel() {
         OffsetDateTime arrival = OffsetDateTime.now();
 
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .withNav(
                 nav ->
                     nav
@@ -159,7 +159,7 @@ class NavigateBehaviourFactoryTest {
 
     @Test
     void shipNotInOrbit() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .withNav(
                 nav ->
                     nav
@@ -176,7 +176,7 @@ class NavigateBehaviourFactoryTest {
 
     @Test
     void shipAlreadyAtLocation() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .withNav(
                 nav ->
                     nav

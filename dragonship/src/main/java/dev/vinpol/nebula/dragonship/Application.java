@@ -1,6 +1,6 @@
 package dev.vinpol.nebula.dragonship;
 
-import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.ViteEnv;
+import dev.vinpol.nebula.dragonship.web.support.vite.api.manifest.ViteEnv;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.CommandLineRunner;

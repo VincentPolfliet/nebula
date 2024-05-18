@@ -7,6 +7,7 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ScheduledTask
 import dev.vinpol.nebula.dragonship.automation.command.ShipCommander;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifierImpl;
+import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
@@ -28,13 +29,13 @@ public class AutomationConfig {
     }
 
     @Bean
-    ShipCommander providesShipCommander(ShipAlgorithmResolver algorithmResolver, ShipBehaviourScheduler scheduler) {
-        return new ShipCommander(algorithmResolver, scheduler);
+    ShipCommander providesShipCommander(ShipBehaviourScheduler scheduler) {
+        return new ShipCommander(scheduler);
     }
 
     @Bean
-    ShipBehaviourScheduler providesBehaviourScheduler(ScheduledExecutor scheduledExecutor) {
-        return new ShipBehaviourScheduler(scheduledExecutor, Executors.newVirtualThreadPerTaskExecutor());
+    ShipBehaviourScheduler providesBehaviourScheduler(FleetApi fleetApi, ScheduledExecutor scheduledExecutor) {
+        return new ShipBehaviourScheduler(fleetApi, scheduledExecutor, Executors.newVirtualThreadPerTaskExecutor());
     }
 
     @Bean

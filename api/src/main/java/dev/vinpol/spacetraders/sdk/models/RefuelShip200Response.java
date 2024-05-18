@@ -18,77 +18,84 @@ import java.util.Arrays;
 
 
 import dev.vinpol.spacetraders.sdk.models.RefuelShip200ResponseData;
+
 import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  *
  */
 
-public class RefuelShip200Response {
-  public static final String SERIALIZED_NAME_DATA = "data";
+public class RefuelShip200Response implements Consumer<Ship> {
+    public static final String SERIALIZED_NAME_DATA = "data";
 
-  private RefuelShip200ResponseData data;
+    private RefuelShip200ResponseData data;
 
-  public RefuelShip200Response() {
-  }
-
-  public RefuelShip200Response data(RefuelShip200ResponseData data) {
-
-    this.data = data;
-    return this;
-  }
-
-   /**
-   * Get data
-   * @return data
-  **/
-
-
-  public RefuelShip200ResponseData getData() {
-    return data;
-  }
-
-
-  public void setData(RefuelShip200ResponseData data) {
-    this.data = data;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
+    public RefuelShip200Response() {
     }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
+
+    public RefuelShip200Response data(RefuelShip200ResponseData data) {
+
+        this.data = data;
+        return this;
     }
-    RefuelShip200Response refuelShip200Response = (RefuelShip200Response) o;
-    return Objects.equals(this.data, refuelShip200Response.data);
-  }
 
-  @Override
-  public int hashCode() {
-    return Objects.hash(data);
-  }
+    /**
+     * Get data
+     *
+     * @return data
+     **/
 
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class RefuelShip200Response {\n");
-    sb.append("    data: ").append(toIndentedString(data)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
 
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
+    public RefuelShip200ResponseData getData() {
+        return data;
     }
-    return o.toString().replace("\n", "\n    ");
-  }
 
+
+    public void setData(RefuelShip200ResponseData data) {
+        this.data = data;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        RefuelShip200Response refuelShip200Response = (RefuelShip200Response) o;
+        return Objects.equals(this.data, refuelShip200Response.data);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(data);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("class RefuelShip200Response {\n");
+        sb.append("    data: ").append(toIndentedString(data)).append("\n");
+        sb.append("}");
+        return sb.toString();
+    }
+
+    /**
+     * Convert the given object to string with each line indented by 4 spaces
+     * (except the first line).
+     */
+    private String toIndentedString(Object o) {
+        if (o == null) {
+            return "null";
+        }
+        return o.toString().replace("\n", "\n    ");
+    }
+
+    @Override
+    public void accept(Ship ship) {
+        ship.setFuel(this.getData().getFuel());
+    }
 }
 

@@ -43,7 +43,7 @@ public class ShipNavRoute {
     }
 
     public long getDurationInSeconds() {
-        return ChronoUnit.SECONDS.between(getDepartureTime(), getArrival());
+        return ChronoUnit.SECONDS.between(getArrival(), getDepartureTime());
     }
 }
 

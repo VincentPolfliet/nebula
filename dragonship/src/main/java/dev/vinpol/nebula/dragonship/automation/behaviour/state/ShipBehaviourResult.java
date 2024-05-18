@@ -16,14 +16,12 @@ public sealed interface ShipBehaviourResult permits Failed, Done, Success, WaitU
         return new WaitUntil(waitUntil);
     }
 
-    static ShipBehaviourResult failure() {
-        return new Failure();
+    static ShipBehaviourResult failure(Exception e) {
+        return new Failure(e.getMessage());
     }
 
     static ShipBehaviourResult failure(String message) {
-        Objects.requireNonNull(message);
-
-        return new FailureWithDetail(message);
+        return new Failure(message);
     }
 
     static ShipBehaviourResult failure(FailureReason reason) {

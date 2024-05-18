@@ -2,10 +2,11 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.scheduler;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public interface ScheduledExecutor {
+public interface ScheduledExecutor extends AutoCloseable {
     /**
      * Schedule a task to be executed at a specified timestamp.
      *
@@ -16,8 +17,17 @@ public interface ScheduledExecutor {
      */
     void scheduleAt(Runnable runnable, OffsetDateTime timestamp);
 
+    default CompletableFuture<Void> scheduleAtAsCompletableFuture(Runnable runnable, OffsetDateTime timestamp) {
+        return CompletableFuture.runAsync(runnable, command -> ScheduledExecutor.this.scheduleAt(command, timestamp));
+    }
+
     static ScheduledExecutor ofScheduledExecutorService(ScheduledExecutorService executor) {
         return new ScheduledExecutorAdapter(executor);
+    }
+
+    @Override
+    default void close() throws Exception {
+
     }
 
     class ScheduledExecutorAdapter implements ScheduledExecutor {
@@ -34,6 +44,11 @@ public interface ScheduledExecutor {
 
         private static Duration calculateWaitUntil(OffsetDateTime timestamp) {
             return Duration.between(OffsetDateTime.now(timestamp.getOffset()), timestamp);
+        }
+
+        @Override
+        public void close() throws Exception {
+            executor.close();
         }
     }
 }

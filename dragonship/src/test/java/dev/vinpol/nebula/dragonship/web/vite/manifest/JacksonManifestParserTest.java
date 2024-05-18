@@ -1,9 +1,9 @@
 package dev.vinpol.nebula.dragonship.web.vite.manifest;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.Chunk;
-import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.JacksonManifestParser;
-import dev.vinpol.nebula.dragonship.web.config.support.vite.api.manifest.Manifest;
+import dev.vinpol.nebula.dragonship.web.support.vite.api.manifest.Chunk;
+import dev.vinpol.nebula.dragonship.web.support.vite.api.manifest.JacksonManifestParser;
+import dev.vinpol.nebula.dragonship.web.support.vite.api.manifest.Manifest;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 

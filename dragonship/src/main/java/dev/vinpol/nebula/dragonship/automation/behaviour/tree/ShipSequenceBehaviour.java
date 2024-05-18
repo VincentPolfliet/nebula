@@ -16,6 +16,7 @@ public class ShipSequenceBehaviour implements ShipBehaviour {
     private final Logger logger = LoggerFactory.getLogger(ShipSequenceBehaviour.class);
 
     private final LeafIterator<Ship> iterator;
+    private Leaf<Ship> current;
 
     public ShipSequenceBehaviour(List<Leaf<Ship>> leaves) {
         Objects.requireNonNull(leaves);
@@ -24,9 +25,9 @@ public class ShipSequenceBehaviour implements ShipBehaviour {
 
     private List<LeafIterator<Ship>> toIterators(List<Leaf<Ship>> leaves) {
         return leaves
-                .stream()
-                .map(ShipSequenceBehaviour::tryWrap)
-                .toList();
+            .stream()
+            .map(ShipSequenceBehaviour::tryWrap)
+            .toList();
     }
 
     @Override
@@ -41,21 +42,21 @@ public class ShipSequenceBehaviour implements ShipBehaviour {
         LeafState state = iterator.act(ship);
         logger.debug("state: {}", state);
 
-        Leaf<Ship> current = iterator.current();
+        this.current = iterator.current();
         logger.debug("current: {}", current);
-        logger.debug("current instance: {}", current.getClass());
+        logger.debug("current instance: {}", current);
 
         ShipBehaviourResult innerResult = switch (state) {
             // Running is handled as a "getInnerResult" because else things like 'Sequence' or 'Selector' wouldn't work
             case SUCCESS, RUNNING -> getInnerResult(current);
-            case FAILED -> ShipBehaviourResult.failure();
+            case FAILED -> ShipBehaviourResult.failure("Leaf '%s' has result FAILED".formatted(current.toString()));
         };
 
         logger.debug("innerResult: {}", innerResult);
         return innerResult;
     }
 
-    private static ShipBehaviourResult getInnerResult(Leaf<Ship> leaf) {
+    private ShipBehaviourResult getInnerResult(Leaf<Ship> leaf) {
         Leaf<Ship> unwrappedLeaf = TorterraUtils.unwrap(leaf);
 
         if (unwrappedLeaf instanceof ShipBehaviourLeaf shipLeaf) {
@@ -67,18 +68,25 @@ public class ShipSequenceBehaviour implements ShipBehaviour {
         return ShipBehaviourResult.success();
     }
 
-    private static ShipBehaviourResult extractResult(Supplier<ShipBehaviourResult> supplier) {
+    private ShipBehaviourResult extractResult(Supplier<ShipBehaviourResult> supplier) {
         ShipBehaviourResult innerResult = supplier.get();
+        logger.debug("innerResult before isDoneConversion: {}", innerResult);
         // 'Done' should only be sent by the final behaviour,
         // we interpreted it as a success so the parent behaviour can continue
         return innerResult.isDone() ? ShipBehaviourResult.success() : innerResult;
     }
 
+    // fixme safeSequence causes an infinite loop
     private static <T> LeafIterator<T> tryWrap(Leaf<T> leaf) {
         boolean isWrappedInFailSafe = leaf instanceof FailSafeLeaf<T>;
         Leaf<T> innerLeaf = TorterraUtils.unwrap(leaf);
 
         LeafIterator<T> iteratorToUse = innerLeaf instanceof IterableLeaf<T> iterable ? iterable.leafIterator() : LeafIterator.singleton(innerLeaf);
         return isWrappedInFailSafe ? LeafIterator.safe(iteratorToUse) : iteratorToUse;
+    }
+
+    @Override
+    public String getName() {
+        return "ShipSequenceBehaviour{" + current + "}";
     }
 }

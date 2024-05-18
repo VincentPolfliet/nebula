@@ -25,7 +25,7 @@ class OrbitBehaviourFactoryTest {
 
     @Test
     void shipIsDocked() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(new ShipNav()
                 .status(ShipNavStatus.DOCKED)
             );
@@ -46,7 +46,7 @@ class OrbitBehaviourFactoryTest {
 
     @Test
     void shipInOrbit() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(new ShipNav()
                 .status(ShipNavStatus.IN_ORBIT)
             );
@@ -63,7 +63,7 @@ class OrbitBehaviourFactoryTest {
 
     @Test
     void shipInTransit() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(new ShipNav()
                 .status(ShipNavStatus.IN_TRANSIT)
             );

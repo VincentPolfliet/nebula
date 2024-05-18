@@ -75,7 +75,7 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
     }
 
     private Optional<Waypoint> findInSystem(SystemSymbol system, WaypointType waypointType) {
-        GetSystemWaypoints200Response response = systemsApi.getSystemWaypoints(system.system(), 1, 10, waypointType, new String[0]);
+        GetSystemWaypoints200Response response = systemsApi.getSystemWaypoints(system.system(), 1, 10, waypointType);
 
         List<Waypoint> data = response.getData();
         return data

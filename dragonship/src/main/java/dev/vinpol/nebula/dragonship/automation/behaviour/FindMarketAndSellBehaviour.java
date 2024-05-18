@@ -3,10 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
-import dev.vinpol.spacetraders.sdk.models.GetSystemWaypoints200Response;
-import dev.vinpol.spacetraders.sdk.models.ShipNavRouteWaypoint;
-import dev.vinpol.spacetraders.sdk.models.SystemTraits;
-import dev.vinpol.spacetraders.sdk.models.Waypoint;
+import dev.vinpol.spacetraders.sdk.models.*;
 
 import java.util.List;
 
@@ -27,7 +24,7 @@ public class FindMarketAndSellBehaviour implements ShipBehaviourFactory {
                 .getRoute()
                 .getDestination();
 
-            GetSystemWaypoints200Response marketPlacesResponse = systemsApi.getSystemWaypoints(currentLocation.getSystemSymbol(), 1, 10, null, new String[]{SystemTraits.MARKETPLACE});
+            GetSystemWaypoints200Response marketPlacesResponse = systemsApi.getSystemWaypoints(currentLocation.getSystemSymbol(), 1, 10, null, WaypointTraitSymbol.MARKETPLACE);
             List<Waypoint> waypoints = marketPlacesResponse.getData();
 
             if (waypoints.isEmpty()) {

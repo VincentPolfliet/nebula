@@ -25,7 +25,7 @@ class DockBehaviourFactoryTest {
 
     @Test
     void dockedShip() {
-        Ship dockedShip = ShipMother.excavator();
+        Ship dockedShip = MotherShip.excavator();
         ShipNav nav = dockedShip.getNav();
         nav.status(ShipNavStatus.DOCKED);
 
@@ -40,7 +40,7 @@ class DockBehaviourFactoryTest {
 
     @Test
     void inTransitShip() {
-        Ship transitShip = ShipMother.excavator();
+        Ship transitShip = MotherShip.excavator();
         ShipNav nav = transitShip.getNav();
         nav.status(ShipNavStatus.IN_TRANSIT);
 
@@ -55,7 +55,7 @@ class DockBehaviourFactoryTest {
 
     @Test
     void inOrbitShip() {
-        Ship inOrbitShip = ShipMother.excavator();
+        Ship inOrbitShip = MotherShip.excavator();
         ShipNav nav = inOrbitShip.getNav();
         nav.status(ShipNavStatus.IN_ORBIT);
 

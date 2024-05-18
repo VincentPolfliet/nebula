@@ -1,5 +1,4 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.state;
 
-record Failure() implements Failed {
-
+record Failure(String message) implements Failed {
 }

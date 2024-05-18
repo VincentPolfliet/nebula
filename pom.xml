@@ -23,7 +23,7 @@
 
         <spring-boot.version>3.2.5</spring-boot.version>
         <jte.version>3.1.10</jte.version>
-        <mapstruct.version>1.6.0.Beta1</mapstruct.version>
+        <mapstruct.version>1.6.0.Beta2</mapstruct.version>
         <cucumber.version>7.15.0</cucumber.version>
     </properties>
 

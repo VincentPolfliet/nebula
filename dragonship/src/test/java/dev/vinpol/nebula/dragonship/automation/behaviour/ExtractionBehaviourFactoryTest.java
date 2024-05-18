@@ -35,7 +35,7 @@ class ExtractionBehaviourFactoryTest {
     void doesExtraction() {
         OffsetDateTime cooldownTimestamp = OffsetDateTime.now().plusSeconds(60);
 
-        Ship ship = ShipMother.excavator();
+        Ship ship = MotherShip.excavator();
         Ship expected = ShipCloner.clone(ship)
             .cooldown(new Cooldown()
                 .totalSeconds(60)
@@ -81,7 +81,7 @@ class ExtractionBehaviourFactoryTest {
 
     @Test
     void cargoIsFull() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .cargo(
                 new ShipCargo()
                     .capacity(1)
@@ -101,7 +101,7 @@ class ExtractionBehaviourFactoryTest {
 
     @Test
     void shipIsInTransit() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(
                 new ShipNav()
                     .status(ShipNavStatus.IN_TRANSIT)
@@ -119,7 +119,7 @@ class ExtractionBehaviourFactoryTest {
 
     @Test
     void shipIsDocked() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .nav(
                 new ShipNav()
                     .status(ShipNavStatus.DOCKED)
@@ -138,7 +138,7 @@ class ExtractionBehaviourFactoryTest {
 
     @Test
     void shipHasActiveCooldown() {
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .cooldown(new Cooldown()
                 .totalSeconds(60)
                 .remainingSeconds(59)

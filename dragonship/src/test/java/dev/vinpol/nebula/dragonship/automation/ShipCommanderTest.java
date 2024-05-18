@@ -1,15 +1,15 @@
 package dev.vinpol.nebula.dragonship.automation;
 
-import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmResolver;
+import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ShipBehaviourScheduler;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.command.MaxRescheduleCountExceededException;
 import dev.vinpol.nebula.dragonship.automation.command.ShipCommander;
-import dev.vinpol.spacetraders.sdk.models.ShipMother;
 import dev.vinpol.spacetraders.sdk.models.Ship;
+import dev.vinpol.spacetraders.sdk.models.MotherShip;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
-import org.mockito.Mockito;
 
 import java.time.Duration;
 import java.time.OffsetDateTime;
@@ -17,13 +17,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
+import static org.awaitility.Awaitility.await;
 import static org.mockito.Mockito.*;
 
 @SuppressWarnings("unchecked")
 class ShipCommanderTest {
-
-    ShipAlgorithmResolver resolver;
 
     ShipBehaviourScheduler scheduler;
 
@@ -31,10 +31,9 @@ class ShipCommanderTest {
 
     @BeforeEach
     void setup() {
-        resolver = mock(ShipAlgorithmResolver.class);
-        scheduler = Mockito.mock(ShipBehaviourScheduler.class);
+        scheduler = mock(ShipBehaviourScheduler.class);
 
-        sut = new ShipCommander(resolver, scheduler);
+        sut = new ShipCommander(scheduler);
     }
 
     @Test
@@ -47,7 +46,7 @@ class ShipCommanderTest {
 
     @Test
     void doNotScheduleWhenAlreadyScheduled() {
-        Ship ship = ShipMother.excavator();
+        Ship ship = MotherShip.excavator();
 
         when(scheduler.isTickScheduled(ship)).thenReturn(true);
 
@@ -55,17 +54,17 @@ class ShipCommanderTest {
 
         assertThat(stage).isCompleted();
 
-        verify(scheduler, times(0)).scheduleTick(ship, resolver);
-        verify(scheduler, times(0)).scheduleTickAt(eq(ship), eq(resolver), any());
+        verify(scheduler, times(0)).scheduleTick(eq(ship.getSymbol()), any());
+        verify(scheduler, times(0)).scheduleTickAt(eq(ship.getSymbol()), any(), any());
     }
 
     @Test
     void scheduleShipWithSuccessAndDone() {
-        Ship ship = ShipMother.excavator();
+        Ship ship = MotherShip.excavator();
 
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
-        when(scheduler.scheduleTick(ship, resolver)).thenReturn(
+        when(scheduler.scheduleTick(eq(ship.getSymbol()), any())).thenReturn(
             CompletableFuture.completedStage(ShipBehaviourResult.success()),
             CompletableFuture.completedStage(ShipBehaviourResult.done())
         );
@@ -74,24 +73,24 @@ class ShipCommanderTest {
 
         assertThat(stage).succeedsWithin(Duration.ofSeconds(1));
 
-        verify(scheduler, times(2)).scheduleTick(ship, resolver);
+        verify(scheduler, times(2)).scheduleTick(eq(ship.getSymbol()), any());
     }
 
     @Test
     void scheduleShipWithWaitUntil() {
-        Ship ship = ShipMother.excavator();
+        Ship ship = MotherShip.excavator();
 
         OffsetDateTime waitUntilTimestamp = OffsetDateTime.now().plusSeconds(10);
 
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
-        when(scheduler.scheduleTick(ship, resolver)).thenReturn(
+        when(scheduler.scheduleTick(eq(ship.getSymbol()), any())).thenReturn(
             CompletableFuture.completedStage(ShipBehaviourResult.success()),
             CompletableFuture.completedStage(ShipBehaviourResult.waitUntil(waitUntilTimestamp)),
             CompletableFuture.completedStage(ShipBehaviourResult.done())
         );
 
-        when(scheduler.scheduleTickAt(ship, resolver, waitUntilTimestamp)).thenReturn(CompletableFuture.completedStage(ShipBehaviourResult.success()));
+        when(scheduler.scheduleTickAt(eq(ship.getSymbol()), any(), eq(waitUntilTimestamp))).thenReturn(CompletableFuture.completedStage(ShipBehaviourResult.success()));
 
         CompletionStage<?> stage = sut.command(ship);
 
@@ -100,19 +99,19 @@ class ShipCommanderTest {
 
         InOrder inOrder = inOrder(scheduler);
 
-        inOrder.verify(scheduler, times(2)).scheduleTick(ship, resolver);
-        inOrder.verify(scheduler).scheduleTickAt(ship, resolver, waitUntilTimestamp);
-        inOrder.verify(scheduler).scheduleTick(ship, resolver);
+        inOrder.verify(scheduler, times(2)).scheduleTick(eq(ship.getSymbol()), any());
+        inOrder.verify(scheduler).scheduleTickAt(eq(ship.getSymbol()), any(), eq(waitUntilTimestamp));
+        inOrder.verify(scheduler).scheduleTick(eq(ship.getSymbol()), any());
     }
 
     @Test
     void scheduleShipWithFailThrowsException() {
-        Ship ship = ShipMother.excavator();
+        Ship ship = MotherShip.excavator();
 
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
-        when(scheduler.scheduleTick(ship, resolver)).thenReturn(
-            CompletableFuture.completedStage(ShipBehaviourResult.failure())
+        when(scheduler.scheduleTick(eq(ship.getSymbol()), any())).thenReturn(
+            CompletableFuture.completedStage(ShipBehaviourResult.failure("fail this"))
         );
 
         CompletionStage<?> stage = sut.command(ship);
@@ -120,4 +119,28 @@ class ShipCommanderTest {
         assertThat(stage)
             .failsWithin(Duration.ofSeconds(1));
     }
+
+
+    @Test
+    void testMaxReschedule() {
+        Ship ship = MotherShip.excavator();
+        ShipCommander commander = new ShipCommander(scheduler, new ShipCommander.Config(1));
+
+        when(scheduler.isTickScheduled(ship)).thenReturn(false);
+
+        when(scheduler.scheduleTick(eq(ship.getSymbol()), any())).thenReturn(
+            CompletableFuture.completedStage(ShipBehaviourResult.success())
+        );
+
+        // override the next behaviour to never send a "Done" event
+        CompletableFuture<?> command = commander.command(ship, ShipBehaviour.ofResult(ShipBehaviourResult.success())).toCompletableFuture();
+
+        await().until(command::isDone);
+        assertThat(command).isCompletedExceptionally();
+
+        assertThatThrownBy(() -> command.getNow(null))
+            .hasRootCauseInstanceOf(MaxRescheduleCountExceededException.class);
+    }
 }
+
+

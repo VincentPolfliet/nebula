@@ -47,7 +47,7 @@ public class ApiConfig {
     Interceptor providesLoggingInterceptor() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.redactHeader("Authorization");
-        logging.level(HttpLoggingInterceptor.Level.BASIC);
+        logging.level(HttpLoggingInterceptor.Level.BODY);
 
         return logging;
     }

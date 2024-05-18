@@ -59,12 +59,11 @@ public class TravelFuelAndTimerCalculator {
         return calculateFuel(distance, flightMode);
     }
 
-    private static double calculateDistance(Coordinate origin, Coordinate destination) {
+    public double calculateDistance(Coordinate origin, Coordinate destination) {
         double ac = Math.abs(origin.y() - destination.y());
         double cb = Math.abs(origin.x() - destination.x());
 
-        double distance = Math.hypot(ac, cb);
-        return distance;
+        return Math.hypot(ac, cb);
     }
 
     public long calculateFuel(double distance, ShipNavFlightMode flightMode) {

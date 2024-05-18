@@ -22,10 +22,6 @@ public class DelegateLeaf<T> implements Leaf<T> {
 
     @Override
     public String toString() {
-        if (name != null) {
-            return name;
-        }
-
-        return inner.toString();
+        return String.valueOf(name) + String.valueOf(inner);
     }
 }

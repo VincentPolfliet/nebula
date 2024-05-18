@@ -3,6 +3,7 @@ package dev.vinpol.nebula.dragonship.web.galaxy;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.vinpol.nebula.dragonship.geo.Coordinate;
+import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.nebula.dragonship.web.Page;
 import dev.vinpol.nebula.dragonship.web.utils.PagingUtils;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
@@ -72,6 +73,12 @@ public class GalaxyController {
         System system = systemsApi.getSystem(symbol).getData();
         model.addAttribute("system", system);
         return "galaxy/system";
+    }
+
+    @GetMapping("/galaxy/waypoint/{waypointSymbol}")
+    public String waypoint(@PathVariable("waypointSymbol") String symbol, @RequestParam(value = "map", required = false, defaultValue = "true") boolean map) {
+        WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(symbol);
+        return "redirect:/galaxy/system/%s?target=%s".formatted(waypointSymbol.system() + (map ? "/map" : ""), waypointSymbol.waypoint());
     }
 
     @GetMapping("/galaxy/system/{system}/map")

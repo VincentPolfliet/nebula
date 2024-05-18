@@ -37,10 +37,10 @@ class MiningBehaviourFactoryTest {
         SystemSymbol symbol = SystemSymbol.tryParse("DD-SYSTEM");
         WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
 
-        Ship ship = ShipMother.excavator();
+        Ship ship = MotherShip.excavator();
 
         SystemsApi systemsApi = apiClient.systemsApi();
-        when(systemsApi.getSystemWaypoints(symbol.system(), 1, 10, waypointType, new String[]{}))
+        when(systemsApi.getSystemWaypoints(symbol.system(), 1, 10, waypointType))
             .thenReturn(
                 new GetSystemWaypoints200Response()
             );
@@ -56,7 +56,7 @@ class MiningBehaviourFactoryTest {
     void waypointInSystemAndShipIsAtLocation() {
         SystemSymbol systemSymbol = SystemSymbol.tryParse("DD-SYSTEM");
         WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
-        Ship ship = ShipMother.excavator();
+        Ship ship = MotherShip.excavator();
         String waypointSymbol = systemSymbol.system() + "-" + waypointType.name().toLowerCase();
 
         ship.getNav()
@@ -74,7 +74,7 @@ class MiningBehaviourFactoryTest {
         Ship original = ShipCloner.clone(ship);
 
         SystemsApi systemsApi = apiClient.systemsApi();
-        when(systemsApi.getSystemWaypoints(systemSymbol.system(), 1, 10, waypointType, new String[]{}))
+        when(systemsApi.getSystemWaypoints(systemSymbol.system(), 1, 10, waypointType))
             .thenReturn(
                 new GetSystemWaypoints200Response()
                     .addDataItem(new Waypoint()
@@ -141,7 +141,7 @@ class MiningBehaviourFactoryTest {
         WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
         String waypointSymbol = systemSymbol.system() + "-" + waypointType.name().toLowerCase();
 
-        Ship ship = ShipMother.excavator()
+        Ship ship = MotherShip.excavator()
             .withNav(nav -> {
                 nav.withRoute(
                     route ->
@@ -185,7 +185,7 @@ class MiningBehaviourFactoryTest {
             });
 
         SystemsApi systemsApi = apiClient.systemsApi();
-        when(systemsApi.getSystemWaypoints(systemSymbol.system(), 1, 10, waypointType, new String[]{})).thenReturn(
+        when(systemsApi.getSystemWaypoints(systemSymbol.system(), 1, 10, waypointType)).thenReturn(
             new GetSystemWaypoints200Response()
                 .addDataItem(new Waypoint()
                     .symbol(waypointSymbol)

@@ -1,33 +1,54 @@
 package dev.vinpol.nebula.dragonship.web.fleet;
 
-import dev.vinpol.nebula.dragonship.geo.Coordinate;
-import dev.vinpol.nebula.dragonship.ships.TravelFuelAndTimerCalculator;
+import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
+import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactory;
+import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
+import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourRefLeaf;
+import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs;
+import dev.vinpol.nebula.dragonship.automation.command.ShipCommander;
+import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.nebula.dragonship.utils.time.TimeWizard;
 import dev.vinpol.nebula.dragonship.web.Page;
 import dev.vinpol.nebula.dragonship.web.utils.PagingUtils;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.System;
 import dev.vinpol.spacetraders.sdk.models.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.Map;
+import java.time.Clock;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+
+import static dev.vinpol.torterra.Torterra.safeSequence;
 
 @Controller
 public class FleetController {
 
     private final FleetApi fleetApi;
     private final SystemsApi systemsApi;
-    private final TravelFuelAndTimerCalculator travelFuelAndTimerCalculator;
+    private final ShipCommander shipCommander;
+    private final ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
+    private final Clock clock;
 
-    public FleetController(FleetApi fleetApi, SystemsApi systemsApi, TravelFuelAndTimerCalculator travelFuelAndTimerCalculator) {
+    public FleetController(FleetApi fleetApi, SystemsApi systemsApi, ShipCommander shipCommander, ShipBehaviourFactoryCreator shipBehaviourFactoryCreator, Clock clock) {
         this.fleetApi = fleetApi;
         this.systemsApi = systemsApi;
-        this.travelFuelAndTimerCalculator = travelFuelAndTimerCalculator;
+        this.shipCommander = shipCommander;
+        this.shipBehaviourFactoryCreator = shipBehaviourFactoryCreator;
+        this.clock = clock;
+    }
+
+
+    @ModelAttribute("clock")
+    public TimeWizard clock() {
+        return new TimeWizard(clock);
     }
 
     @GetMapping(value = "/fleet")
@@ -56,6 +77,22 @@ public class FleetController {
         return "fleet/ship-row";
     }
 
+    @PostMapping(value = "/fleet/{shipSymbol}/refuel")
+    public String refuel(@PathVariable("shipSymbol") String shipSymbol, Model model) {
+        Ship beforeRefuel = fleetApi.getMyShip(shipSymbol).getData();
+
+        fleetApi.refuelShip(shipSymbol,
+            new RefuelShipRequest()
+                .fromCargo(true)
+                // 1 unit is 100 fuel
+                .units((int) Math.max((beforeRefuel.getFuel().getCurrent() - (double) beforeRefuel.getFuel().getCapacity() / 100), 1d))
+        );
+
+        Ship afterRefuel = fleetApi.getMyShip(shipSymbol).getData();
+        model.addAttribute("ship", afterRefuel);
+        return "fleet/ship-row";
+    }
+
     @GetMapping("/fleet/{shipSymbol}/navigate")
     public String navigate(@PathVariable("shipSymbol") String shipSymbol, Model model) {
         Ship ship = fleetApi.getMyShip(shipSymbol).getData();
@@ -70,38 +107,17 @@ public class FleetController {
     }
 
     @PostMapping("/fleet/{shipSymbol}/navigate")
-    public String navigate(@PathVariable("shipSymbol") String shipSymbol, @RequestParam("target") String targetSymbol, Model model) {
-        fleetApi.navigateShip(shipSymbol,
-            new NavigateShipRequest()
-                .waypointSymbol(targetSymbol)
-        );
-
-        model.addAttribute("ship", fleetApi.getMyShip(shipSymbol).getData());
-        return "fleet/ship-row";
-    }
-
-    @GetMapping("/fleet/fuel/estimation")
-    public String calculateFuel(@RequestParam("ship") String shipSymbol, @RequestParam("system") String systemSymbol, @RequestParam("origin") String originSymbol, @RequestParam("target") String targetSymbol, Model model) {
+    public CompletableFuture<String> navigate(@PathVariable("shipSymbol") String shipSymbol, @RequestParam("target") String targetSymbol, Model model) {
         Ship ship = fleetApi.getMyShip(shipSymbol).getData();
 
-        Waypoint originWaypoint = systemsApi.getWaypoint(systemSymbol, originSymbol).getData();
-        Waypoint targetWaypoint = systemsApi.getWaypoint(systemSymbol, targetSymbol).getData();
+        ShipBehaviourRefLeaf navigationRef = ShipBehaviourLeafs.navigate(WaypointSymbol.tryParse(targetSymbol));
+        navigationRef.setBehaviourFactory(shipBehaviourFactoryCreator);
 
-        Map<ShipNavFlightMode, Long> cost = travelFuelAndTimerCalculator.calculateFuel(
-            new Coordinate(originWaypoint.getX(), originWaypoint.getY()),
-            new Coordinate(targetWaypoint.getX(), targetWaypoint.getY())
-        );
-
-        Map<ShipNavFlightMode, Double> duration = travelFuelAndTimerCalculator.calculateTime(
-            new Coordinate(originWaypoint.getX(), originWaypoint.getY()),
-            new Coordinate(targetWaypoint.getX(), targetWaypoint.getY()),
-            ship.getEngine().getSpeed()
-        );
-
-        model.addAttribute("fuel", cost);
-        model.addAttribute("duration", duration);
-
-        return "fleet/fuel-estimation";
+        return shipCommander.command(ship, navigationRef)
+            .thenApply((Function<Object, String>) o -> {
+                model.addAttribute("ship", fleetApi.getMyShip(shipSymbol).getData());
+                return "fleet/ship-row";
+            }).toCompletableFuture();
     }
 
     @PostMapping(value = "/fleet/{shipSymbol}/dock")

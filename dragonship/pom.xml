@@ -214,6 +214,19 @@
             </plugin>
 
             <plugin>
+                <groupId>org.pitest</groupId>
+                <artifactId>pitest-maven</artifactId>
+                <configuration>
+                    <targetClasses>
+                        <param>dev.vinpol.nebula.dragonship.automation*</param>
+                    </targetClasses>
+                    <targetTests>
+                        <param>dev.vinpol.nebula.dragonship.automation*</param>
+                    </targetTests>
+                </configuration>
+            </plugin>
+
+            <plugin>
                 <groupId>gg.jte</groupId>
                 <artifactId>jte-maven-plugin</artifactId>
                 <version>${jte.version}</version>

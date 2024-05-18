@@ -41,6 +41,12 @@ public interface ShipBehaviourFactoryCreator {
         return ShipBehaviour.ofResult(ShipBehaviourResult.waitUntil(arrival));
     }
 
+
+    @SuppressWarnings("UnusedReturnValue")
+    default ShipSequenceBehaviour sequenceOf(Leaf<Ship>... leaves) {
+        return sequenceOf(List.of(leaves));
+    }
+
     default ShipSequenceBehaviour sequenceOf(List<Leaf<Ship>> leaves) {
         inject(leaves, this);
         return new ShipSequenceBehaviour(leaves);
