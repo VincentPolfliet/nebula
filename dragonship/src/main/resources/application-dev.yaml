@@ -13,4 +13,4 @@ gg:
         templateLocation: src/main/jte
         classLocation: target/jte-classes
 
-logging.level.dev.vinpol.nebula.dragonship.automation: DEBUG
+logging.level.dev.vinpol.nebula.dragonship: DEBUG

@@ -7,4 +7,6 @@ nebula.ext.sync-on-boot: ${NEBULA_SYNC_ON_BOOT:false}
 gg:
     jte:
         developmentMode: false
-
+spring:
+    messages:
+        use-code-as-default-message: true

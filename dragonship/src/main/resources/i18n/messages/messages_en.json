@@ -1,0 +1,9 @@
+{
+    "nav": {
+        "docs": "Docs",
+        "home": "Home",
+        "fleet": "Fleet",
+        "galaxy": "Galaxy",
+        "settings": "Settings"
+    }
+}
