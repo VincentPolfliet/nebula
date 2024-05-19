@@ -8,16 +8,16 @@ import dev.vinpol.nebula.dragonship.web.Page;
 import dev.vinpol.nebula.dragonship.web.utils.PagingUtils;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
-import dev.vinpol.spacetraders.sdk.models.GetSystems200Response;
-import dev.vinpol.spacetraders.sdk.models.Ship;
+import dev.vinpol.spacetraders.sdk.models.*;
 import dev.vinpol.spacetraders.sdk.models.System;
-import dev.vinpol.spacetraders.sdk.models.SystemWaypoint;
 import one.util.streamex.StreamEx;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -71,14 +71,29 @@ public class GalaxyController {
         model.addAttribute("page", content);
 
         System system = systemsApi.getSystem(symbol).getData();
+
         model.addAttribute("system", system);
         return "galaxy/system";
+    }
+
+    @GetMapping("/galaxy/system/{system}/markets.json")
+    @ResponseBody
+    public ResponseEntity<Object> getMarketsOfSystem(@PathVariable("system") String symbol) {
+        return ResponseEntity.ok(systemsApi.getSystemWaypoints(symbol, 1, 10, null, WaypointTraitSymbol.MARKETPLACE));
     }
 
     @GetMapping("/galaxy/waypoint/{waypointSymbol}")
     public String waypoint(@PathVariable("waypointSymbol") String symbol, @RequestParam(value = "map", required = false, defaultValue = "true") boolean map) {
         WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(symbol);
         return "redirect:/galaxy/system/%s?target=%s".formatted(waypointSymbol.system() + (map ? "/map" : ""), waypointSymbol.waypoint());
+    }
+
+    @GetMapping("/galaxy/waypoint/{waypointSymbol}.json")
+    @ResponseBody
+    public ResponseEntity<Waypoint> getWaypointJson(@PathVariable("waypointSymbol") String symbol) {
+        WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(symbol);
+        var waypoint = systemsApi.getWaypoint(waypointSymbol.system(), waypointSymbol.waypoint()).getData();
+        return ResponseEntity.ok(waypoint);
     }
 
     @GetMapping("/galaxy/system/{system}/map")
@@ -190,7 +205,7 @@ public class GalaxyController {
     private List<Ship> getCurrentShipsInSystem(String systemSymbol) {
         // TODO: support paging in the frontend, if there are many ships this will probably slow everything to a crawl
         return StreamEx.of(fleetApi.getMyShips().iterator())
-            .filter(ship -> ship.getNav().getSystemSymbol().equals(systemSymbol))
+            .filter(ship -> ship.getNav().isInSystem(systemSymbol))
             .collect(Collectors.toList());
     }
 

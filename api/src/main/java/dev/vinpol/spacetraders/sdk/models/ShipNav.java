@@ -57,5 +57,9 @@ public class ShipNav {
     public boolean isDocked() {
         return getStatus() == ShipNavStatus.DOCKED;
     }
+
+    public boolean isInSystem(String systemSymbol) {
+        return getSystemSymbol().equals(systemSymbol);
+    }
 }
 

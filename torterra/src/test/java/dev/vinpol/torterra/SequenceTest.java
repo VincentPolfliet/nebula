@@ -3,10 +3,14 @@ package dev.vinpol.torterra;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static dev.vinpol.torterra.Torterra.succeed;
-import static dev.vinpol.torterra.assertions.LeafStateAssertion.assertThat;
-import static org.mockito.Mockito.*;
+import static dev.vinpol.torterra.assertions.LeafStateAssertion.assertState;
+import static dev.vinpol.torterra.assertions.StatefulLeafAssertion.assertLeaf;
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 class SequenceTest {
 
@@ -18,7 +22,8 @@ class SequenceTest {
 
         LeafState state = sequence.act(new Object());
 
-        assertThat(state).isSuccess();
+        assertState(state).isSuccess();
+        assertLeaf(sequence).isSuccess();
     }
 
     @Test
@@ -30,7 +35,8 @@ class SequenceTest {
 
         LeafState result = sequence.act(new Object());
 
-        assertThat(result).isFailure();
+        assertState(result).isFailure();
+        assertLeaf(sequence).isFailure();
     }
 
     @Test
@@ -39,12 +45,17 @@ class SequenceTest {
             List.of(succeed(), succeed(), succeed())
         );
 
-        assertThat(sequence.act(new Object())).isRunning();
-        assertThat(sequence.act(new Object())).isRunning();
-        assertThat(sequence.act(new Object())).isSuccess();
+        assertState(sequence.act(new Object())).isRunning();
+        assertLeaf(sequence).isRunning();
+
+        assertState(sequence.act(new Object())).isRunning();
+        assertLeaf(sequence).isRunning();
+
+        assertState(sequence.act(new Object())).isSuccess();
 
         // repeats final state
-        assertThat(sequence.act(new Object())).isSuccess();
+        assertState(sequence.act(new Object())).isSuccess();
+        assertLeaf(sequence).isSuccess();
     }
 
     @Test
@@ -64,14 +75,41 @@ class SequenceTest {
             )
         );
 
-        assertThat(sequence.act(new Object())).isRunning();
-        assertThat(sequence.act(new Object())).isFailure();
+        assertState(sequence.act(new Object())).isRunning();
+        assertLeaf(sequence).isRunning();
+
+        assertState(sequence.act(new Object())).isFailure();
 
         // repeats final state
-        assertThat(sequence.act(new Object())).isFailure();
+        assertState(sequence.act(new Object())).isFailure();
+        assertLeaf(sequence).isFailure();
 
         verifyNoInteractions(lastStep);
     }
 
+    @Test
+    void asLeafIterator() {
+        Sequence<Object> sequence = new Sequence<>(
+            List.of(
+                succeed(),
+                Torterra.fail(),
+                _ -> LeafState.running()
+            )
+        );
+
+        LeafIterator<Object> leafIterator = sequence.leafIterator();
+
+        Object o = new Object();
+
+        assertThat(leafIterator.hasNext()).isTrue();
+        assertState(leafIterator.act(o)).isRunning();
+
+        assertThat(leafIterator.hasNext()).isTrue();
+        assertState(leafIterator.act(o)).isFailure();
+
+        assertThat(leafIterator.hasNext()).isFalse();
+
+        assertThatThrownBy(() -> leafIterator.act(o)).isInstanceOf(NoSuchElementException.class);
+    }
 
 }

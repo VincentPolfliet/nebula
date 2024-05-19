@@ -49,13 +49,7 @@ public interface Torterra {
     static <T> Leaf<T> selector(Leaf<T>... leaves) {
         return new Selector<>(List.of(leaves));
     }
-
-
-    @SafeVarargs
-    static <T> Leaf<T> safeSequence(Leaf<T>... leaves) {
-        return failSafe(sequence(leaves));
-    }
-
+    
     @SafeVarargs
     static <T> Leaf<T> sequence(Leaf<T>... leaves) {
         return new Sequence<>(List.of(leaves));

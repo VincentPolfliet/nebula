@@ -3,17 +3,13 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
-import dev.vinpol.torterra.Leaf;
-import dev.vinpol.torterra.LeafState;
 
 import java.util.function.Supplier;
 
-public final class ShipBehaviourLeaf implements Leaf<Ship> {
+public final class ShipBehaviourLeaf implements ShipLeaf {
 
     private final Supplier<ShipBehaviour> behaviourSupplier;
     private ShipBehaviour behaviour;
-    private ShipBehaviourResult behaviourResult;
-    private LeafState leafState;
 
     public ShipBehaviourLeaf(Supplier<ShipBehaviour> behaviourSupplier) {
         super();
@@ -21,32 +17,12 @@ public final class ShipBehaviourLeaf implements Leaf<Ship> {
     }
 
     @Override
-    public LeafState act(Ship ship) {
-        if (leafState != null) {
-            return leafState;
-        }
-
-        this.behaviour = behaviourSupplier.get();
-        this.behaviourResult = behaviour.update(ship);
-        this.leafState = handleLeafState(behaviourResult);
-
-        return leafState;
-    }
-
-    private LeafState handleLeafState(ShipBehaviourResult result) {
-        if (result.isFailure()) {
-            return LeafState.success();
-        }
-
-        return LeafState.success();
-    }
-
-    public ShipBehaviourResult getResult() {
-        return behaviourResult;
+    public ShipBehaviourResult update(Ship ship) {
+        return behaviourSupplier.get().update(ship);
     }
 
     @Override
     public String toString() {
-        return behaviour.getName();
+        return behaviour != null ? behaviour.getName() : String.valueOf(behaviourSupplier);
     }
 }

@@ -1,5 +1,6 @@
 @import dev.vinpol.nebula.dragonship.web.Page
 @import dev.vinpol.spacetraders.sdk.models.System
+@import dev.vinpol.spacetraders.sdk.models.WaypointType
 @import java.util.List
 
 @param Page page
@@ -11,32 +12,29 @@
 
             <h1 class="title">System</h1>
 
-            <a class="button is-primary" href="/galaxy/system/${system.getSymbol()}/map">🧭 Map</a>
-
-            <table  class="table">
-                <thead>
-                <tr>
-                    <th scope="col">Symbol</th>
-                    <th scope="col">Orbit</th>
-                    <th scope="col">Type</th>
-                    <th scope="col">Orbitals</th>
-                </tr>
-                </thead>
-                <tbody>
-                @for(var waypoint : system.getWaypoints())
-                    <tr>
-                        <td>${waypoint.getSymbol()}</td>
-                        <td>${waypoint.getOrbits()}</td>
-                        <td>${waypoint.getType()}</td>
-                        <td>
-                            @for(var orbital : waypoint.getOrbitals())
-                               ${orbital.getSymbol()},
-                            @endfor
-                        </td>
-                    </tr>
-                @endfor
-                </tbody>
-            </table>
+            <div class="columns">
+                <div class="column">
+                    <a class="block" href="/galaxy/system/${system.getSymbol()}/map">
+                        <h1 class="title is-4">
+                            🧭 Map
+                        </h1>
+                    </a>
+                </div>
+                <div class="column">
+                    <a class="block">
+                        <h1 class="title is-4">
+                            🛒 Markets
+                        </h1>
+                    </a>
+                </div>
+                <div class="column">
+                    <a class="block" href="/galaxy/system/${system.getSymbol()}/map">
+                        <h1 class="title is-4">
+                            TODO
+                        </h1>
+                    </a>
+                </div>
+            </div>
         </div>
     </div>
 `, scripts = @`@template.asset(name = "main.js")`)

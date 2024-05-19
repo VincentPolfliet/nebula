@@ -30,12 +30,16 @@ const onTypeClicked = function (item) {
     item.menuActive = !item.menuActive;
 }
 
-const navigateToWaypoint = function (symbol) {
-    const marker = markersPerWaypoint[symbol];
+const navigateToWaypoint = function (waypoint) {
+    const marker = markersPerWaypoint[waypoint.symbol];
 
     if (marker) {
         map.flyTo(marker.getLatLng(), 5);
         marker.openPopup()
+
+        fetch(`/galaxy/waypoint/${waypoint.symbol}.json`)
+            .then(body => body.json())
+            .then(json => console.log(json))
     }
 }
 
@@ -116,14 +120,13 @@ function fillMarkers() {
                 <p class="menu-label" @click="resetAllFilters()">Legend</p>
                 <ul class="menu-list">
                     <li v-for="type in waypointTypes">
-                        <!-- TODO: fix this not taking the entire bar -->
                         <a class="level-item" @click="onTypeClicked(type)">
                             <span> <span :class="type.iconClass"></span> {{ type.title }}</span>
                         </a>
 
                         <ul v-bind:class="{ 'is-hidden': !type.menuActive }">
                             <li v-for="waypoint in getWaypointsByType(type.type)"
-                                @click="navigateToWaypoint(waypoint.symbol)">
+                                @click="navigateToWaypoint(waypoint)">
                                 <a>{{ waypoint.symbol }}</a>
                             </li>
                         </ul>

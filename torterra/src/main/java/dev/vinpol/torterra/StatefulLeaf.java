@@ -2,10 +2,12 @@ package dev.vinpol.torterra;
 
 import lombok.AccessLevel;
 import lombok.Getter;
+import lombok.Setter;
 
 public abstract class StatefulLeaf<T> implements Leaf<T> {
 
     @Getter(AccessLevel.PROTECTED)
+    @Setter(AccessLevel.PROTECTED)
     private LeafState state = LeafState.running();
 
     @Override

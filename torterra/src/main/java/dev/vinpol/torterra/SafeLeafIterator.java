@@ -22,7 +22,7 @@ public class SafeLeafIterator<T> implements LeafIterator<T> {
 
     @Override
     public LeafState act(T instance) {
-        LeafState state = iterator.act(instance);
+        LeafState state = iterator.next(instance);
 
         if (state instanceof FailedState) {
             return LeafState.success();

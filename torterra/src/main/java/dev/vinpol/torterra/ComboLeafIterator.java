@@ -42,9 +42,19 @@ public class ComboLeafIterator<T> implements LeafIterator<T> {
         return true;
     }
 
+
     @Override
     public Leaf<T> current() {
+        if (currentIterator == null){
+            return null;
+        }
+
         return currentIterator.current();
+    }
+
+
+    public LeafIterator<T> currentIterator() {
+        return currentIterator;
     }
 
     /**

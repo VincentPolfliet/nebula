@@ -1,6 +1,6 @@
 package dev.vinpol.torterra;
 
-public sealed interface LeafState permits FailedState, RunningState, SuccessState {
+public interface LeafState {
 
     static LeafState success() {
         return new SuccessState();

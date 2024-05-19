@@ -10,7 +10,7 @@
 
     <div id="navbar-content" class="navbar-menu">
         <div class="navbar-start">
-            <a href="https://docs.spacetraders.io/" class="navbar-item">📄 Docs</a>
+            <a href="https://docs.spacetraders.io/" class="navbar-item" target="_blank">📄 Docs</a>
         </div>
 
         <div class="navbar-center">

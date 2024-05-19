@@ -2,6 +2,7 @@
 @import dev.vinpol.nebula.dragonship.utils.time.TimeWizard
 @import dev.vinpol.spacetraders.sdk.models.Ship
 @import dev.vinpol.spacetraders.sdk.models.ShipNavFlightMode
+@import dev.vinpol.spacetraders.sdk.models.ShipNavStatus
 @import dev.vinpol.spacetraders.sdk.models.WaypointType
 
 @import static dev.vinpol.nebula.dragonship.web.fleet.FleetUtils.*
@@ -65,8 +66,7 @@
         @if(ship.hasActiveCooldown())
             ${ActivityState.WAITING_ON_COOLDOWN}
         @elseif(ship.isInTransit())
-            est <span
-                class="humanize humanize-relativetime">${clock.differenceInSeconds(ship.getNav().getRoute().getArrival())}</span> until arrival
+            ${ShipNavStatus.IN_TRANSIT} (est <span class="humanize humanize-relativetime">${clock.differenceInSeconds(ship.getNav().getRoute().getArrival())}</span>)
         @elseif(!ship.getNav().isInTransit())
             ${ship.getNav().getStatus()}
         @else

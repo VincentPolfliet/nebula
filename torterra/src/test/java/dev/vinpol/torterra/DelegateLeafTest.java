@@ -2,7 +2,7 @@ package dev.vinpol.torterra;
 
 import org.junit.jupiter.api.Test;
 
-import static dev.vinpol.torterra.assertions.LeafStateAssertion.assertThat;
+import static dev.vinpol.torterra.assertions.LeafStateAssertion.assertState;
 
 class DelegateLeafTest {
 
@@ -13,7 +13,7 @@ class DelegateLeafTest {
 
         LeafState result = delegate.act(new Object());
 
-        assertThat(result).isSuccess();
+        assertState(result).isSuccess();
     }
 
 
@@ -24,6 +24,6 @@ class DelegateLeafTest {
 
         LeafState state = delegate.act(new Object());
 
-        assertThat(state).isFailure();
+        assertState(state).isFailure();
     }
 }

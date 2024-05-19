@@ -1,9 +1,9 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
-import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
-import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs;
+import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
+import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.GetSystemWaypoints200Response;
 import dev.vinpol.spacetraders.sdk.models.Ship;
@@ -17,8 +17,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs.*;
 import static dev.vinpol.torterra.Torterra.predicate;
-import static dev.vinpol.torterra.Torterra.safeSequence;
+import static dev.vinpol.torterra.Torterra.sequence;
 
 public class MiningBehaviourFactory implements ShipBehaviourFactory {
 
@@ -52,15 +53,15 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
             WaypointSymbol nearbyWaypointSymbol = WaypointSymbol.tryParse(nearbyWaypoint.getSymbol());
 
             List<Leaf<Ship>> sequence = List.of(
-                ShipLeafs.cargoIsNotFull(),
-                ShipLeafs.hasNoActiveCooldown(),
-                ShipLeafs.hasFuelLeft(),
-                ShipLeafs.isNotInTransit(),
-                safeSequence(
+                cargoIsNotFull(),
+                hasNoActiveCooldown(),
+                hasFuelLeft(),
+                isNotInTransit(),
+                sequence(
                     ShipLeafs.isDocked(),
                     ShipBehaviourLeafs.orbit()
                 ),
-                safeSequence(
+                sequence(
                     predicate(inShip -> !isAtLocation(inShip, nearbyWaypoint)),
                     ShipBehaviourLeafs.navigate(nearbyWaypointSymbol),
                     ShipBehaviourLeafs.dock(),

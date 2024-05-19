@@ -9,7 +9,7 @@ import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.WaypointType;
 import dev.vinpol.torterra.IterableLeaf;
 import dev.vinpol.torterra.Leaf;
-import dev.vinpol.torterra.TorterraUtils;
+import dev.vinpol.torterra.Tortilla;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -41,12 +41,6 @@ public interface ShipBehaviourFactoryCreator {
         return ShipBehaviour.ofResult(ShipBehaviourResult.waitUntil(arrival));
     }
 
-
-    @SuppressWarnings("UnusedReturnValue")
-    default ShipSequenceBehaviour sequenceOf(Leaf<Ship>... leaves) {
-        return sequenceOf(List.of(leaves));
-    }
-
     default ShipSequenceBehaviour sequenceOf(List<Leaf<Ship>> leaves) {
         inject(leaves, this);
         return new ShipSequenceBehaviour(leaves);
@@ -54,7 +48,7 @@ public interface ShipBehaviourFactoryCreator {
 
     private static void inject(Iterable<Leaf<Ship>> leaves, ShipBehaviourFactoryCreator registry) {
         for (Leaf<Ship> leaf : leaves) {
-            Leaf<Ship> unwrapped = TorterraUtils.unwrap(leaf);
+            Leaf<Ship> unwrapped = Tortilla.unwrap(leaf);
 
             if (unwrapped instanceof IterableLeaf<Ship> iterable) {
                 inject(iterable, registry);

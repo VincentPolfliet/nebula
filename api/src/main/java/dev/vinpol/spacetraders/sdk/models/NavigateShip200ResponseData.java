@@ -6,6 +6,7 @@ import lombok.Data;
 public class NavigateShip200ResponseData {
     private ShipFuel fuel;
     private ShipNav nav;
+    private Object[] events;
 
     public NavigateShip200ResponseData fuel(ShipFuel fuel) {
         this.fuel = fuel;

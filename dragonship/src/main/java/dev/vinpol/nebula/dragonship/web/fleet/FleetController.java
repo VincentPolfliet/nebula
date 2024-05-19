@@ -1,11 +1,7 @@
 package dev.vinpol.nebula.dragonship.web.fleet;
 
-import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
-import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourRefLeaf;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs;
 import dev.vinpol.nebula.dragonship.automation.command.ShipCommander;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
@@ -16,17 +12,13 @@ import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.System;
 import dev.vinpol.spacetraders.sdk.models.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import dev.vinpol.torterra.Torterra;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Clock;
 import java.util.List;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
-
-import static dev.vinpol.torterra.Torterra.safeSequence;
 
 @Controller
 public class FleetController {
@@ -107,17 +99,22 @@ public class FleetController {
     }
 
     @PostMapping("/fleet/{shipSymbol}/navigate")
-    public CompletableFuture<String> navigate(@PathVariable("shipSymbol") String shipSymbol, @RequestParam("target") String targetSymbol, Model model) {
+    public String navigate(@PathVariable("shipSymbol") String shipSymbol, @RequestParam("target") String targetSymbol, Model model) {
         Ship ship = fleetApi.getMyShip(shipSymbol).getData();
 
-        ShipBehaviourRefLeaf navigationRef = ShipBehaviourLeafs.navigate(WaypointSymbol.tryParse(targetSymbol));
-        navigationRef.setBehaviourFactory(shipBehaviourFactoryCreator);
+        shipCommander.command(ship, shipBehaviourFactoryCreator.sequenceOf(
+                List.of(
+                    Torterra.sequence(
+                        ShipLeafs.isDocked(),
+                        ShipBehaviourLeafs.orbit()
+                    ),
+                    ShipBehaviourLeafs.navigate(WaypointSymbol.tryParse(targetSymbol))
+                )
+            )
+        );
 
-        return shipCommander.command(ship, navigationRef)
-            .thenApply((Function<Object, String>) o -> {
-                model.addAttribute("ship", fleetApi.getMyShip(shipSymbol).getData());
-                return "fleet/ship-row";
-            }).toCompletableFuture();
+        model.addAttribute("ship", fleetApi.getMyShip(shipSymbol).getData());
+        return "fleet/ship-row";
     }
 
     @PostMapping(value = "/fleet/{shipSymbol}/dock")

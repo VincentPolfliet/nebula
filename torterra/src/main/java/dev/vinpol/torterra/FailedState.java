@@ -1,4 +1,4 @@
 package dev.vinpol.torterra;
 
-public record FailedState() implements LeafState {
+record FailedState() implements LeafState {
 }

@@ -1,8 +1,6 @@
 package dev.vinpol.torterra.assertions;
 
-import dev.vinpol.torterra.FailedState;
 import dev.vinpol.torterra.LeafState;
-import dev.vinpol.torterra.RunningState;
 import org.assertj.core.api.AbstractAssert;
 
 import java.util.function.Predicate;
@@ -24,7 +22,7 @@ public class LeafStateAssertion extends AbstractAssert<LeafStateAssertion, LeafS
         super(leafState, LeafStateAssertion.class);
     }
 
-    public static LeafStateAssertion assertThat(LeafState state) {
+    public static LeafStateAssertion assertState(LeafState state) {
         return new LeafStateAssertion(state);
     }
 

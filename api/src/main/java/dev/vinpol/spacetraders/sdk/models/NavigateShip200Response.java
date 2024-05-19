@@ -6,7 +6,6 @@ import lombok.Data;
 public class NavigateShip200Response {
 
     private NavigateShip200ResponseData data;
-    private Object events;
 
     public NavigateShip200Response data(NavigateShip200ResponseData data) {
         this.data = data;

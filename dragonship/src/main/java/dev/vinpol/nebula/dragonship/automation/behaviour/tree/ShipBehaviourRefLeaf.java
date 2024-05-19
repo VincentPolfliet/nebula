@@ -1,21 +1,25 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 
-import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
-import dev.vinpol.torterra.Leaf;
-import dev.vinpol.torterra.LeafState;
 
 import java.util.Objects;
 
-public final class ShipBehaviourRefLeaf implements Leaf<Ship>, ShipBehaviour {
+public final class ShipBehaviourRefLeaf implements ShipLeaf {
 
+    private final String name;
     private final ShipBehaviourRef ref;
     private ShipBehaviourFactoryCreator behaviourFactory;
     private ShipBehaviourLeaf inner;
 
     public ShipBehaviourRefLeaf(ShipBehaviourRef ref) {
+        this.name = null;
+        this.ref = ref;
+    }
+
+    public ShipBehaviourRefLeaf(String name, ShipBehaviourRef ref) {
+        this.name = name;
         this.ref = Objects.requireNonNull(ref);
     }
 
@@ -24,21 +28,8 @@ public final class ShipBehaviourRefLeaf implements Leaf<Ship>, ShipBehaviour {
     }
 
     @Override
-    public LeafState act(Ship ship) {
-        if (inner == null) {
-            inner = new ShipBehaviourLeaf(() -> ref.apply(behaviourFactory).create());
-        }
-
-        return inner.act(ship);
-    }
-
-    public ShipBehaviourResult getResult() {
-        return inner.getResult();
-    }
-
-    @Override
     public String getName() {
-        return inner != null ? inner.toString() : "null";
+        return name != null ? name : (inner != null ? inner.toString() : "null");
     }
 
     @Override
@@ -47,8 +38,16 @@ public final class ShipBehaviourRefLeaf implements Leaf<Ship>, ShipBehaviour {
     }
 
     @Override
+    public ShipBehaviourLeafState act(Ship instance) {
+        if (inner == null) {
+            inner = new ShipBehaviourLeaf(() -> ref.apply(behaviourFactory).create());
+        }
+
+        return inner.act(instance);
+    }
+
+    @Override
     public ShipBehaviourResult update(Ship ship) {
-        act(ship);
-        return getResult();
+        return act(ship).result();
     }
 }

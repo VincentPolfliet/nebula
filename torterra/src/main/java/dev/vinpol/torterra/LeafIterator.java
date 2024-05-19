@@ -1,17 +1,28 @@
 package dev.vinpol.torterra;
 
-import javax.annotation.concurrent.NotThreadSafe;
 import java.util.Iterator;
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
-@NotThreadSafe
-public interface LeafIterator<T> {
+public interface LeafIterator<T> extends Leaf<T> {
     boolean hasNext();
 
     Leaf<T> current();
 
-    LeafState act(T instance);
+    /**
+     * Throws: NoSuchElementException – if the iteration has no more elements
+     *
+     * @param instance
+     * @return
+     */
+    default LeafState next(T instance) {
+        if (!hasNext()) {
+            throw new NoSuchElementException();
+        }
+
+        return act(instance);
+    }
 
     static <T> LeafIterator<T> singleton(Leaf<T> leaf) {
         return new SingletonLeafIterator<>(leaf);

@@ -2,7 +2,9 @@ package dev.vinpol.torterra;
 
 import lombok.Getter;
 
+import javax.annotation.Nonnull;
 import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.Objects;
 
 public class Selector<T> extends StatefulLeaf<T> implements IterableLeaf<T>, LeafIterator<T> {
@@ -30,7 +32,7 @@ public class Selector<T> extends StatefulLeaf<T> implements IterableLeaf<T>, Lea
             current = iterator.next();
             LeafState result = current.act(instance);
 
-            if (result instanceof SuccessState) {
+            if (result.isSuccess()) {
                 succeed();
             }
         }
@@ -45,6 +47,7 @@ public class Selector<T> extends StatefulLeaf<T> implements IterableLeaf<T>, Lea
         return this;
     }
 
+    @Nonnull
     @Override
     public Iterator<Leaf<T>> iterator() {
         return leaves.iterator();

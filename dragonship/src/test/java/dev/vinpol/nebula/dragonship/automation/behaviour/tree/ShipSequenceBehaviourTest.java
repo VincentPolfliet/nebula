@@ -7,16 +7,15 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.state.Success;
 import dev.vinpol.spacetraders.sdk.models.MotherShip;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipNavStatus;
-import dev.vinpol.torterra.StatefulLeaf;
 import dev.vinpol.torterra.Leaf;
+import dev.vinpol.torterra.StatefulLeaf;
 import dev.vinpol.torterra.Torterra;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
-import java.util.List;
 
-import static dev.vinpol.torterra.Torterra.safeSequence;
+import static dev.vinpol.torterra.Torterra.selector;
 import static dev.vinpol.torterra.Torterra.sequence;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -24,7 +23,7 @@ class ShipSequenceBehaviourTest {
 
     @Test
     void treeIsNullThrowsException() {
-        NullPointerException exception = Assertions.catchNullPointerException(() -> new ShipSequenceBehaviour(null));
+        NullPointerException exception = Assertions.catchNullPointerException(() -> new ShipSequenceBehaviour((Leaf<Ship>) null));
 
         assertThat(exception).isNotNull();
     }
@@ -50,11 +49,7 @@ class ShipSequenceBehaviourTest {
 
     @Test
     void returnsTrueAndDoneWithOneSuccessStep() {
-        List<Leaf<Ship>> tree = List.of(
-            Torterra.succeed()
-        );
-
-        ShipSequenceBehaviour sut = new ShipSequenceBehaviour(tree);
+        ShipSequenceBehaviour sut = new ShipSequenceBehaviour(Torterra.succeed());
 
         Ship ship = new Ship();
         ShipBehaviourResult firstTick = sut.update(ship);
@@ -71,11 +66,7 @@ class ShipSequenceBehaviourTest {
 
     @Test
     void returnsFalseAndDoneWithOneFailedStep() {
-        List<Leaf<Ship>> tree = List.of(
-            Torterra.fail()
-        );
-
-        ShipSequenceBehaviour sut = new ShipSequenceBehaviour(tree);
+        ShipSequenceBehaviour sut = new ShipSequenceBehaviour(Torterra.fail());
 
         Ship ship = new Ship();
         ShipBehaviourResult firstTick = sut.update(ship);
@@ -92,16 +83,12 @@ class ShipSequenceBehaviourTest {
 
     @Test
     void returnsDoneWhenStepIsStillRunning() {
-        List<Leaf<Ship>> tree = List.of(
-            new StatefulLeaf<Ship>() {
-                @Override
-                public void doAct(Ship instance) {
+        ShipSequenceBehaviour sut = new ShipSequenceBehaviour(new StatefulLeaf<Ship>() {
+            @Override
+            public void doAct(Ship instance) {
 
-                }
             }
-        );
-
-        ShipSequenceBehaviour sut = new ShipSequenceBehaviour(tree);
+        });
 
         Ship ship = new Ship();
         ShipBehaviourResult result = sut.update(ship);
@@ -111,29 +98,45 @@ class ShipSequenceBehaviourTest {
     }
 
     @Test
-    void testSafeSequenceSupport() {
+    void testSequence() {
         ShipSequenceBehaviour behaviour = new ShipSequenceBehaviour(
-            List.of(
-                safeSequence(
-                    ShipLeafs.isDocked(),
-                    Torterra.fail()
-                ),
+            sequence(
+                Torterra.fail(),
                 Torterra.succeed()
-            )
+            ),
+            Torterra.succeed()
         );
 
         Ship ship = MotherShip.excavator()
             .withNav(nav -> {
-                nav.setStatus(ShipNavStatus.DOCKED);
+                nav.setStatus(ShipNavStatus.IN_ORBIT);
             });
 
         // dock check
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
 
-        // succeed step
+        // sequence step
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
 
-        // actually done
+        // done
+        assertThat(behaviour.update(ship).isDone()).isTrue();
+    }
+
+    @Test
+    void testSelector() {
+        ShipSequenceBehaviour behaviour = new ShipSequenceBehaviour(
+            selector(
+                Torterra.fail(),
+                Torterra.fail(),
+                Torterra.succeed()
+            )
+        );
+
+        Ship ship = MotherShip.excavator();
+
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
         assertThat(behaviour.update(ship).isDone()).isTrue();
     }
 }
