@@ -4,13 +4,13 @@ import java.util.stream.Stream;
 
 public interface Storage<K, T> {
 
-    void store(K key, T item);
+    void set(K key, T item);
 
-    T retrieve(K key);
+    T get(K key);
 
     default boolean hasItem(K key) {
-        return retrieve(key) != null;
+        return get(key) != null;
     }
 
-    Stream<T> stream();
+    Stream<T> streamValues();
 }

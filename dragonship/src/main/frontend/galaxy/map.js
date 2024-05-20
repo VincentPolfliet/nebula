@@ -2,6 +2,7 @@ import 'vite/modulepreload-polyfill';
 
 import 'bulma'
 import '../index.scss'
+import '../icons.css'
 
 import {createApp} from 'vue'
 import Map from './Map.vue'

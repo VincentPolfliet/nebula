@@ -6,6 +6,52 @@ import retrofit2.http.*;
 
 public interface SystemsApi {
     /**
+     * Get System
+     * Get the details of a system.
+     *
+     * @return Call&lt;GetSystem200Response&gt;
+     */
+    @GET("systems/{systemSymbol}")
+    GetSystem200Response getSystem(@Path("systemSymbol") String systemSymbol);
+
+    /**
+     * List Waypoints in System
+     * Return a paginated list of all of the waypoints for a given system.  If a waypoint is uncharted, it will return the &#x60;Uncharted&#x60; trait instead of its actual traits.
+     *
+     * @param systemSymbol The system symbol (required)
+     * @param page         What entry offset to request (optional, default to 1)
+     * @param limit        How many entries to return per page (optional, default to 10)
+     * @param type         Filter waypoints by type. (optional)
+     * @param traits       Filter waypoints by one or more traits. (optional)
+     * @return Call&lt;GetSystemWaypoints200Response&gt;
+     */
+    @GET("systems/{systemSymbol}/waypoints")
+    GetSystemWaypoints200Response getSystemWaypoints(@Path("systemSymbol") String systemSymbol, @Query("page") Integer page, @Query("limit") Integer limit, @Query("type") WaypointType type, @Query("traits") WaypointTraitSymbol... traits);
+
+    /**
+     * List Systems
+     * Return a paginated list of all systems.
+     *
+     * @param page  What entry offset to request (optional, default to 1)
+     * @param limit How many entries to return per page (optional, default to 10)
+     * @return Call&lt;GetSystems200Response&gt;
+     */
+    @GET("systems")
+    GetSystems200Response getSystems(@Query("page") Integer page, @Query("limit") Integer limit);
+
+    /**
+     * Get Waypoint
+     * View the details of a waypoint.  If the waypoint is uncharted, it will return the &#39;Uncharted&#39; trait instead of its actual traits.
+     *
+     * @param systemSymbol   The system symbol (required)
+     * @param waypointSymbol The waypoint symbol (required)
+     * @return Call&lt;GetWaypoint200Response&gt;
+     */
+    @GET("systems/{systemSymbol}/waypoints/{waypointSymbol}")
+    GetWaypoint200Response getWaypoint(@Path("systemSymbol") String systemSymbol, @Path("waypointSymbol") String waypointSymbol);
+
+
+    /**
      * Get Construction Site
      * Get construction details for a waypoint. Requires a waypoint with a property of &#x60;isUnderConstruction&#x60; to be true.
      *
@@ -56,51 +102,6 @@ public interface SystemsApi {
     Call<GetShipyard200Response> getShipyard(
         @Path("systemSymbol") String systemSymbol, @Path("waypointSymbol") String waypointSymbol
     );
-
-    /**
-     * Get System
-     * Get the details of a system.
-     *
-     * @return Call&lt;GetSystem200Response&gt;
-     */
-    @GET("systems/{systemSymbol}")
-    GetSystem200Response getSystem(@Path("systemSymbol") String systemSymbol);
-
-    /**
-     * List Waypoints in System
-     * Return a paginated list of all of the waypoints for a given system.  If a waypoint is uncharted, it will return the &#x60;Uncharted&#x60; trait instead of its actual traits.
-     *
-     * @param systemSymbol The system symbol (required)
-     * @param page         What entry offset to request (optional, default to 1)
-     * @param limit        How many entries to return per page (optional, default to 10)
-     * @param type         Filter waypoints by type. (optional)
-     * @param traits       Filter waypoints by one or more traits. (optional)
-     * @return Call&lt;GetSystemWaypoints200Response&gt;
-     */
-    @GET("systems/{systemSymbol}/waypoints")
-    GetSystemWaypoints200Response getSystemWaypoints(@Path("systemSymbol") String systemSymbol, @Query("page") Integer page, @Query("limit") Integer limit, @Query("type") WaypointType type, @Query("traits") WaypointTraitSymbol... traits);
-
-    /**
-     * List Systems
-     * Return a paginated list of all systems.
-     *
-     * @param page  What entry offset to request (optional, default to 1)
-     * @param limit How many entries to return per page (optional, default to 10)
-     * @return Call&lt;GetSystems200Response&gt;
-     */
-    @GET("systems")
-    GetSystems200Response getSystems(@Query("page") Integer page, @Query("limit") Integer limit);
-
-    /**
-     * Get Waypoint
-     * View the details of a waypoint.  If the waypoint is uncharted, it will return the &#39;Uncharted&#39; trait instead of its actual traits.
-     *
-     * @param systemSymbol   The system symbol (required)
-     * @param waypointSymbol The waypoint symbol (required)
-     * @return Call&lt;GetWaypoint200Response&gt;
-     */
-    @GET("systems/{systemSymbol}/waypoints/{waypointSymbol}")
-    GetWaypoint200Response getWaypoint(@Path("systemSymbol") String systemSymbol, @Path("waypointSymbol") String waypointSymbol);
 
     /**
      * Supply Construction Site

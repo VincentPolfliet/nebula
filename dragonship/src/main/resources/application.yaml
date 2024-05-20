@@ -1,5 +1,6 @@
 nebula:
     st:
+        token: ${NEBULA_TOKEN}
         url: https://api.spacetraders.io/v2/
 
 nebula.ext.sync-on-boot: ${NEBULA_SYNC_ON_BOOT:false}

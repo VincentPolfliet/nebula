@@ -1,7 +1,6 @@
 @import dev.vinpol.nebula.dragonship.utils.time.TimeWizard
 @import dev.vinpol.nebula.dragonship.web.Page
 @import dev.vinpol.spacetraders.sdk.models.Ship
-@import java.util.Collection
 @import java.util.List
 
 @param Page page

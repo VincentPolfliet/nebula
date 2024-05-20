@@ -16,7 +16,7 @@ public interface AgentsApi {
      * @return Call&lt;GetMyAgent200Response&gt;
      */
     @GET("agents/{agentSymbol}")
-    Call<GetMyAgent200Response> getAgent(@Path("agentSymbol") String agentSymbol);
+   GetMyAgent200Response getAgent(@Path("agentSymbol") String agentSymbol);
 
     /**
      * List Agents
@@ -27,7 +27,7 @@ public interface AgentsApi {
      * @return Call&lt;GetAgents200Response&gt;
      */
     @GET("agents")
-    Call<GetAgents200Response> getAgents(@Query("page") Integer page, @Query("limit") Integer limit);
+    GetAgents200Response getAgents(@Query("page") Integer page, @Query("limit") Integer limit);
 
     /**
      * Get Agent

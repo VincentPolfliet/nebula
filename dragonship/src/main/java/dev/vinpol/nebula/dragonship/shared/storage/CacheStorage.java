@@ -19,18 +19,26 @@ public abstract class CacheStorage<K, T> implements Storage<K, T> {
         this.cache = cache;
     }
 
+
     @Override
-    public void store(K key, T item) {
+    public void set(K key, T item) {
         cache.put(key, item);
     }
 
     @Override
-    public T retrieve(K key) {
+    public T get(K key) {
         return cache.get(key);
     }
 
     @Override
-    public Stream<T> stream() {
+    public Stream<T> streamValues() {
         return cache.getAll(cache.keys()).values().stream();
+    }
+
+    private static final class EternalCacheStorage<K, T> extends CacheStorage<K, T> {
+
+        private EternalCacheStorage(Class<K> keyType, Class<T> valueType) {
+            super(keyType, valueType);
+        }
     }
 }

@@ -12,7 +12,9 @@
 
 <tr id="ship-row-${ship.getSymbol()}">
     <td><a href="/ship/detail/${ship.getSymbol()}">${ship.getSymbol()}</a></td>
+
     <td>${ship.getRole()}</td>
+
     <td class="is-number">
         ${String.format("%.0f", calculateAverageCondition(ship))}
     </td>
@@ -22,11 +24,15 @@
     </td>
 
     <td>
+        !{var destination = ship.getNav().getRoute().getDestination();}
+
         @if(ship.getNav().isInTransit())
             <a href="/galaxy/waypoint/${ship.getNav().getRoute().getOrigin().getSymbol()}">${ship.getNav().getRoute().getOrigin().getSymbol()}</a> ->
-            <a href="/galaxy/waypoint/${ship.getNav().getRoute().getDestination().getSymbol()}">${ship.getNav().getRoute().getDestination().getSymbol()}</a>
+            <a href="/galaxy/waypoint/${destination.getSymbol()}">${destination.getSymbol()}</a>
         @else
-            <a href="/galaxy/waypoint/${ship.getNav().getWaypointSymbol()}">${ship.getNav().getWaypointSymbol()}</a>
+
+
+            <a href="/galaxy/waypoint/${destination.getSymbol()}">${destination.getSymbol()} (${destination.getType()})</a>
         @endif
     </td>
 
@@ -66,7 +72,9 @@
         @if(ship.hasActiveCooldown())
             ${ActivityState.WAITING_ON_COOLDOWN}
         @elseif(ship.isInTransit())
-            ${ShipNavStatus.IN_TRANSIT} (est <span class="humanize humanize-relativetime">${clock.differenceInSeconds(ship.getNav().getRoute().getArrival())}</span>)
+            ${ShipNavStatus.IN_TRANSIT} (est
+            <time class="humanize humanize-relativetime"
+                  datetime="${ship.getNav().getRoute().getArrival().toString()}">${clock.differenceInSeconds(ship.getNav().getRoute().getArrival())}</time>)
         @elseif(!ship.getNav().isInTransit())
             ${ship.getNav().getStatus()}
         @else

@@ -19,7 +19,7 @@ public final class BigBrain implements ApiClient {
 
     @Override
     public AgentsApi agentsApi() {
-        return inner.agentsApi();
+        return new AgentsApiCache(inner.agentsApi());
     }
 
     @Override

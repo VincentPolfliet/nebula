@@ -2,7 +2,6 @@ package dev.vinpol.nebula.dragonship.shared.i18n;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.vinpol.nebula.dragonship.utils.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,15 +9,11 @@ import org.springframework.boot.autoconfigure.context.MessageSourceProperties;
 import org.springframework.context.support.AbstractMessageSource;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.ResourceUtils;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.text.MessageFormat;
 import java.util.Locale;
 
@@ -47,7 +42,7 @@ public class JsonMessageSource extends AbstractMessageSource {
             this.jsonMessagePath = jsonMessagePath;
         }
 
-        logger.debug("jsonMessagePath: {}", jsonMessagePath);
+        logger.debug("jsonMessagePath: {}", this.jsonMessagePath);
 
         this.baseName = properties.getBasename();
         this.setUseCodeAsDefaultMessage(properties.isUseCodeAsDefaultMessage());
@@ -63,7 +58,7 @@ public class JsonMessageSource extends AbstractMessageSource {
             loadMessages(locale);
         }
 
-        JsonNode nodeForLocale = messagesCache.retrieve(locale);
+        JsonNode nodeForLocale = messagesCache.get(locale);
         JsonNode nodeAtCode = nodeForLocale.at(appendIfNotStartsWith('/', code).replace('.', '/'));
 
         String text = nodeAtCode.asText("__" + code + "__");
@@ -80,7 +75,7 @@ public class JsonMessageSource extends AbstractMessageSource {
 
             String content = output.toString(StandardCharsets.UTF_8);
             JsonNode jsonNode = objectMapper.readValue(content, JsonNode.class);
-            messagesCache.store(locale, jsonNode);
+            messagesCache.set(locale, jsonNode);
         } catch (IOException e) {
             throw new UncheckedIOException(e);
         }

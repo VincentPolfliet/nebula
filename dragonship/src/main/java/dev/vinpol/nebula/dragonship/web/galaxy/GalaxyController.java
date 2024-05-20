@@ -63,19 +63,6 @@ public class GalaxyController {
         return "galaxy/systems";
     }
 
-    @GetMapping("/galaxy/system/{system}")
-    public String galaxy(@PathVariable("system") String symbol, Model model) {
-        Page content = new Page();
-        content.setTitle("System");
-
-        model.addAttribute("page", content);
-
-        System system = systemsApi.getSystem(symbol).getData();
-
-        model.addAttribute("system", system);
-        return "galaxy/system";
-    }
-
     @GetMapping("/galaxy/system/{system}/markets.json")
     @ResponseBody
     public ResponseEntity<Object> getMarketsOfSystem(@PathVariable("system") String symbol) {
@@ -102,12 +89,12 @@ public class GalaxyController {
 
         System system = systemsApi.getSystem(systemSymbol).getData();
 
-        MapData mapData = Optional.ofNullable(mapDataCache.retrieve(systemSymbol))
+        MapData mapData = Optional.ofNullable(mapDataCache.get(systemSymbol))
             // clone because mutable and not threadsafe
             .map(MapDataCloner::clone)
             .orElseGet(() -> {
                 MapData calculateMapData = calculateMapData(systemSymbol, system);
-                mapDataCache.store(systemSymbol, calculateMapData);
+                mapDataCache.set(systemSymbol, calculateMapData);
                 return calculateMapData;
             });
 

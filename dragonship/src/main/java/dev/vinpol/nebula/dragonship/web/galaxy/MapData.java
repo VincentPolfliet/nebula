@@ -43,9 +43,9 @@ public class MapData {
     }
 
     @JsonProperty("types")
-    public Set<WayPointType> getTypes() {
+    public Set<MapItemType> getTypes() {
         return waypoints.stream()
-            .map(w -> new WayPointType(w.type(), w.type()))
+            .map(w -> new MapItemType(w.type(), w.type()))
             .sorted((o1, o2) -> {
                 Integer leftPriority = PRIORITY_MAP.getOrDefault(o1.type(), 0);
                 Integer rightPriority = PRIORITY_MAP.getOrDefault(o2.type(), 0);

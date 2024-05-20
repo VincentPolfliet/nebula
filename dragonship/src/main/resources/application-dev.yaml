@@ -1,7 +1,3 @@
-nebula:
-    st:
-        token: eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZGVudGlmaWVyIjoiV0VURU5ET0ZUT1dMIiwidmVyc2lvbiI6InYyLjIuMCIsInJlc2V0X2RhdGUiOiIyMDI0LTA0LTI4IiwiaWF0IjoxNzE0NjcwMzA2LCJzdWIiOiJhZ2VudC10b2tlbiJ9.KU0u93_YCsayZxVnVZoDGb3Hyspvqs4Zog_AuAtl2OlTKhUsZ488zfqXljdl2mq0sww0M9B0NrWDvhVRcVUWRqz291fGbpFV3WE49ByTIHrPo9Ock6Ee4AjtYzhhs161N4UCb2l04fyvcjPHZOajglM1BYK0E5hPpsbsJnn693A2b1rokSYD15h2pd95GPoQgGnxn2a53CjwQb4Rzd1YUrs22EhZpIVTJVtFHJKapO2IMsVELPSTcmsq4ohktFhBjrw1_vvezIw_BBlI2q-coclv4pCy6SwFQMTboGQx2ln5RoQZn1g16PkomPFDLqY1waMdcA1vEMzL_DdiToryUg
-
 nebula.ext.sync-on-boot: false
 
 vite:
@@ -12,5 +8,12 @@ gg:
         developmentMode: true
         templateLocation: src/main/jte
         classLocation: target/jte-classes
+
+management:
+    endpoints:
+        web:
+            exposure:
+                include: "mappings"
+
 
 logging.level.dev.vinpol.nebula.dragonship: DEBUG

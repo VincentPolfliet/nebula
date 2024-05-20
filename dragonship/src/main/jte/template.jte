@@ -1,4 +1,6 @@
 @import dev.vinpol.nebula.dragonship.web.Page
+@import dev.vinpol.nebula.dragonship.web.agent.CurrentAgentAdvice
+@import dev.vinpol.spacetraders.sdk.models.Agent
 @import gg.jte.Content
 
 @param Page page = new dev.vinpol.nebula.dragonship.web.Page().withTitle("*** NO TITLE ***")
@@ -27,7 +29,7 @@
 <body>
 
 <header id="header">
-    @template.navbar()
+    @template.navbar(agent = CurrentAgentAdvice.getCurrentAgent())
 </header>
 
 <main id="main">
