@@ -3,13 +3,14 @@ import * as path from "path";
 import vue from '@vitejs/plugin-vue'
 import {globSync} from 'glob';
 import {fileURLToPath} from 'url';
+import socketReload from "./SocketReloadPlugin.js";
 
 export default defineConfig({
     root: path.resolve(__dirname, 'src/main/frontend'),
     server: {
         hot: true // 🥵
     },
-    plugins: [vue()],
+    plugins: [vue(), socketReload()],
     build: {
         // generate .vite/manifest.json in outDir
         manifest: true,

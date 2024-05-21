@@ -76,6 +76,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.squareup.okio</groupId>
+            <artifactId>okio</artifactId>
+            <version>3.9.0</version>
+        </dependency>
+
+        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <!-- required version by spring, the newer version we use in testing won't let it start -->
@@ -96,11 +102,6 @@
             <groupId>com.j2html</groupId>
             <artifactId>j2html</artifactId>
             <version>1.6.0</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-hateoas</artifactId>
         </dependency>
 
         <dependency>
