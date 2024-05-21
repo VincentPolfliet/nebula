@@ -1,12 +1,15 @@
 @import dev.vinpol.nebula.dragonship.utils.time.TimeWizard
 @import dev.vinpol.nebula.dragonship.web.Page
 @import dev.vinpol.spacetraders.sdk.models.Ship
+@import dev.vinpol.spacetraders.sdk.models.ShipRole
 @import java.util.List
+@import java.util.Set
 
 @param Page page
 @param int currentPage
 @param int total
 @param List<Ship> ships
+@param Set<ShipRole> automationSupport
 @param TimeWizard clock
 
 @template.template(page = page,
@@ -32,7 +35,7 @@ content = @`
             <tbody>
 
             @for(var ship : ships)
-                @template.fleet.ship-row(ship = ship, clock = clock)
+                @template.fleet.ship-row(ship = ship, clock = clock, automationSupport = automationSupport)
             @endfor
             </tbody>
         </table>

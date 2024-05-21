@@ -10,10 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
@@ -109,6 +106,12 @@ public class ShipBehaviourScheduler {
 
                 return result;
             });
+    }
+
+    public Optional<ShipBehaviour> getTaskAsOptional(String symbol) {
+        // TODO: future isn't supported yet to return as task
+        return Optional.ofNullable(activeBehaviours.getOrDefault(symbol, null))
+            .map(ShipBehaviourTask::getCurrentBehaviour);
     }
 
     static class ShipBehaviourTask implements Supplier<ShipBehaviourResult> {

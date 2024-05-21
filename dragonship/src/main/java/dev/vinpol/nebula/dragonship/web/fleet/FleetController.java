@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.dragonship.web.fleet;
 
+import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmResolver;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Clock;
 import java.util.List;
+import java.util.Set;
 
 @Controller
 public class FleetController {
@@ -27,13 +29,15 @@ public class FleetController {
     private final SystemsApi systemsApi;
     private final ShipCommander shipCommander;
     private final ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
+    private final ShipAlgorithmResolver shipAlgorithmResolver;
     private final Clock clock;
 
-    public FleetController(FleetApi fleetApi, SystemsApi systemsApi, ShipCommander shipCommander, ShipBehaviourFactoryCreator shipBehaviourFactoryCreator, Clock clock) {
+    public FleetController(FleetApi fleetApi, SystemsApi systemsApi, ShipCommander shipCommander, ShipBehaviourFactoryCreator shipBehaviourFactoryCreator, ShipAlgorithmResolver shipAlgorithmResolver, Clock clock) {
         this.fleetApi = fleetApi;
         this.systemsApi = systemsApi;
         this.shipCommander = shipCommander;
         this.shipBehaviourFactoryCreator = shipBehaviourFactoryCreator;
+        this.shipAlgorithmResolver = shipAlgorithmResolver;
         this.clock = clock;
     }
 
@@ -41,6 +45,11 @@ public class FleetController {
     @ModelAttribute("clock")
     public TimeWizard clock() {
         return new TimeWizard(clock);
+    }
+
+    @ModelAttribute("automationSupport")
+    public Set<ShipRole> automationSupport() {
+        return shipAlgorithmResolver.getSupported();
     }
 
     @GetMapping(value = "/fleet")

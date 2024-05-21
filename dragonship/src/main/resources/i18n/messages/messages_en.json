@@ -5,5 +5,8 @@
         "fleet": "Fleet",
         "galaxy": "Galaxy",
         "settings": "Settings"
+    },
+    "fleet": {
+        "automation": "Automation"
     }
 }

@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ConcurrentHashMap;
@@ -53,19 +54,19 @@ public class ShipCommander {
             return CompletableFuture.completedStage(null);
         }
 
-        return internalScheduleAndHandle(ship, (updated) -> ShipBehaviour.finished());
+        return commandWithFunction(ship, (updated) -> ShipBehaviour.finished());
     }
 
     public CompletionStage<?> command(Ship ship, ShipBehaviour override) {
-        return internalScheduleAndHandle(ship, (update) -> override);
+        return commandWithFunction(ship, (update) -> override);
     }
 
     public CompletionStage<?> command(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
-        return internalScheduleAndHandle(ship, nextBehaviour);
+        return commandWithFunction(ship, nextBehaviour);
     }
 
 
-    public CompletionStage<?> internalScheduleAndHandle(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
+    public CompletionStage<?> commandWithFunction(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
         CompletionStage<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), nextBehaviour);
         return handlerFuture(ship, future, nextBehaviour);
     }
@@ -102,7 +103,7 @@ public class ShipCommander {
             // success means that the tick has been completed without failure, and there are still steps to execute
             case Success success -> {
                 // reschedule this bad boi
-                return internalScheduleAndHandle(ship, shipBehaviourResolver);
+                return commandWithFunction(ship, shipBehaviourResolver);
             }
             case WaitUntil waitUntil -> {
                 // reschedule it at a given timestamp
@@ -121,6 +122,14 @@ public class ShipCommander {
 
             default -> throw new IllegalArgumentException();
         }
+    }
+
+    public Optional<ShipBehaviour> getCurrentBehaviour(Ship ship) {
+        if (!scheduler.isTickScheduled(ship)) {
+            return Optional.empty();
+        }
+
+        return scheduler.getTaskAsOptional(ship.getSymbol());
     }
 
     public record Config(int maxRescheduleAmount) {

@@ -1,13 +1,16 @@
 @import dev.vinpol.nebula.dragonship.automation.ActivityState
 @import dev.vinpol.nebula.dragonship.utils.time.TimeWizard
-@import dev.vinpol.spacetraders.sdk.models.Ship
+@import dev.vinpol.nebula.dragonship.web.support.jte.JteLocalizer
+@import dev.vinpol.spacetraders.sdk.models.*
 @import dev.vinpol.spacetraders.sdk.models.ShipNavFlightMode
 @import dev.vinpol.spacetraders.sdk.models.ShipNavStatus
 @import dev.vinpol.spacetraders.sdk.models.WaypointType
 
+@import java.util.Set
 @import static dev.vinpol.nebula.dragonship.web.fleet.FleetUtils.*
 
 @param Ship ship
+@param Set<ShipRole> automationSupport
 @param TimeWizard clock
 
 <tr id="ship-row-${ship.getSymbol()}">
@@ -30,8 +33,6 @@
             <a href="/galaxy/waypoint/${ship.getNav().getRoute().getOrigin().getSymbol()}">${ship.getNav().getRoute().getOrigin().getSymbol()}</a> ->
             <a href="/galaxy/waypoint/${destination.getSymbol()}">${destination.getSymbol()}</a>
         @else
-
-
             <a href="/galaxy/waypoint/${destination.getSymbol()}">${destination.getSymbol()} (${destination.getType()})</a>
         @endif
     </td>
@@ -113,6 +114,15 @@
 
                         @if(!fuel.isInfinite() && ship.getNav().getRoute().getDestination().getType() == WaypointType.FUEL_STATION && ship.isDocked())
                             <a class="dropdown-item" hx-swap="none" hx-post="/fleet/${ship.getSymbol()}/refuel">⛽ Refuel
+                            </a>
+                        @endif
+
+                        @if(automationSupport.contains(ship.getRole()))
+                            <a href="/automation/${ship.getSymbol()}" class="dropdown-item icon-text">
+                                 <span class="icon">
+                                    <i class="gg-bot"></i>
+                                </span>
+                                <span>${JteLocalizer.i18n("fleet.automation")}</span>
                             </a>
                         @endif
                     </div>

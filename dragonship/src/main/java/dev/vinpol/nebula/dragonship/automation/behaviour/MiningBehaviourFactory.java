@@ -13,9 +13,7 @@ import dev.vinpol.torterra.Leaf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 
 import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs.*;
 import static dev.vinpol.torterra.Torterra.predicate;
@@ -35,6 +33,14 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
         this.shipBehaviourFactoryCreator = shipBehaviourFactoryCreator;
         this.system = system;
         this.waypointType = waypointType;
+    }
+
+    @Override
+    public Map<String, String> parameters() {
+        Map<String, String> parameters = new HashMap<>();
+        parameters.put("system", system.system());
+        parameters.put("waypointType", waypointType.name());
+        return parameters;
     }
 
     @Override

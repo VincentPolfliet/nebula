@@ -7,5 +7,7 @@ import dev.vinpol.spacetraders.sdk.models.ShipRole;
 public interface ShipAlgorithm {
     ShipRole forRole();
 
+    ShipAlgorithmDescription description(Ship ship);
+
     ShipBehaviour decideBehaviour(Ship ship);
 }
