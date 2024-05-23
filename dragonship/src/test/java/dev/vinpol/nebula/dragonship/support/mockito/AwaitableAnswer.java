@@ -1,41 +1,38 @@
 package dev.vinpol.nebula.dragonship.support.mockito;
 
+import dev.vinpol.nebula.dragonship.support.awaitable.AwaitableObject;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
 public class AwaitableAnswer<T> implements Answer<T> {
 
-    private final Supplier<T> supplier;
-    private final AtomicBoolean lock = new AtomicBoolean(true);
+    private final AwaitableObject<T> awaitable;
 
-    public AwaitableAnswer(Supplier<T> supplier) {
-        this.supplier = supplier;
+    private AwaitableAnswer(AwaitableObject<T> awaitable) {
+        this.awaitable = awaitable;
     }
 
     public static <T> AwaitableAnswer<T> await(Runnable runnable) {
-        return new AwaitableAnswer<>(() -> {
-            runnable.run();
-            return null;
-        });
+        return new AwaitableAnswer<>(new AwaitableObject<>(
+            () -> {
+                runnable.run();
+                return null;
+            }
+        ));
     }
 
     public static <T> AwaitableAnswer<T> await(Supplier<T> supplier) {
-        return new AwaitableAnswer<>(supplier);
+        return new AwaitableAnswer<>(new AwaitableObject<>(supplier));
     }
 
     public void release() {
-        lock.set(false);
+        awaitable.release();
     }
 
     @Override
     public T answer(InvocationOnMock invocationOnMock) throws Throwable {
-        while (lock.get()) {
-            // wait until lock gets released
-        }
-
-        return supplier.get();
+        return awaitable.get();
     }
 }

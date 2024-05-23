@@ -29,13 +29,13 @@ public class AutomationConfig {
     }
 
     @Bean
-    ShipCommander providesShipCommander(ShipBehaviourScheduler scheduler) {
-        return new ShipCommander(scheduler);
+    ShipCommander providesShipCommander(ShipBehaviourScheduler scheduler, FleetApi fleetApi) {
+        return new ShipCommander(scheduler, fleetApi);
     }
 
     @Bean
-    ShipBehaviourScheduler providesBehaviourScheduler(FleetApi fleetApi, ScheduledExecutor scheduledExecutor) {
-        return new ShipBehaviourScheduler(fleetApi, scheduledExecutor, Executors.newVirtualThreadPerTaskExecutor());
+    ShipBehaviourScheduler providesBehaviourScheduler(ScheduledExecutor scheduledExecutor) {
+        return new ShipBehaviourScheduler(scheduledExecutor, Executors.newVirtualThreadPerTaskExecutor());
     }
 
     @Bean

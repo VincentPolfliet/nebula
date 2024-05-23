@@ -10,7 +10,17 @@ import java.util.function.Supplier;
 @FunctionalInterface
 public interface ShipBehaviour {
     static ShipBehaviour ofResult(ShipBehaviourResult result) {
-        return (inShip) -> result;
+        return new ShipBehaviour() {
+            @Override
+            public String getName() {
+                return result.toString();
+            }
+
+            @Override
+            public ShipBehaviourResult update(Ship inShip) {
+                return result;
+            }
+        };
     }
 
     ShipBehaviourResult update(Ship ship);

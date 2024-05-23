@@ -6,9 +6,9 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ShipBehaviour
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ScheduledExecutor;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.Done;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
+import dev.vinpol.nebula.dragonship.support.awaitable.AwaitableObject;
 import dev.vinpol.nebula.dragonship.support.mockito.AwaitableAnswer;
-import dev.vinpol.spacetraders.sdk.api.FleetApi;
-import dev.vinpol.spacetraders.sdk.models.GetMyShip200Response;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.MotherShip;
 import org.junit.jupiter.api.AfterEach;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 import java.util.concurrent.*;
 import java.util.function.Function;
 
@@ -25,8 +26,7 @@ import static org.assertj.core.api.Assertions.assertThatNullPointerException;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ShipBehaviourSchedulerTest {
 
@@ -34,18 +34,16 @@ class ShipBehaviourSchedulerTest {
     ScheduledExecutor timer = ScheduledExecutor.ofScheduledExecutorService(scheduler);
     ExecutorService worker = Executors.newSingleThreadExecutor();
 
-    FleetApi fleetApi;
     ShipAlgorithm algorithm;
     ShipBehaviourScheduler sut;
     Function<Ship, ShipBehaviour> resolver;
 
     @BeforeEach
     void setup() {
-        fleetApi = mock(FleetApi.class);
         algorithm = mock(ShipAlgorithm.class);
         resolver = (updated) -> algorithm.decideBehaviour(updated);
 
-        sut = new ShipBehaviourScheduler(fleetApi, timer, worker);
+        sut = new ShipBehaviourScheduler(timer, worker);
     }
 
     @AfterEach
@@ -60,10 +58,9 @@ class ShipBehaviourSchedulerTest {
         Ship ship = MotherShip.excavator();
         String shipSymbol = ship.getSymbol();
 
-        when(fleetApi.getMyShip(shipSymbol)).thenReturn(new GetMyShip200Response().data(ship));
         when(algorithm.decideBehaviour(ship)).thenReturn(ShipBehaviour.ofResult(done()));
 
-        CompletableFuture<ShipBehaviourResult> stage = sut.scheduleTick(shipSymbol, resolver).toCompletableFuture();
+        CompletableFuture<ShipBehaviourResult> stage = sut.scheduleTick(shipSymbol, _ -> ship, resolver).toCompletableFuture();
 
         await().until(stage::isDone);
         ShipBehaviourResult result = stage.getNow(null);
@@ -78,10 +75,9 @@ class ShipBehaviourSchedulerTest {
 
         OffsetDateTime timestamp = OffsetDateTime.now();
 
-        when(fleetApi.getMyShip(shipSymbol)).thenReturn(new GetMyShip200Response().data(ship));
         when(algorithm.decideBehaviour(ship)).thenReturn(ShipBehaviour.ofResult(done()));
 
-        CompletableFuture<ShipBehaviourResult> stage = sut.scheduleTickAt(shipSymbol, resolver, timestamp).toCompletableFuture();
+        CompletableFuture<ShipBehaviourResult> stage = sut.scheduleTickAt(shipSymbol, _ -> ship, resolver, timestamp).toCompletableFuture();
 
         await().until(stage::isDone);
         ShipBehaviourResult result = stage.getNow(null);
@@ -93,12 +89,17 @@ class ShipBehaviourSchedulerTest {
     void scheduleTickThrowsExceptionWhenParamsAreNull() {
         assertThatNullPointerException()
             .isThrownBy(() -> {
-                sut.scheduleTick(null, ship -> ShipBehaviour.finished());
+                sut.scheduleTick(null, _ -> new Ship(), _ -> ShipBehaviour.finished());
             });
 
         assertThatNullPointerException()
             .isThrownBy(() -> {
-                sut.scheduleTick("symbol", null);
+                sut.scheduleTick("symbol", _ -> new Ship(), null);
+            });
+
+        assertThatNullPointerException()
+            .isThrownBy(() -> {
+                sut.scheduleTick("symbol", null, _ -> ShipBehaviour.finished());
             });
     }
 
@@ -112,11 +113,10 @@ class ShipBehaviourSchedulerTest {
         Ship ship = MotherShip.excavator();
         String shipSymbol = ship.getSymbol();
 
-        when(fleetApi.getMyShip(shipSymbol)).thenReturn(new GetMyShip200Response().data(ship));
         when(algorithm.decideBehaviour(ship)).thenReturn(ShipBehaviour.ofResult(done()));
 
         OffsetDateTime timestamp = OffsetDateTime.now().plusNanos(300);
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, resolver, timestamp).toCompletableFuture();
+        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, _ -> ship, resolver, timestamp).toCompletableFuture();
 
         assertTrue(sut.isTickScheduled(ship));
         await().until(future::isDone);
@@ -128,8 +128,6 @@ class ShipBehaviourSchedulerTest {
         Ship ship = MotherShip.excavator();
         String shipSymbol = ship.getSymbol();
 
-        when(fleetApi.getMyShip(shipSymbol)).thenReturn(new GetMyShip200Response().data(ship));
-
         // because it's async, the completable future could be completed before the isTickScheduled assert is ran causing it to fail
         // i'm too stupid to know if await() has functionality for this
         AwaitableAnswer<Object> answer = AwaitableAnswer.await(() -> {
@@ -138,7 +136,7 @@ class ShipBehaviourSchedulerTest {
 
         when(algorithm.decideBehaviour(ship)).thenAnswer(answer);
 
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, resolver).toCompletableFuture();
+        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, _ -> ship, resolver).toCompletableFuture();
 
         assertTrue(sut.isTickScheduled(ship));
         answer.release();
@@ -152,13 +150,11 @@ class ShipBehaviourSchedulerTest {
         Ship ship = MotherShip.excavator();
         String shipSymbol = ship.getSymbol();
 
-        when(fleetApi.getMyShip(shipSymbol)).thenReturn(new GetMyShip200Response().data(ship));
-
         when(algorithm.decideBehaviour(ship)).thenReturn(ShipBehaviour.ofSupplier(() -> {
             throw new RuntimeException();
         }));
 
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, resolver).toCompletableFuture();
+        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, _ -> ship, resolver).toCompletableFuture();
 
         assertTrue(sut.isTickScheduled(ship));
         await().until(future::isDone);
@@ -171,8 +167,6 @@ class ShipBehaviourSchedulerTest {
         Ship ship = MotherShip.excavator();
         String shipSymbol = ship.getSymbol();
 
-        when(fleetApi.getMyShip(shipSymbol)).thenReturn(new GetMyShip200Response().data(ship));
-
         AwaitableAnswer<Object> answer = AwaitableAnswer.await(() -> {
             throw new RuntimeException();
         });
@@ -180,7 +174,7 @@ class ShipBehaviourSchedulerTest {
         when(algorithm.decideBehaviour(ship)).thenAnswer(answer);
 
         OffsetDateTime timestamp = OffsetDateTime.now();
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, resolver, timestamp).toCompletableFuture();
+        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, _ -> ship, resolver, timestamp).toCompletableFuture();
 
         assertTrue(sut.isTickScheduled(ship));
         answer.release();
@@ -195,17 +189,53 @@ class ShipBehaviourSchedulerTest {
         Ship ship = MotherShip.excavator();
         String shipSymbol = ship.getSymbol();
 
-        when(fleetApi.getMyShip(shipSymbol)).thenReturn(new GetMyShip200Response().data(ship));
         when(algorithm.decideBehaviour(ship)).thenReturn(ShipBehaviour.ofSupplier(() -> {
             throw new RuntimeException();
         }));
 
         OffsetDateTime timestamp = OffsetDateTime.now();
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, resolver, timestamp).toCompletableFuture();
+        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, _ -> ship, resolver, timestamp).toCompletableFuture();
 
         assertTrue(sut.isTickScheduled(ship));
         await().until(future::isDone);
         assertThat(future).isCompletedExceptionally();
         assertFalse(sut.isTickScheduled(ship));
+    }
+
+    @Test
+    void getCurrentBehaviourViaScheduleTickAt() {
+        Ship ship = MotherShip.excavator();
+        String shipSymbol = ship.getSymbol();
+
+        OffsetDateTime future = OffsetDateTime.now().plusSeconds(20);
+        sut.scheduleTickAt(shipSymbol, _ -> ship, _ -> ShipBehaviour.finished(), future);
+        Optional<ShipBehaviour> currentBehaviourOptional = sut.getCurrentBehaviour(shipSymbol);
+
+        assertThat(currentBehaviourOptional).isPresent();
+
+        ShipBehaviour currentBehaviour = currentBehaviourOptional.get();
+        assertThat(currentBehaviour.update(ship)).satisfies(result -> {
+            assertThat(result.isWaitUntil()).isTrue();
+
+            WaitUntil waitUntil = (WaitUntil) result;
+            assertThat(waitUntil.waitUntil()).isEqualTo(future);
+        });
+    }
+
+    @Test
+    void getCurrentBehaviourViaScheduleTick() {
+        Ship ship = MotherShip.excavator();
+        String shipSymbol = ship.getSymbol();
+
+        AwaitableObject<ShipBehaviourResult> awaitable = AwaitableObject.await(ShipBehaviourResult::done);
+
+        ShipBehaviour awaitableBehaviour = _ -> awaitable.get();
+        sut.scheduleTick(shipSymbol, _ -> ship, _ -> awaitableBehaviour);
+
+        Optional<ShipBehaviour> currentBehaviourOptional = sut.getCurrentBehaviour(shipSymbol);
+
+        assertThat(currentBehaviourOptional).isPresent();
+        ShipBehaviour currentBehaviour = currentBehaviourOptional.get();
+        assertThat(currentBehaviour).isEqualTo(awaitableBehaviour);
     }
 }

@@ -3,6 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.command;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ShipBehaviourScheduler;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.*;
+import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,11 +26,12 @@ public class ShipCommander {
     private final Map<String, ShipBehaviourResult> lastResults = new ConcurrentHashMap<>();
     private final Map<String, Integer> lastResultIsSameCount = new ConcurrentHashMap<>();
 
+    private final FleetApi fleetApi;
     private final ShipBehaviourScheduler scheduler;
     private final int maxRescheduleCount;
 
-    public ShipCommander(ShipBehaviourScheduler scheduler) {
-        this(scheduler, defaultConfig());
+    public ShipCommander(ShipBehaviourScheduler scheduler, FleetApi fleetApi) {
+        this(scheduler, fleetApi, defaultConfig());
     }
 
     private static Config defaultConfig() {
@@ -38,7 +40,8 @@ public class ShipCommander {
         );
     }
 
-    public ShipCommander(ShipBehaviourScheduler scheduler, Config config) {
+    public ShipCommander(ShipBehaviourScheduler scheduler, FleetApi fleetApi, Config config) {
+        this.fleetApi = fleetApi;
         this.scheduler = Objects.requireNonNull(scheduler);
         this.maxRescheduleCount = Math.abs(config.maxRescheduleAmount());
     }
@@ -67,12 +70,12 @@ public class ShipCommander {
 
 
     public CompletionStage<?> commandWithFunction(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
-        CompletionStage<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), nextBehaviour);
+        CompletionStage<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), nextBehaviour);
         return handlerFuture(ship, future, nextBehaviour);
     }
 
     private CompletionStage<?> internalScheduleAtAndHandle(Ship ship, OffsetDateTime at) {
-        CompletionStage<ShipBehaviourResult> future = scheduler.scheduleTickAt(ship.getSymbol(), (updated) -> ShipBehaviour.finished(), at);
+        CompletionStage<ShipBehaviourResult> future = scheduler.scheduleTickAt(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), (updated) -> ShipBehaviour.finished(), at);
         return handlerFuture(ship, future, (updated) -> ShipBehaviour.finished());
     }
 
@@ -129,7 +132,11 @@ public class ShipCommander {
             return Optional.empty();
         }
 
-        return scheduler.getTaskAsOptional(ship.getSymbol());
+        return scheduler.getCurrentBehaviour(ship.getSymbol());
+    }
+
+    public void cancel(Ship ship) {
+
     }
 
     public record Config(int maxRescheduleAmount) {
