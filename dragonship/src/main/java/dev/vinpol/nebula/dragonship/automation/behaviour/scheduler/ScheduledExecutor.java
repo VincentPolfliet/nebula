@@ -1,12 +1,16 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.scheduler;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Supplier;
 
-public interface ScheduledExecutor extends AutoCloseable {
+public interface ScheduledExecutor {
     /**
      * Schedule a task to be executed at a specified timestamp.
      *
@@ -15,40 +19,35 @@ public interface ScheduledExecutor extends AutoCloseable {
      *                  <p>
      *                  Note: The provided runnable should ideally be non-blocking to prevent delays in execution.
      */
-    void scheduleAt(Runnable runnable, OffsetDateTime timestamp);
+    CompletableFuture<Void> scheduleAt(Runnable runnable, OffsetDateTime timestamp);
 
-    default CompletableFuture<Void> scheduleAtAsCompletableFuture(Runnable runnable, OffsetDateTime timestamp) {
-        return CompletableFuture.runAsync(runnable, command -> ScheduledExecutor.this.scheduleAt(command, timestamp));
+    <T> CompletableFuture<T> scheduleAt(Supplier<T> supplier, OffsetDateTime timestamp);
+
+    static ScheduledExecutor ofExecutor(Executor executor) {
+        return new ExecutorAdapter(executor);
     }
 
-    static ScheduledExecutor ofScheduledExecutorService(ScheduledExecutorService executor) {
-        return new ScheduledExecutorAdapter(executor);
-    }
+    class ExecutorAdapter implements ScheduledExecutor {
+        private final Executor executor;
 
-    @Override
-    default void close() throws Exception {
-
-    }
-
-    class ScheduledExecutorAdapter implements ScheduledExecutor {
-        private final ScheduledExecutorService executor;
-
-        private ScheduledExecutorAdapter(ScheduledExecutorService executor) {
+        private ExecutorAdapter(Executor executor) {
             this.executor = executor;
         }
 
-        @Override
-        public void scheduleAt(Runnable runnable, OffsetDateTime timestamp) {
-            executor.schedule(runnable, calculateWaitUntil(timestamp).toSeconds(), TimeUnit.SECONDS);
+        public CompletableFuture<Void> scheduleAt(Runnable runnable, OffsetDateTime timestamp) {
+            return CompletableFuture.runAsync(runnable, delayedExecutor(timestamp));
+        }
+
+        public <T> CompletableFuture<T> scheduleAt(Supplier<T> supplier, OffsetDateTime timestamp) {
+            return CompletableFuture.supplyAsync(supplier, delayedExecutor(timestamp));
+        }
+
+        private @NotNull Executor delayedExecutor(OffsetDateTime timestamp) {
+            return CompletableFuture.delayedExecutor(calculateWaitUntil(timestamp).toSeconds(), TimeUnit.SECONDS, executor);
         }
 
         private static Duration calculateWaitUntil(OffsetDateTime timestamp) {
             return Duration.between(OffsetDateTime.now(timestamp.getOffset()), timestamp);
-        }
-
-        @Override
-        public void close() throws Exception {
-            executor.close();
         }
     }
 }

@@ -67,9 +67,10 @@ class ShipCommanderTest {
 
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
-        when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any())).thenReturn(
-            CompletableFuture.completedStage(ShipBehaviourResult.success()),
-            CompletableFuture.completedStage(ShipBehaviourResult.done())
+        when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any()))
+            .thenReturn(
+            CompletableFuture.completedFuture(ShipBehaviourResult.success()),
+            CompletableFuture.completedFuture(ShipBehaviourResult.done())
         );
 
         CompletionStage<?> stage = sut.command(ship);
@@ -88,12 +89,12 @@ class ShipCommanderTest {
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any())).thenReturn(
-            CompletableFuture.completedStage(ShipBehaviourResult.success()),
-            CompletableFuture.completedStage(ShipBehaviourResult.waitUntil(waitUntilTimestamp)),
-            CompletableFuture.completedStage(ShipBehaviourResult.done())
+            CompletableFuture.completedFuture(ShipBehaviourResult.success()),
+            CompletableFuture.completedFuture(ShipBehaviourResult.waitUntil(waitUntilTimestamp)),
+            CompletableFuture.completedFuture(ShipBehaviourResult.done())
         );
 
-        when(scheduler.scheduleTickAt(eq(ship.getSymbol()), any(), any(), eq(waitUntilTimestamp))).thenReturn(CompletableFuture.completedStage(ShipBehaviourResult.success()));
+        when(scheduler.scheduleTickAt(eq(ship.getSymbol()), any(), any(), eq(waitUntilTimestamp))).thenReturn(CompletableFuture.completedFuture(ShipBehaviourResult.success()));
 
         CompletionStage<?> stage = sut.command(ship);
 
@@ -114,7 +115,7 @@ class ShipCommanderTest {
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any())).thenReturn(
-            CompletableFuture.completedStage(ShipBehaviourResult.failure("fail this"))
+            CompletableFuture.completedFuture(ShipBehaviourResult.failure("fail this"))
         );
 
         CompletionStage<?> stage = sut.command(ship);
@@ -132,7 +133,7 @@ class ShipCommanderTest {
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any())).thenReturn(
-            CompletableFuture.completedStage(ShipBehaviourResult.success())
+            CompletableFuture.completedFuture(ShipBehaviourResult.success())
         );
 
         // override the next behaviour to never send a "Done" event

@@ -12,9 +12,7 @@ import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.*;
 import java.util.function.Function;
 
 public class ShipCommander {
@@ -70,16 +68,16 @@ public class ShipCommander {
 
 
     public CompletionStage<?> commandWithFunction(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
-        CompletionStage<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), nextBehaviour);
+        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), nextBehaviour).toCompletableFuture();
         return handlerFuture(ship, future, nextBehaviour);
     }
 
     private CompletionStage<?> internalScheduleAtAndHandle(Ship ship, OffsetDateTime at) {
-        CompletionStage<ShipBehaviourResult> future = scheduler.scheduleTickAt(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), (updated) -> ShipBehaviour.finished(), at);
+        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTickAt(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), (updated) -> ShipBehaviour.finished(), at).toCompletableFuture();
         return handlerFuture(ship, future, (updated) -> ShipBehaviour.finished());
     }
 
-    private CompletionStage<?> handlerFuture(Ship ship, CompletionStage<ShipBehaviourResult> future, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
+    private CompletionStage<?> handlerFuture(Ship ship, CompletableFuture<ShipBehaviourResult> future, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
         return future
             .thenComposeAsync(result -> handleResult(ship, result, shipBehaviourResolver));
     }
