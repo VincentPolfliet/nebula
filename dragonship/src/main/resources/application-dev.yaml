@@ -1,7 +1,12 @@
+logging.level.dev.vinpol.nebula.dragonship: INFO
+logging.level.dev.vinpol.nebula.dragonship.automation: INFO
+logging.level.dev.vinpol.nebula.dragonship.web.support.vite: DEBUG
+
 nebula.ext.sync-on-boot: false
 
 vite:
     baseUrl: http://localhost:5173/
+    devPort: 5173
 
 gg:
     jte:
@@ -14,6 +19,3 @@ management:
         web:
             exposure:
                 include: "mappings"
-
-
-logging.level.dev.vinpol.nebula.dragonship: DEBUG

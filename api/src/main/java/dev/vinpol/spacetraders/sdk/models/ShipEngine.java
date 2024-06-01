@@ -53,9 +53,9 @@ public class ShipEngine {
     private SymbolEnum symbol;
     private String name;
     private String description;
-    private Integer condition;
+    private double condition;
     private Integer speed;
-    private int integrity;
+    private double integrity;
     private ShipRequirements requirements;
 
     public ShipEngine() {
@@ -130,7 +130,7 @@ public class ShipEngine {
     }
 
 
-    public ShipEngine condition(Integer condition) {
+    public ShipEngine condition(double condition) {
 
         this.condition = condition;
         return this;
@@ -145,12 +145,12 @@ public class ShipEngine {
      **/
 
 
-    public Integer getCondition() {
+    public double getCondition() {
         return condition;
     }
 
 
-    public void setCondition(Integer condition) {
+    public void setCondition(double condition) {
         this.condition = condition;
     }
 

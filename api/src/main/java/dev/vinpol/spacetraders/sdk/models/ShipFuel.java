@@ -1,5 +1,6 @@
 package dev.vinpol.spacetraders.sdk.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 /**
@@ -26,15 +27,18 @@ public class ShipFuel {
         return this;
     }
 
-    public boolean isInfinite() {
+    @JsonIgnore
+    public boolean isNotInfinite() {
         // fuel should be considered infinite if the capacity and current volume are both 0
-        return current == 0 && capacity == 0;
+        return current != 0 || capacity != 0;
     }
 
+    @JsonIgnore
     public boolean isFull() {
         return current == capacity;
     }
 
+    @JsonIgnore
     public boolean isEmpty() {
         return current == 0;
     }

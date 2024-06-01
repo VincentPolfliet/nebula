@@ -1,51 +1,62 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
-import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
-import dev.vinpol.nebula.dragonship.automation.sdk.ApiClientStub;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
-import dev.vinpol.spacetraders.sdk.api.FleetApi;
-import dev.vinpol.spacetraders.sdk.api.SystemsApi;
+import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.nebula.dragonship.support.junit.MockWebServerExtension;
 import dev.vinpol.spacetraders.sdk.models.*;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 
 import java.time.OffsetDateTime;
+import java.util.Collections;
+import java.util.List;
 
-import static dev.vinpol.nebula.dragonship.automation.sdk.ShipCargoUtil.cargo;
+import static dev.vinpol.nebula.dragonship.automation.sdk.CooldownUtil.cooldown;
 import static dev.vinpol.nebula.dragonship.automation.sdk.ShipCargoUtil.cargoItem;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
+@DirtiesContext
+@ContextConfiguration
+@ExtendWith(MockWebServerExtension.class)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class MiningBehaviourFactoryTest {
 
-    private ShipBehaviourFactoryCreator registry;
-    private ApiClientStub apiClient;
+    private static MockWebServerExtension extension;
 
-    @BeforeEach
-    void setup() {
-        apiClient = new ApiClientStub();
-        registry = new DefaultShipBehaviourFactoryCreator(apiClient, mock(ShipEventNotifier.class));
+    @Autowired
+    private ShipBehaviourFactoryCreator registry;
+
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("nebula.st.url", () -> extension.url("/").toString());
+        registry.add("nebula.st.token", () -> "token");
+    }
+
+    @BeforeAll
+    static void beforeAll(MockWebServerExtension extension) {
+        MiningBehaviourFactoryTest.extension = extension;
     }
 
     @Test
     void updateNoWaypointOfTypeInSystem() {
+        enqueue(new GetSystemWaypoints200Response().data(Collections.emptyList()));
+
         SystemSymbol symbol = SystemSymbol.tryParse("DD-SYSTEM");
         WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
 
         Ship ship = MotherShip.excavator();
 
-        SystemsApi systemsApi = apiClient.systemsApi();
-        when(systemsApi.getSystemWaypoints(symbol.system(), 1, 10, waypointType))
-            .thenReturn(
-                new GetSystemWaypoints200Response()
-            );
-
-        MiningBehaviourFactory factory = new MiningBehaviourFactory(systemsApi, registry, symbol, waypointType);
+        MiningBehaviourFactory factory = registry.miningAutomation(symbol, waypointType);
         ShipBehaviour behaviour = factory.create();
         ShipBehaviourResult result = behaviour.update(ship);
 
@@ -53,228 +64,290 @@ class MiningBehaviourFactoryTest {
     }
 
     @Test
-    void waypointInSystemAndShipIsAtLocation() {
-        SystemSymbol systemSymbol = SystemSymbol.tryParse("DD-SYSTEM");
+    void shipNotAtLocationInOrbit() {
+        SystemSymbol symbol = SystemSymbol.tryParse("DD-SYSTEM");
         WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
+
+        WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(symbol.system() + "-" + waypointType);
+
         Ship ship = MotherShip.excavator();
-        String waypointSymbol = systemSymbol.system() + "-" + waypointType.name().toLowerCase();
 
-        ship.getNav()
-            .withRoute(
-                route ->
-                    route.withDestination(
-                        destination ->
-                            destination
-                                .systemSymbol(systemSymbol.system())
-                                .symbol(waypointSymbol)
-                                .type(waypointType)
-                    )
-            );
+        ship.withNav(nav -> {
+            nav.setStatus(ShipNavStatus.IN_ORBIT);
+            nav.setWaypointSymbol("DD-SYSTEM-OTHERWAYPOINTTYPE");
+        });
 
-        Ship original = ShipCloner.clone(ship);
-
-        SystemsApi systemsApi = apiClient.systemsApi();
-        when(systemsApi.getSystemWaypoints(systemSymbol.system(), 1, 10, waypointType))
-            .thenReturn(
-                new GetSystemWaypoints200Response()
-                    .addDataItem(new Waypoint()
-                        .symbol(waypointSymbol)
-                        .systemSymbol(systemSymbol.system())
-                    )
-            );
-
-        FleetApi fleetApi = apiClient.fleetApi();
-
-        ShipCargo currentCargo = original.getCargo();
-
-        // lamo this line
-        // TODO fix
-        ExtractResources201ResponseData extractionResource = new ExtractResources201ResponseData()
-            .cargo(
-                cargo(currentCargo.getCapacity(), currentCargo.getCapacity())
-                    .addInventoryItem(cargoItem(TradeSymbol.COPPER_ORE).units(currentCargo.getCapacity()
-                    ))
-            )
-            .cooldown(
-                new Cooldown()
-                    .remainingSeconds(59)
-                    .totalSeconds(60)
-                    .expiration(OffsetDateTime.now().plusSeconds(59))
-            );
-
-        when(fleetApi.extractResources(ship.getSymbol(), new ExtractResourcesRequest()))
-            .thenReturn(new ExtractResources201Response().data(extractionResource));
-
-        Ship shipAfterExtraction = ShipCloner.clone(original);
-        shipAfterExtraction
-            .cooldown(extractionResource.getCooldown())
-            .cargo(extractionResource.getCargo());
-
-        MiningBehaviourFactory factory = new MiningBehaviourFactory(systemsApi, registry, systemSymbol, waypointType);
+        MiningBehaviourFactory factory = registry.miningAutomation(symbol, waypointType);
         ShipBehaviour behaviour = factory.create();
 
-        // check for cargo
+        enqueue(new GetSystemWaypoints200Response().data(List.of(new Waypoint().symbol(symbol.system() + "-" + waypointType).type(waypointType))));
+
+        // check in orbit
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
 
-        // check for cooldown
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // check for fuel
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // check for not in transit
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // Ship is NOT docked, so don't go into orbit
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // Ship is already at location
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // Ship does an extraction
-        assertThat(behaviour.update(ship).isWaitUntil()).isTrue();
-    }
-
-    // @Test fixme this test is either wrong or the logic changed i can't remember
-    void waypointInSystemAndShipIsNotAtLocation() {
-        SystemSymbol systemSymbol = SystemSymbol.tryParse("DD-SYSTEM");
-        WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
-        String waypointSymbol = systemSymbol.system() + "-" + waypointType.name().toLowerCase();
-
-        Ship ship = MotherShip.excavator()
-            .withNav(nav -> {
-                nav.withRoute(
-                    route ->
-                        route.withDestination(
-                            destination ->
-                                destination
-                                    .systemSymbol(systemSymbol.system())
-                                    .symbol(systemSymbol.system() + WaypointType.NEBULA.name().toLowerCase()) // other waypoint
-                                    .type(WaypointType.NEBULA)
-                        )
-                );
-            });
-
-        int currentCargoCapacity = ship.getCargo().getCapacity();
-
-        Ship expected = ShipCloner.clone(ship)
-            .withNav(nav -> {
-                nav.withRoute(route -> {
-                    route.arrival(OffsetDateTime.now().plusSeconds(5));
-                    route.withDestination(destination -> {
-                        destination
-                            .symbol(systemSymbol.system())
-                            .symbol(waypointSymbol)
-                            .type(waypointType);
-                    });
-                });
-            })
-            .withFuel(fuel -> {
-                fuel.current(75)
-                    .capacity(100);
-            })
-            .withCooldown(cooldown -> {
-                cooldown
-                    .remainingSeconds(59)
-                    .totalSeconds(60)
-                    .expiration(OffsetDateTime.now().plusSeconds(59));
-            })
-            .withCargo(cargo -> {
-                cargo.capacity(ship.getCargo().getCapacity())
-                    .addInventoryItem(cargoItem(TradeSymbol.COPPER_ORE).units(currentCargoCapacity));
-            });
-
-        SystemsApi systemsApi = apiClient.systemsApi();
-        when(systemsApi.getSystemWaypoints(systemSymbol.system(), 1, 10, waypointType)).thenReturn(
-            new GetSystemWaypoints200Response()
-                .addDataItem(new Waypoint()
-                    .symbol(waypointSymbol)
-                    .systemSymbol(systemSymbol.system())
-                )
-        );
-
-        FleetApi fleetApi = apiClient.fleetApi();
-
-        when(fleetApi.navigateShip(ship.getSymbol(), new NavigateShipRequest().waypointSymbol(waypointSymbol))).thenReturn(
-            new NavigateShip200Response()
-                .data(new NavigateShip200ResponseData()
-                    .nav(expected.getNav())
-                    .fuel(expected.getFuel())
-                )
-        );
-
-        when(fleetApi.dockShip(ship.getSymbol())).thenReturn(
-            new DockShip200Response()
-                .data(
-                    new ShipNavModifiedResponseData()
-                        .nav(ShipCloner.clone(expected).getNav().status(ShipNavStatus.DOCKED))
-                )
-        );
-
-        when(fleetApi.refuelShip(eq(ship.getSymbol()), any(RefuelShipRequest.class)))
-            .thenReturn(
-                new RefuelShip200Response()
-                    .data(new RefuelShip200ResponseData()
-                        .fuel(
-                            new ShipFuel()
-                                .capacity(100)
-                                .current(100)
-                        )
-                    )
-            );
-
-        when(fleetApi.orbitShip(ship.getSymbol()))
-            .thenReturn(new OrbitShip200Response()
-                .data(new ShipNavModifiedResponseData()
-                    .nav(new ShipNav().status(ShipNavStatus.IN_ORBIT))
-                )
-            );
-
-        when(fleetApi.extractResources(ship.getSymbol(), new ExtractResourcesRequest())).thenReturn(
-            new ExtractResources201Response().data(new ExtractResources201ResponseData()
-                .cargo(expected.getCargo())
-                .cooldown(expected.getCooldown())
-            )
-        );
-
-        MiningBehaviourFactory factory = new MiningBehaviourFactory(systemsApi, registry, systemSymbol, waypointType);
-        ShipBehaviour behaviour = factory.create();
-
-        // Ship has place in cargo
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // Ship has no cooldown
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // Ship has fuel left
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // Ship is not in transit
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // Ship is docked
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // orbit
+        // check at location
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
 
         // navigate
-        assertThat(behaviour.update(ship).isWaitUntil()).isTrue();
+        Ship afterNavigationShip = ShipCloner.clone(ship).withNav(nav -> {
+            nav.setWaypointSymbol(waypointSymbol.waypoint());
+            nav.withRoute(route -> {
+                route.setDepartureTime(OffsetDateTime.now());
+                route.arrival(OffsetDateTime.now());
+                route.destination(new ShipNavRouteWaypoint().symbol(waypointSymbol.waypoint()).systemSymbol(waypointSymbol.system()).type(waypointType));
+            });
+        });
+
+        afterNavigationShip.withFuel(fuel -> {
+            fuel.setCurrent(69);
+        });
+
+        enqueue(new NavigateShip200Response()
+            .data(
+                new NavigateShip200ResponseData()
+                    .nav(afterNavigationShip.getNav())
+                    .fuel(afterNavigationShip.getFuel())
+            ));
+
+        ShipBehaviourResult navigateResult = behaviour.update(ship);
+        assertThat(navigateResult.isWaitUntil()).isTrue();
+        assertThat(((WaitUntil) navigateResult).timestamp()).isEqualTo(afterNavigationShip.getNav().getRoute().getArrival());
+
+        assertThat(ship.getNav().getWaypointSymbol()).isEqualTo(afterNavigationShip.getNav().getWaypointSymbol());
+
+        // not docked check
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
 
         // dock
-        ShipBehaviourResult result = behaviour.update(ship);
-        assertThat(result.isDone()).isTrue();
+        Ship afterDockingShip = ShipCloner.clone(ship).withNav(nav -> {
+            nav.setWaypointSymbol(waypointSymbol.waypoint());
+            nav.setStatus(ShipNavStatus.DOCKED);
+        });
+
+        enqueue(new DockShip200Response().data(new ShipNavModifiedResponseData().nav(afterDockingShip.getNav())));
+
+        ShipBehaviourResult dockResult = behaviour.update(ship);
+        assertThat(dockResult.isSuccess()).isTrue();
+        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.DOCKED);
+
+        // check if we need to refuel
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
 
         // refuel
+        Ship afterRefueling = ShipCloner.clone(ship).withFuel(fuel -> {
+            fuel.setCurrent(100);
+            fuel.setCapacity(100);
+        });
+
+        enqueue(new RefuelShip200Response()
+            .data(
+                new RefuelShip200ResponseData()
+                    .fuel(afterRefueling.getFuel())
+            )
+        );
+
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(ship.getFuel().isFull()).isTrue();
+
+        // not in orbit check
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
 
         // orbit
+        Ship afterOrbitShip = ShipCloner.clone(ship).withNav(nav -> {
+            nav.setStatus(ShipNavStatus.IN_ORBIT);
+        });
+
+        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitShip.getNav())));
+
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
 
         // extraction
-        assertThat(behaviour.update(ship).isWaitUntil()).isTrue();
+        Ship afterExtractionShip = ShipCloner.clone(ship)
+            .cooldown(cooldown(OffsetDateTime.now()))
+            .withCargo(cargo -> {
+                cargo.addInventoryItem(cargoItem(TradeSymbol.IRON));
+            });
 
-        // finished
-        assertThat(behaviour.update(ship).isDone()).isTrue();
+        enqueue(
+            new ExtractResources201Response()
+                .data(
+                    new ExtractResources201ResponseData()
+                        .cargo(afterExtractionShip.getCargo())
+                        .cooldown(afterExtractionShip.getCooldown())
+                ),
+            201
+        );
+
+        ShipBehaviourResult extractionResult = behaviour.update(ship);
+        assertThat(extractionResult.isWaitUntil()).isTrue();
     }
+
+    @Test
+    void shipAtLocationInOrbit() {
+        SystemSymbol symbol = SystemSymbol.tryParse("DD-SYSTEM");
+        WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
+
+        WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(symbol.system() + "-" + waypointType);
+
+        Ship ship = MotherShip.excavator();
+
+        ship.withNav(nav -> {
+            nav.setStatus(ShipNavStatus.IN_ORBIT);
+            nav.setWaypointSymbol(waypointSymbol.waypoint());
+        });
+
+        MiningBehaviourFactory factory = registry.miningAutomation(symbol, waypointType);
+        ShipBehaviour behaviour = factory.create();
+
+        enqueue(new GetSystemWaypoints200Response().data(List.of(new Waypoint().symbol(symbol.system() + "-" + waypointType).type(waypointType))));
+
+        // check in orbit
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // check at location
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // check is not docked
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // dock
+        enqueue(new DockShip200Response()
+            .data(new ShipNavModifiedResponseData()
+                .nav(ShipCloner.clone(ship).getNav().status(ShipNavStatus.DOCKED)))
+        );
+
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // check fuel is not full
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // check not in orbit
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // orbit
+        Ship afterOrbitShip = ShipCloner.clone(ship).withNav(nav -> {
+            nav.setStatus(ShipNavStatus.IN_ORBIT);
+        });
+
+        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitShip.getNav())));
+
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
+
+        // extraction
+        Ship afterExtractionShip = ShipCloner.clone(ship)
+            .cooldown(cooldown(OffsetDateTime.now()))
+            .withCargo(cargo -> {
+                cargo.addInventoryItem(cargoItem(TradeSymbol.IRON));
+            });
+
+        enqueue(
+            new ExtractResources201Response()
+                .data(
+                    new ExtractResources201ResponseData()
+                        .cargo(afterExtractionShip.getCargo())
+                        .cooldown(afterExtractionShip.getCooldown())
+                ),
+            201
+        );
+
+        ShipBehaviourResult extractionResult = behaviour.update(ship);
+        assertThat(extractionResult.isWaitUntil()).isTrue();
+    }
+
+    @Test
+    void shipAtLocationDocked() {
+        SystemSymbol symbol = SystemSymbol.tryParse("DD-SYSTEM");
+        WaypointType waypointType = WaypointType.ENGINEERED_ASTEROID;
+
+        WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(symbol.system() + "-" + waypointType);
+
+        Ship ship = MotherShip.excavator();
+
+        ship.withNav(nav -> {
+            nav.setStatus(ShipNavStatus.DOCKED);
+            nav.setWaypointSymbol(waypointSymbol.waypoint());
+        });
+
+        MiningBehaviourFactory factory = registry.miningAutomation(symbol, waypointType);
+        ShipBehaviour behaviour = factory.create();
+
+        enqueue(new GetSystemWaypoints200Response().data(List.of(new Waypoint().symbol(symbol.system() + "-" + waypointType).type(waypointType))));
+
+        // check in orbit
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // orbit
+        Ship afterOrbitShip = ShipCloner.clone(ship).withNav(nav -> {
+            nav.setStatus(ShipNavStatus.IN_ORBIT);
+        });
+
+        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitShip.getNav())));
+
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
+
+        // check at location
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // check is not docked
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // dock
+        enqueue(new DockShip200Response()
+            .data(new ShipNavModifiedResponseData()
+                .nav(ShipCloner.clone(ship).getNav().status(ShipNavStatus.DOCKED)))
+        );
+
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.DOCKED);
+
+        // fuel is not full
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // not in orbit check
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+
+        // orbit again
+        Ship afterOrbitAgain = ShipCloner.clone(ship).withNav(nav -> {
+            nav.setStatus(ShipNavStatus.IN_ORBIT);
+        });
+
+        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitAgain.getNav())));
+
+        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
+
+        // extraction
+        Ship afterExtractionShip = ShipCloner.clone(ship)
+            .cooldown(cooldown(OffsetDateTime.now()))
+            .withCargo(cargo -> {
+                cargo.addInventoryItem(cargoItem(TradeSymbol.IRON));
+            });
+
+        enqueue(
+            new ExtractResources201Response()
+                .data(
+                    new ExtractResources201ResponseData()
+                        .cargo(afterExtractionShip.getCargo())
+                        .cooldown(afterExtractionShip.getCooldown())
+                ),
+            201
+        );
+
+        ShipBehaviourResult extractionResult = behaviour.update(ship);
+        assertThat(extractionResult.isWaitUntil()).isTrue();
+    }
+
+
+    private static void enqueue(Object object) {
+        enqueue(object, 200);
+    }
+
+
+    private static void enqueue(Object object, int responseCode) {
+        extension.enqueue(object, responseCode);
+    }
+
 }

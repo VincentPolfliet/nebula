@@ -7,19 +7,23 @@ import java.util.List;
 import java.util.Map;
 
 public final class ShipAlgorithmDescription {
-    private final List<ShipBehaviourReason> reasons = new ArrayList<>();
+    private final List<AvailableBehaviour> reasons = new ArrayList<>();
 
-    public ShipAlgorithmDescription withFactory(BehaviourReason reason, ShipBehaviourFactory factory) {
-        reasons.add(new ShipBehaviourReason(reason, factory.parameters()));
+    public ShipAlgorithmDescription withFactory(String reason, ShipBehaviourFactory factory) {
+        reasons.add(new AvailableBehaviour(reason, factory.parameters()));
         return this;
     }
 
-    public ShipAlgorithmDescription withReason(BehaviourReason reason, Map<String, String> parameters) {
-        reasons.add(new ShipBehaviourReason(reason, parameters));
+    public ShipAlgorithmDescription withBehaviour(String behaviour, Map<String, String> parameters) {
+        reasons.add(new AvailableBehaviour(behaviour, parameters));
         return this;
     }
 
-    public List<ShipBehaviourReason> build() {
+    public List<AvailableBehaviour> build() {
         return reasons;
+    }
+
+    public ShipAlgorithmDescription withBehaviour(Behaviour behaviour, Map<String, String> params) {
+        return withBehaviour(behaviour.name(), params);
     }
 }

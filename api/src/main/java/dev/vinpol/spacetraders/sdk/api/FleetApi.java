@@ -363,9 +363,7 @@ public interface FleetApi {
         "Content-Type:application/json"
     })
     @POST("my/ships/{shipSymbol}/sell")
-    Call<SellCargo201Response> sellCargo(
-        @Path("shipSymbol") String shipSymbol, @Body SellCargoRequest sellCargoRequest
-    );
+    SellCargo201Response sellCargo(@Path("shipSymbol") String shipSymbol, @Body SellCargoRequest sellCargoRequest);
 
     /**
      * Ship Refine

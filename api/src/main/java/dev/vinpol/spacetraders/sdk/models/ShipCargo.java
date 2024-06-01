@@ -13,6 +13,7 @@
 
 package dev.vinpol.spacetraders.sdk.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.Getter;
 
@@ -28,8 +29,8 @@ import java.util.Objects;
 public class ShipCargo {
     /**
      * -- GETTER --
-     *  The max number of items that can be stored in the cargo hold.
-     *  minimum: 0
+     * The max number of items that can be stored in the cargo hold.
+     * minimum: 0
      *
      * @return capacity
      */
@@ -37,8 +38,8 @@ public class ShipCargo {
     private Integer capacity;
     /**
      * -- GETTER --
-     *  The number of items currently stored in the cargo hold.
-     *  minimum: 0
+     * The number of items currently stored in the cargo hold.
+     * minimum: 0
      *
      * @return units
      */
@@ -71,8 +72,14 @@ public class ShipCargo {
         return this;
     }
 
+    @JsonIgnore
     public boolean isFull() {
         return Objects.equals(capacity, units);
+    }
+
+    @JsonIgnore
+    public boolean isEmpty() {
+        return inventory.isEmpty();
     }
 }
 

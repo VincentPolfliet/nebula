@@ -1,5 +1,6 @@
 package dev.vinpol.spacetraders.sdk.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
@@ -42,6 +43,7 @@ public class ShipNavRoute {
         return destination(dest);
     }
 
+    @JsonIgnore
     public long getDurationInSeconds() {
         return ChronoUnit.SECONDS.between(getArrival(), getDepartureTime());
     }

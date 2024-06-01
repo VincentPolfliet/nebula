@@ -1,0 +1,3 @@
+[submodule "fbt"]
+	path = fbt
+	url = https://github.com/SkidRunner/Fluent-Behaviour-Tree.git

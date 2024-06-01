@@ -7,9 +7,13 @@ import dev.vinpol.spacetraders.sdk.models.DockShip200Response;
 import dev.vinpol.spacetraders.sdk.models.ShipNavModifiedResponseData;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipNav;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DockBehaviourFactory implements ShipBehaviourFactory {
 
+
+    private final Logger logger = LoggerFactory.getLogger(DockBehaviourFactory.class);
     private final FleetApi fleetApi;
 
     public DockBehaviourFactory(FleetApi fleetApi) {

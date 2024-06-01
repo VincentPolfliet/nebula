@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.dragonship.automation.command;
 
+import dev.vinpol.nebula.dragonship.automation.ActivityState;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ShipBehaviourScheduler;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.*;
@@ -55,11 +56,11 @@ public class ShipCommander {
             return CompletableFuture.completedStage(null);
         }
 
-        return commandWithFunction(ship, (updated) -> ShipBehaviour.finished());
+        return commandWithFunction(ship, _ -> ShipBehaviour.finished());
     }
 
     public CompletionStage<?> command(Ship ship, ShipBehaviour override) {
-        return commandWithFunction(ship, (update) -> override);
+        return commandWithFunction(ship, _ -> override);
     }
 
     public CompletionStage<?> command(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
@@ -67,19 +68,19 @@ public class ShipCommander {
     }
 
 
-    public CompletionStage<?> commandWithFunction(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
-        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), nextBehaviour).toCompletableFuture();
+    public CompletableFuture<?> commandWithFunction(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
+        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), nextBehaviour);
         return handlerFuture(ship, future, nextBehaviour);
     }
 
-    private CompletionStage<?> internalScheduleAtAndHandle(Ship ship, OffsetDateTime at) {
-        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTickAt(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), (updated) -> ShipBehaviour.finished(), at).toCompletableFuture();
-        return handlerFuture(ship, future, (updated) -> ShipBehaviour.finished());
+    private CompletableFuture<?> internalScheduleAtAndHandle(Ship ship, OffsetDateTime at) {
+        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTickAt(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), _ -> ShipBehaviour.finished(), at);
+        return handlerFuture(ship, future, _ -> ShipBehaviour.finished());
     }
 
-    private CompletionStage<?> handlerFuture(Ship ship, CompletableFuture<ShipBehaviourResult> future, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
+    private CompletableFuture<?> handlerFuture(Ship ship, CompletableFuture<ShipBehaviourResult> future, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
         return future
-            .thenComposeAsync(result -> handleResult(ship, result, shipBehaviourResolver));
+            .thenCompose(result -> handleResult(ship, result, shipBehaviourResolver));
     }
 
     private CompletionStage<?> handleResult(Ship ship, ShipBehaviourResult result, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
@@ -108,7 +109,7 @@ public class ShipCommander {
             }
             case WaitUntil waitUntil -> {
                 // reschedule it at a given timestamp
-                return internalScheduleAtAndHandle(ship, waitUntil.waitUntil());
+                return internalScheduleAtAndHandle(ship, waitUntil.timestamp());
             }
             case Done done -> {
                 lastResults.remove(shipSymbol);
@@ -125,6 +126,16 @@ public class ShipCommander {
         }
     }
 
+    public ActivityState getCurrentState(Ship ship) {
+        return getCurrentBehaviour(ship)
+            .map(this::toActivityState)
+            .orElse(ActivityState.IDLE);
+    }
+
+    private ActivityState toActivityState(ShipBehaviour shipBehaviour) {
+        return ActivityState.IDLE;
+    }
+
     public Optional<ShipBehaviour> getCurrentBehaviour(Ship ship) {
         if (!scheduler.isTickScheduled(ship)) {
             return Optional.empty();
@@ -134,7 +145,9 @@ public class ShipCommander {
     }
 
     public void cancel(Ship ship) {
+        Objects.requireNonNull(ship);
 
+        scheduler.cancelTick(ship.getSymbol());
     }
 
     public record Config(int maxRescheduleAmount) {

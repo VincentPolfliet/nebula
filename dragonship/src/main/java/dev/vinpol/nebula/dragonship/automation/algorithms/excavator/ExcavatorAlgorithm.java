@@ -1,6 +1,6 @@
 package dev.vinpol.nebula.dragonship.automation.algorithms.excavator;
 
-import dev.vinpol.nebula.dragonship.automation.algorithms.BehaviourReason;
+import dev.vinpol.nebula.dragonship.automation.algorithms.Behaviour;
 import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithm;
 import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmDescription;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
@@ -30,15 +30,15 @@ public class ExcavatorAlgorithm implements ShipAlgorithm {
     }
 
     @Override
-    public ShipAlgorithmDescription description(Ship ship) {
+    public ShipAlgorithmDescription getDescription(Ship ship) {
         ShipNavRouteWaypoint target = getTarget(ship);
         SystemSymbol systemSymbol = SystemSymbol.tryParse(target.getSystemSymbol());
 
         return new ShipAlgorithmDescription()
-            .withReason(BehaviourReason.HAS_ACTIVE_COOLDOWN, Map.of("cooldown", String.valueOf(ship.getCooldown().getExpiration())))
-            .withReason(BehaviourReason.IS_IN_TRANSIT, Map.of("in_transit", "" + ship.isInTransit()))
-            .withReason(BehaviourReason.CARGO_IS_FULL, Map.of("cargo_is_full", "" + ship.isCargoFull()))
-            .withFactory(BehaviourReason.AVAILABLE_TO_MINE, shipBehaviourFactoryCreator.miningAutomation(systemSymbol, WaypointType.ENGINEERED_ASTEROID));
+            .withBehaviour(Behaviour.WAITING_ON_COOLDOWN, Map.of("cooldown", String.valueOf(ship.getCooldown().getExpiration())))
+            .withBehaviour(Behaviour.IN_TRANSIT, Map.of("in_transit", "" + ship.isInTransit()))
+            .withBehaviour(Behaviour.NAVIGATE_TO_CLOSEST_MARKET, Map.of("cargo_is_full", "" + ship.isCargoFull()))
+            .withFactory(Behaviour.MINING.name(), shipBehaviourFactoryCreator.miningAutomation(systemSymbol, WaypointType.ENGINEERED_ASTEROID));
     }
 
     @Override

@@ -2,14 +2,12 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourRefLeaf;
-import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipSequenceBehaviour;
+import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourSequence;
+import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipTreeBehaviour;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
-import dev.vinpol.spacetraders.sdk.models.Ship;
+import dev.vinpol.spacetraders.sdk.models.TradeSymbol;
 import dev.vinpol.spacetraders.sdk.models.WaypointType;
-import dev.vinpol.torterra.IterableLeaf;
-import dev.vinpol.torterra.Leaf;
-import dev.vinpol.torterra.Tortilla;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -41,23 +39,28 @@ public interface ShipBehaviourFactoryCreator {
         return ShipBehaviour.ofResult(ShipBehaviourResult.waitUntil(arrival));
     }
 
-    default ShipSequenceBehaviour sequenceOf(List<Leaf<Ship>> leaves) {
-        inject(leaves, this);
-        return new ShipSequenceBehaviour(leaves);
+    default ShipTreeBehaviour treeOf(ShipBehaviour... leaves) {
+        return treeOf(List.of(leaves));
     }
 
-    private static void inject(Iterable<Leaf<Ship>> leaves, ShipBehaviourFactoryCreator registry) {
-        for (Leaf<Ship> leaf : leaves) {
-            Leaf<Ship> unwrapped = Tortilla.unwrap(leaf);
+    default ShipTreeBehaviour treeOf(List<ShipBehaviour> leaves) {
+        inject(leaves);
+        return new ShipTreeBehaviour(leaves);
+    }
 
-            if (unwrapped instanceof IterableLeaf<Ship> iterable) {
-                inject(iterable, registry);
-            } else if (unwrapped instanceof ShipBehaviourRefLeaf ref) {
-                ref.setBehaviourFactory(registry);
+    @SuppressWarnings("unchecked")
+    default void inject(Iterable<ShipBehaviour> leaves) {
+        for (ShipBehaviour leaf : leaves) {
+            if (leaf instanceof ShipBehaviourRefLeaf ref) {
+                ref.setBehaviourFactory(this);
+            } else if (leaf instanceof ShipBehaviourSequence sequence) {
+                inject(sequence.behaviours());
             }
         }
     }
 
-    FindMarketAndSellBehaviour navigateToClosestMarket();
+    FindMarketAndSellBehaviourFactory navigateToClosestMarket();
+
+    SellCargoBehaviourFactory sellCargo(TradeSymbol tradeSymbol, int units);
 
 }

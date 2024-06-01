@@ -66,7 +66,7 @@ class NavigateBehaviourFactoryTest {
 
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result).isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
-            assertThat(waitUntil.waitUntil()).isEqualTo(arrival);
+            assertThat(waitUntil.timestamp()).isEqualTo(arrival);
         });
 
         verify(shipEventNotifier).setWaitUntilArrival(ship.getSymbol(), arrival);
@@ -107,7 +107,7 @@ class NavigateBehaviourFactoryTest {
 
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result).isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
-            assertThat(waitUntil.waitUntil()).isEqualTo(arrival);
+            assertThat(waitUntil.timestamp()).isEqualTo(arrival);
         });
 
         verify(shipEventNotifier).setFuelIsAlmostEmpty(ship.getSymbol());
@@ -149,7 +149,7 @@ class NavigateBehaviourFactoryTest {
 
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result).isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
-            assertThat(waitUntil.waitUntil()).isEqualTo(arrival);
+            assertThat(waitUntil.timestamp()).isEqualTo(arrival);
         });
 
         verify(shipEventNotifier).setFuelIsAlmostEmpty(ship.getSymbol());
@@ -179,13 +179,7 @@ class NavigateBehaviourFactoryTest {
         Ship ship = MotherShip.excavator()
             .withNav(
                 nav ->
-                    nav
-                        .withRoute(route -> {
-                            route.destination(
-                                new ShipNavRouteWaypoint()
-                                    .symbol(waypointSymbol.waypoint())
-                            );
-                        })
+                    nav.waypointSymbol(waypointSymbol.waypoint())
                         .status(ShipNavStatus.IN_ORBIT)
             );
 

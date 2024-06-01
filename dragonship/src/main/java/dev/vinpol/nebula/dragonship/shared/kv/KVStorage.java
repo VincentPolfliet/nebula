@@ -25,9 +25,9 @@ public class KVStorage implements KVStore {
         Objects.requireNonNull(key);
 
         return StreamEx.of(repository.find(where("key").eq(key)).iterator())
-                .findFirst()
-                .map(KeyValue::value)
-                .orElseThrow();
+            .findFirst()
+            .map(KeyValue::value)
+            .orElseThrow();
     }
 
     @Override
@@ -36,6 +36,14 @@ public class KVStorage implements KVStore {
         Objects.requireNonNull(value);
 
         repository.update(new KeyValue(key, value), true);
+    }
+
+    @Override
+    public boolean contains(String key) {
+        Objects.requireNonNull(key);
+
+        KeyValue value = repository.getById(key);
+        return value != null;
     }
 
     private record KeyValue(@Id @JsonProperty("key") String key, @JsonProperty("value") String value) {

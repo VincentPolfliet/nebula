@@ -9,18 +9,18 @@ public class FleetUtils {
     }
 
     public static double calculateAverageIntegrity(Ship ship) {
-        int reactorIntegrity = ship.getReactor().getIntegrity();
-        int frameIntegrity = ship.getFrame().getIntegrity();
-        int engineIntegrity = ship.getEngine().getIntegrity();
+        double reactorIntegrity = ship.getReactor().getIntegrity();
+        double frameIntegrity = ship.getFrame().getIntegrity();
+        double engineIntegrity = ship.getEngine().getIntegrity();
 
-        return (((double) reactorIntegrity + frameIntegrity + engineIntegrity) / 3) * 100;
+        return ((reactorIntegrity + frameIntegrity + engineIntegrity) / 3) * 100;
     }
 
     public static double calculateAverageCondition(Ship ship) {
-        int reactorCondition = ship.getReactor().getCondition();
-        int frameCondition = ship.getFrame().getCondition();
-        int engineCondition = ship.getEngine().getCondition();
+        double reactorCondition = ship.getReactor().getCondition();
+        double frameCondition = ship.getFrame().getCondition();
+        double engineCondition = ship.getEngine().getCondition();
 
-        return (((double) reactorCondition + frameCondition + engineCondition) / 3) * 100;
+        return ((reactorCondition + frameCondition + engineCondition) / 3) * 100;
     }
 }

@@ -1,5 +1,6 @@
 package dev.vinpol.spacetraders.sdk.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.util.function.Consumer;
@@ -46,14 +47,17 @@ public class ShipNav {
         return this;
     }
 
+    @JsonIgnore
     public boolean isInOrbit() {
         return getStatus() == ShipNavStatus.IN_ORBIT;
     }
 
+    @JsonIgnore
     public boolean isInTransit() {
         return getStatus() == ShipNavStatus.IN_TRANSIT;
     }
 
+    @JsonIgnore
     public boolean isDocked() {
         return getStatus() == ShipNavStatus.DOCKED;
     }

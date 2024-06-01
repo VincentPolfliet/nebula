@@ -1,23 +1,19 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
-import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
-import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.GetSystemWaypoints200Response;
-import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.Waypoint;
 import dev.vinpol.spacetraders.sdk.models.WaypointType;
-import dev.vinpol.torterra.Leaf;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
+import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs.*;
+import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourSequence.sequence;
 import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs.*;
-import static dev.vinpol.torterra.Torterra.predicate;
-import static dev.vinpol.torterra.Torterra.sequence;
 
 public class MiningBehaviourFactory implements ShipBehaviourFactory {
 
@@ -58,40 +54,24 @@ public class MiningBehaviourFactory implements ShipBehaviourFactory {
             Waypoint nearbyWaypoint = nearbyAsteroidOptional.get();
             WaypointSymbol nearbyWaypointSymbol = WaypointSymbol.tryParse(nearbyWaypoint.getSymbol());
 
-            List<Leaf<Ship>> sequence = List.of(
-                cargoIsNotFull(),
-                hasNoActiveCooldown(),
-                hasFuelLeft(),
-                isNotInTransit(),
+            return shipBehaviourFactoryCreator.treeOf(
+                orbit(),
                 sequence(
-                    ShipLeafs.isDocked(),
-                    ShipBehaviourLeafs.orbit()
+                    navigate(nearbyWaypointSymbol),
+                    dock(),
+                    refuel(),
+                    orbit()
                 ),
-                sequence(
-                    predicate(inShip -> !isAtLocation(inShip, nearbyWaypoint)),
-                    ShipBehaviourLeafs.navigate(nearbyWaypointSymbol),
-                    ShipBehaviourLeafs.dock(),
-                    ShipBehaviourLeafs.refuel(),
-                    ShipBehaviourLeafs.orbit()
-                ),
-                ShipBehaviourLeafs.extraction()
+                extraction()
             );
-
-            return shipBehaviourFactoryCreator.sequenceOf(sequence);
         });
     }
 
     private Optional<Waypoint> findInSystem(SystemSymbol system, WaypointType waypointType) {
-        GetSystemWaypoints200Response response = systemsApi.getSystemWaypoints(system.system(), 1, 10, waypointType);
+        GetSystemWaypoints200Response response = systemsApi.getSystemWaypoints(system.system(), 1, 1, waypointType);
 
-        List<Waypoint> data = response.getData();
-        return data
+        return response.getData()
             .stream()
             .findFirst();
     }
-
-    private boolean isAtLocation(Ship ship, Waypoint waypoint) {
-        return ship.isAtLocation(waypoint.getSymbol());
-    }
-
 }

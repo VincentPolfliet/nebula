@@ -78,9 +78,9 @@ public class ShipFrame {
     /**
      * Condition is a range of 0 to 100 where 0 is completely worn out and 100 is brand new.
      * minimum: 0
-     * maximum: 100
+     * maximum: 1
      **/
-    private int condition;
+    private double condition;
 
     /**
      * The amount of slots that can be dedicated to modules installed in the ship. Each installed module take up a number of slots, and once there are no more slots, no new modules can be installed.
@@ -94,7 +94,7 @@ public class ShipFrame {
      **/
     private int mountingPoints;
     private int fuelCapacity;
-    private int integrity;
+    private double integrity;
     private ShipRequirements requirements;
 
     public ShipFrame symbol(SymbolEnum symbol) {
@@ -112,7 +112,7 @@ public class ShipFrame {
         return this;
     }
 
-    public ShipFrame condition(Integer condition) {
+    public ShipFrame condition(double condition) {
         this.condition = condition;
         return this;
     }
@@ -127,7 +127,7 @@ public class ShipFrame {
         return this;
     }
 
-    public ShipFrame integrity(int integrity) {
+    public ShipFrame integrity(double integrity) {
         this.integrity = integrity;
         return this;
     }

@@ -4,6 +4,7 @@ import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.spacetraders.sdk.ApiClient;
+import dev.vinpol.spacetraders.sdk.models.TradeSymbol;
 import dev.vinpol.spacetraders.sdk.models.WaypointType;
 import org.springframework.stereotype.Component;
 
@@ -49,7 +50,12 @@ public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryC
     }
 
     @Override
-    public FindMarketAndSellBehaviour navigateToClosestMarket() {
-        return new FindMarketAndSellBehaviour(this, apiClient.systemsApi());
+    public FindMarketAndSellBehaviourFactory navigateToClosestMarket() {
+        return new FindMarketAndSellBehaviourFactory(this, apiClient.systemsApi());
+    }
+
+    @Override
+    public SellCargoBehaviourFactory sellCargo(TradeSymbol tradeSymbol, int units) {
+        return new SellCargoBehaviourFactory(apiClient.fleetApi(), tradeSymbol, units);
     }
 }

@@ -40,7 +40,7 @@ public class ApiConfig {
             builder.addInterceptor(interceptor);
         }
 
-        return new BigBrain(new RetrofitApiClient(builder.build(), nebulaProperties.url()), nitrite);
+        return new RetrofitApiClient(builder.build(), nebulaProperties.url());
     }
 
     @Bean

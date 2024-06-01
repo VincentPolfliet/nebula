@@ -9,5 +9,10 @@ gg:
     jte:
         developmentMode: false
 spring:
+    groovy:
+        template:
+            check-template-location: false
+    devtools:
+        add-properties: false
     messages:
         use-code-as-default-message: true

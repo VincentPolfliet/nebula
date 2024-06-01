@@ -21,10 +21,13 @@ public class CurrentAgentAdvice {
 
     @ModelAttribute("agent")
     public Agent agent() {
-        String agentSymbol = kvStorage.get("agent");
-        Agent currentAgent = agentsApi.getAgent(agentSymbol).getData();
-        CURRENT_AGENT.set(currentAgent);
-        return currentAgent;
+        if (!kvStorage.contains("agent")) {
+            Agent currentAgent = agentsApi.getMyAgent().getData();
+            kvStorage.set("agent", currentAgent.getSymbol());
+            CURRENT_AGENT.set(currentAgent);
+        }
+
+        return getCurrentAgent();
     }
 
     public static Agent getCurrentAgent() {

@@ -114,7 +114,9 @@ public class FleetApiCache implements FleetApi {
 
     @Override
     public NavigateShip200Response navigateShip(String shipSymbol, NavigateShipRequest navigateShipRequest) {
-        return fleetApi.navigateShip(shipSymbol, navigateShipRequest);
+        NavigateShip200Response navigateResponse = fleetApi.navigateShip(shipSymbol, navigateShipRequest);
+        cache.updateIfExists(shipSymbol, navigateResponse);
+        return navigateResponse;
     }
 
     @Override
@@ -159,7 +161,7 @@ public class FleetApiCache implements FleetApi {
     }
 
     @Override
-    public Call<SellCargo201Response> sellCargo(String shipSymbol, SellCargoRequest sellCargoRequest) {
+    public SellCargo201Response sellCargo(String shipSymbol, SellCargoRequest sellCargoRequest) {
         return fleetApi.sellCargo(shipSymbol, sellCargoRequest);
     }
 

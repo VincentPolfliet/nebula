@@ -2,7 +2,9 @@ package dev.vinpol.nebula.dragonship.web.support.vite.jte;
 
 import dev.vinpol.nebula.dragonship.web.support.vite.api.manifest.ManifestLoader;
 import gg.jte.Content;
+import gg.jte.springframework.boot.autoconfigure.JteProperties;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 import java.util.Objects;
@@ -16,10 +18,6 @@ public final class JteManifestSupport {
 
     @Autowired
     void setManifestSupplier(ManifestLoader manifestSupplier) {
-        if (JteManifestSupport.manifestSupplier != null) {
-            throw new IllegalStateException("manifestSupplier is already set");
-        }
-
         JteManifestSupport.manifestSupplier = manifestSupplier;
     }
 

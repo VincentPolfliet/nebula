@@ -55,11 +55,11 @@ public class ShipReactor {
     /**
      * Condition is a range of 0 to 100 where 0 is completely worn out and 100 is brand new.
      * minimum: 0
-     * maximum: 100
+     * maximum: 1
      **/
-    private Integer condition;
+    private double condition;
     private Integer powerOutput;
-    private int integrity;
+    private double integrity;
     private ShipRequirements requirements;
 
     public ShipReactor symbol(SymbolEnum symbol) {
@@ -77,8 +77,14 @@ public class ShipReactor {
         return this;
     }
 
-    public ShipReactor condition(Integer condition) {
+    public ShipReactor condition(double condition) {
         this.condition = condition;
+        return this;
+    }
+
+
+    public ShipReactor integrity(double integrity) {
+        this.integrity = integrity;
         return this;
     }
 

@@ -5,7 +5,9 @@
         </encoder>
     </appender>
 
-    <root level="debug">
+    <logger name="dev.vinpol.nebula.dragonship.automation" level="info"/>
+
+    <root level="info">
         <appender-ref ref="STDOUT"/>
     </root>
 </configuration>

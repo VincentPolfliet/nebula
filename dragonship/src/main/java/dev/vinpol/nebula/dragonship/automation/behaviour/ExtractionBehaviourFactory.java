@@ -4,6 +4,7 @@ import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
+import dev.vinpol.spacetraders.sdk.models.ExtractResources201ResponseData;
 import dev.vinpol.spacetraders.sdk.models.ExtractResourcesRequest;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 
@@ -42,7 +43,7 @@ public class ExtractionBehaviourFactory implements ShipBehaviourFactory {
                     return ShipBehaviourResult.failure(FailureReason.ACTIVE_COOLDOWN);
                 }
 
-                var extractionResponse = fleetApi.extractResources(ship.getSymbol(), new ExtractResourcesRequest()).getData();
+                ExtractResources201ResponseData extractionResponse = fleetApi.extractResources(ship.getSymbol(), new ExtractResourcesRequest()).getData();
 
                 ship.setCargo(extractionResponse.getCargo());
 

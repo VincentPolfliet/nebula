@@ -11,9 +11,11 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Component
 @Profile("dev")
@@ -30,35 +32,51 @@ public class ViteDevRunner implements ApplicationRunner, AutoCloseable {
     private final ViteRemoteSocketServer viteRemoteSocketServer;
     private final ViteProcessRunner processRunner;
 
+    private final AtomicBoolean socketServerRunning = new AtomicBoolean(false);
+    private final AtomicBoolean processRunning = new AtomicBoolean(false);
+
     private final String prefix;
     private final String scriptName;
 
-    private final int port = 9000;
+    private final int remoteSocketPort = 9000;
+    private final int vitePort;
 
     public ViteDevRunner(ViteProperties properties) {
         this.prefix = properties.baseDirectory() != null ? properties.baseDirectory() : null;
         this.scriptName = Objects.requireNonNullElse(properties.scriptName(), "dev");
-
+        this.vitePort = Objects.requireNonNullElse(properties.devPort(), 5173);
         this.viteRemoteSocketServer = new ViteRemoteSocketServer();
         this.processRunner = new ViteProcessRunner(io);
     }
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
-        // TODO: only start process when server is already running
         io.execute(() -> {
             try {
-                viteRemoteSocketServer.start(port);
+                socketServerRunning.set(true);
+                viteRemoteSocketServer.start(remoteSocketPort);
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } finally {
+                socketServerRunning.set(false);
             }
         });
 
         io.execute(() -> {
             try {
-                processRunner.start(new ProcessBuilder(buildCommand()));
+                processRunning.set(true);
+                logger.info("Vite has started on {}", vitePort);
+
+                ProcessBuilder builder = new ProcessBuilder(buildCommand());
+                Map<String, String> env = builder.environment();
+                env.put("VITE_PORT", String.valueOf(vitePort));
+                env.put("VITE_SOCKET_RELOAD_PORT", String.valueOf(remoteSocketPort));
+
+                processRunner.start(builder);
             } catch (IOException e) {
                 throw new RuntimeException(e);
+            } finally {
+                processRunning.set(false);
             }
         });
     }
@@ -67,9 +85,8 @@ public class ViteDevRunner implements ApplicationRunner, AutoCloseable {
         // params for command should be seperated entries
         List<String> commands = new ArrayList<>();
 
-        // TODO: set npm location to either find it on current path or use the maven frontend plugin ???
-        String npmPath = "C:\\Program Files\\nodejs\\npm.cmd";
-
+        // TODO: make this configurable
+        String npmPath = "target\\node\\npm.cmd";
         commands.add(npmPath);
 
         if (prefix != null) {

@@ -5,7 +5,7 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResu
 
 import java.util.concurrent.CompletableFuture;
 
-public interface ShipBehaviourTask extends Runnable {
+interface ShipBehaviourTask extends Runnable {
     String shipSymbol();
 
     ShipBehaviour behaviour();

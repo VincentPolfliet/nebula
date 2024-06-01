@@ -1,30 +1,50 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 
+import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.spacetraders.sdk.models.TradeSymbol;
+
+import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourSequence.sequence;
 
 public final class ShipBehaviourLeafs {
     private ShipBehaviourLeafs() {
 
     }
 
-    public static ShipBehaviourRefLeaf orbit() {
-        return new ShipBehaviourRefLeaf("orbit", ShipBehaviourFactoryCreator::orbitAutomation);
+    public static ShipBehaviour orbit() {
+        return sequence("tryOrbit",
+            ShipLeafs.isNotInOrbit(),
+            new ShipBehaviourRefLeaf("orbit", ShipBehaviourFactoryCreator::orbitAutomation)
+        );
     }
 
-    public static ShipBehaviourRefLeaf extraction() {
+    public static ShipBehaviour extraction() {
         return new ShipBehaviourRefLeaf("extraction", ShipBehaviourFactoryCreator::extraction);
     }
 
-    public static ShipBehaviourRefLeaf dock() {
-        return new ShipBehaviourRefLeaf("dock", ShipBehaviourFactoryCreator::dock);
+    public static ShipBehaviour dock() {
+        return sequence("tryDock",
+            ShipLeafs.isNotDocked(),
+            new ShipBehaviourRefLeaf("dock", ShipBehaviourFactoryCreator::dock)
+        );
     }
 
-    public static ShipBehaviourRefLeaf refuel() {
-        return new ShipBehaviourRefLeaf("refuel", ShipBehaviourFactoryCreator::refuel);
+    public static ShipBehaviour refuel() {
+        return sequence("tryRefuel",
+            ShipLeafs.fuelIsNotFull(),
+            new ShipBehaviourRefLeaf("refuel", ShipBehaviourFactoryCreator::refuel)
+        );
     }
 
-    public static ShipBehaviourRefLeaf navigate(final WaypointSymbol waypointSymbol) {
-        return new ShipBehaviourRefLeaf("navigate", (registry) -> registry.navigateAutomation(waypointSymbol));
+    public static ShipBehaviour navigate(WaypointSymbol waypoint) {
+        return sequence("tryNavigate",
+            ShipLeafs.isNotAtLocation(waypoint),
+            new ShipBehaviourRefLeaf("navigate", registry -> registry.navigateAutomation(waypoint))
+        );
+    }
+
+    public static ShipBehaviour sellCargo(TradeSymbol tradeSymbol, int units) {
+        return new ShipBehaviourRefLeaf("sellCargo %s (%dx)".formatted(tradeSymbol, units), (registry) -> registry.sellCargo(tradeSymbol, units));
     }
 }

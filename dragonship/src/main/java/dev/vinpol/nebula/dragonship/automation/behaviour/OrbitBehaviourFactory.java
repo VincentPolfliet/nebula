@@ -5,9 +5,13 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResu
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.OrbitShip200Response;
 import dev.vinpol.spacetraders.sdk.models.Ship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public final class OrbitBehaviourFactory implements ShipBehaviourFactory {
 
+
+    private final Logger logger = LoggerFactory.getLogger(OrbitBehaviourFactory.class);
     private final FleetApi fleetApi;
 
     public OrbitBehaviourFactory(FleetApi fleetApi) {
@@ -24,11 +28,9 @@ public final class OrbitBehaviourFactory implements ShipBehaviourFactory {
 
             @Override
             public ShipBehaviourResult update(Ship ship) {
-                // orbit ship, so that it can fly to asteroid or mine the asteroid
-                if (!ship.isDocked()) {
-                    return ShipBehaviourResult.failure(FailureReason.NOT_DOCKED);
-                }
+                logger.info("OrbitBehaviour is running");
 
+                // orbit can always be called, even when ship is not docked
                 OrbitShip200Response orbit = fleetApi.orbitShip(ship.getSymbol());
                 ship.setNav(orbit.getData().getNav());
                 return ShipBehaviourResult.done();

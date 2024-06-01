@@ -4,6 +4,7 @@ import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.nebula.dragonship.ships.TravelFuelAndTimerCalculator;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.NavigateShip200ResponseData;
 import dev.vinpol.spacetraders.sdk.models.NavigateShipRequest;

@@ -10,7 +10,6 @@
     <modules>
         <module>dragonship</module>
         <module>api</module>
-        <module>torterra</module>
         <module>JavaGOAP</module>
     </modules>
 
@@ -116,12 +115,6 @@
             <dependency>
                 <groupId>dev.vinpol.nebula</groupId>
                 <artifactId>nebula-spring-boot-starter</artifactId>
-                <version>1.0-SNAPSHOT</version>
-            </dependency>
-
-            <dependency>
-                <groupId>dev.vinpol</groupId>
-                <artifactId>torterra</artifactId>
                 <version>1.0-SNAPSHOT</version>
             </dependency>
 

@@ -1,6 +1,7 @@
 package dev.vinpol.nebula.dragonship.web.fleet;
 
 import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmResolver;
+import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs;
@@ -13,14 +14,17 @@ import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.System;
 import dev.vinpol.spacetraders.sdk.models.*;
-import dev.vinpol.torterra.Torterra;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Clock;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+
+import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourSequence.sequence;
 
 @Controller
 public class FleetController {
@@ -64,8 +68,17 @@ public class FleetController {
 
         GetMyShips200Response response = fleetApi.getMyShips(page, limit);
         PagingUtils.setMetaOnModel(model, response.getMeta());
-        model.addAttribute("ships", response.getData());
 
+        List<Ship> ships = response.getData();
+        model.addAttribute("ships", ships);
+
+        Map<Ship, ShipBehaviour> shipBehaviourMap = new HashMap<>();
+
+        for (Ship ship : ships) {
+            shipBehaviourMap.put(ship, shipCommander.getCurrentBehaviour(ship).orElse(null));
+        }
+
+        model.addAttribute("behaviours", shipBehaviourMap);
         return "fleet/index";
     }
 
@@ -74,8 +87,13 @@ public class FleetController {
         fleetApi.orbitShip(shipSymbol);
 
         Ship retrievedShip = fleetApi.getMyShip(shipSymbol).getData();
-        model.addAttribute("ship", retrievedShip);
+        setShipStateOnModel(model, retrievedShip);
         return "fleet/ship-row";
+    }
+
+    private void setShipStateOnModel(Model model, Ship retrievedShip) {
+        model.addAttribute("ship", retrievedShip);
+        model.addAttribute("currentBehaviour", shipCommander.getCurrentBehaviour(retrievedShip).orElse(null));
     }
 
     @PostMapping(value = "/fleet/{shipSymbol}/refuel")
@@ -90,7 +108,7 @@ public class FleetController {
         );
 
         Ship afterRefuel = fleetApi.getMyShip(shipSymbol).getData();
-        model.addAttribute("ship", afterRefuel);
+        setShipStateOnModel(model, afterRefuel);
         return "fleet/ship-row";
     }
 
@@ -111,9 +129,10 @@ public class FleetController {
     public String navigate(@PathVariable("shipSymbol") String shipSymbol, @RequestParam("target") String targetSymbol, Model model) {
         Ship ship = fleetApi.getMyShip(shipSymbol).getData();
 
-        shipCommander.command(ship, shipBehaviourFactoryCreator.sequenceOf(
+        shipCommander.command(ship, shipBehaviourFactoryCreator.treeOf(
                 List.of(
-                    Torterra.sequence(
+                    sequence(
+                        "tryOrbit",
                         ShipLeafs.isDocked(),
                         ShipBehaviourLeafs.orbit()
                     ),
@@ -122,7 +141,7 @@ public class FleetController {
             )
         );
 
-        model.addAttribute("ship", fleetApi.getMyShip(shipSymbol).getData());
+        setShipStateOnModel(model, ship);
         return "fleet/ship-row";
     }
 
@@ -131,7 +150,7 @@ public class FleetController {
         fleetApi.dockShip(shipSymbol);
 
         Ship retrievedShip = fleetApi.getMyShip(shipSymbol).getData();
-        model.addAttribute("ship", retrievedShip);
+        setShipStateOnModel(model, retrievedShip);
         return "fleet/ship-row";
     }
 
@@ -140,7 +159,27 @@ public class FleetController {
         fleetApi.patchShipNav(shipSymbol, new PatchShipNavRequest().flightMode(flightMode));
 
         Ship updatedShip = fleetApi.getMyShip(shipSymbol).getData();
-        model.addAttribute("ship", updatedShip);
+        setShipStateOnModel(model, updatedShip);
+        return "fleet/ship-row";
+    }
+
+    @PostMapping("/fleet/{shipSymbol}/automation/start")
+    public String startAutomation(@PathVariable("shipSymbol") String shipSymbol, Model model) {
+        Ship ship = fleetApi.getMyShip(shipSymbol).getData();
+        shipCommander.command(ship, shipAlgorithmResolver.resolve(ship.getRole()).decideBehaviour(ship));
+
+        Ship updatedShip = fleetApi.getMyShip(shipSymbol).getData();
+        setShipStateOnModel(model, updatedShip);
+        return "fleet/ship-row";
+    }
+
+    @PostMapping("/fleet/{shipSymbol}/automation/stop")
+    public String stopAutomation(@PathVariable("shipSymbol") String shipSymbol, Model model) {
+        Ship ship = fleetApi.getMyShip(shipSymbol).getData();
+        shipCommander.cancel(ship);
+
+        Ship updatedShip = fleetApi.getMyShip(shipSymbol).getData();
+        setShipStateOnModel(model, updatedShip);
         return "fleet/ship-row";
     }
 }

@@ -1,9 +1,9 @@
-import {Plugin, createLogger} from 'vite'
+import {Plugin} from 'vite'
 import {connect} from "node:net";
 import colors from 'picocolors'
 
 export class Config {
-    port?: number = 9000
+    port: number = 9000
     log: boolean = false
     exitOnError: boolean = true
 }
@@ -15,12 +15,12 @@ export const socketReload = (config: Config = new Config()): Plugin => ({
         const logger = server.config.logger
 
         const socket = connect(config.port, "localhost", () => {
-            logger.info(colors.green(`Connected to remote server on ${config.port}`));
+            logger.info(`Connected to socket server on ${colors.green(config.port)}`);
         })
 
-        socket.on('error', async message => {
+        socket.on('error', async error => {
             if (config.log) {
-                logger.error(message.stack);
+                logger.error(error.stack);
             }
 
             if (config.exitOnError) {

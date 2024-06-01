@@ -4,6 +4,7 @@ import lombok.Data;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
@@ -63,14 +64,8 @@ public class Ship {
     }
 
     public boolean isAtLocation(String waypoint) {
-        ShipNavRoute route = nav.getRoute();
-        ShipNavRouteWaypoint destination = route.getDestination();
-
-        if (destination == null) {
-            return false;
-        }
-
-        return waypoint.equals(route.getDestination().getSymbol());
+        String currentLocation = nav.getWaypointSymbol();
+        return Objects.equals(waypoint, currentLocation);
     }
 
     public Ship crew(ShipCrew crew) {

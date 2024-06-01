@@ -167,7 +167,7 @@ class ShipBehaviourSchedulerTest {
             assertThat(result.isWaitUntil()).isTrue();
 
             WaitUntil waitUntil = (WaitUntil) result;
-            assertThat(waitUntil.waitUntil()).isEqualTo(future);
+            assertThat(waitUntil.timestamp()).isEqualTo(future);
         });
     }
 

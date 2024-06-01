@@ -3,7 +3,7 @@ package dev.vinpol.spacetraders.sdk.models;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class ShipSymbolGenerator {
-    private static final String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ_0123456789-";
+    private static final String ALLOWED_CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
     private ShipSymbolGenerator() {
 
@@ -12,7 +12,7 @@ public class ShipSymbolGenerator {
     public static String generate() {
         StringBuilder strb = new StringBuilder();
 
-        for (int i = 0; i < 14; i++) {
+        for (int i = 0; i < 7; i++) {
             int index = ThreadLocalRandom.current().nextInt(ALLOWED_CHARACTERS.length());
             strb.append(ALLOWED_CHARACTERS.charAt(index));
         }

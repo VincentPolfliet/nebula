@@ -72,7 +72,7 @@ class ExtractionBehaviourFactoryTest {
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result)
             .isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
-                assertThat(waitUntil.waitUntil()).isEqualTo(cooldownTimestamp);
+                assertThat(waitUntil.timestamp()).isEqualTo(cooldownTimestamp);
             });
 
         verify(shipEventNotifier).setCargoFull(ship.getSymbol());

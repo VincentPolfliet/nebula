@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 
@@ -20,7 +21,20 @@ public interface ShipBehaviour {
             public ShipBehaviourResult update(Ship inShip) {
                 return result;
             }
+
+            @Override
+            public String toString() {
+                return getName();
+            }
         };
+    }
+
+    static ShipBehaviour succeed() {
+        return ofResult(ShipBehaviourResult.success());
+    }
+
+    static ShipBehaviour fail() {
+        return ofResult(ShipBehaviourResult.failure(FailureReason.FAILURE));
     }
 
     ShipBehaviourResult update(Ship ship);
@@ -32,7 +46,7 @@ public interface ShipBehaviour {
     static ShipBehaviour ofSupplier(Supplier<ShipBehaviour> supplier) {
         Objects.requireNonNull(supplier);
 
-        return new LazyLoadShipBehaviour(ship -> supplier.get());
+        return new LazyLoadShipBehaviour(_ -> supplier.get());
     }
 
     static ShipBehaviour ofFunction(Function<Ship, ShipBehaviour> function) {

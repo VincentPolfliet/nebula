@@ -1,26 +1,31 @@
-import {defineConfig} from "vite";
+import {defineConfig, loadEnv} from "vite";
 import * as path from "path";
 import vue from '@vitejs/plugin-vue'
 import {globSync} from 'glob';
 import {fileURLToPath} from 'url';
 import socketReload from "./SocketReloadPlugin.js";
 
-export default defineConfig({
-    root: path.resolve(__dirname, 'src/main/frontend'),
-    server: {
-        hot: true // 🥵
-    },
-    plugins: [vue(), socketReload()],
-    build: {
-        // generate .vite/manifest.json in outDir
-        manifest: true,
-        rollupOptions: {
-            // overwrite default .html entry
-            // input: './src/main.js',
-            input: resolveInput()
+export default ({mode}) => {
+    process.env = {...process.env, ...loadEnv(mode, process.cwd())};
+
+    return defineConfig({
+        root: path.resolve(__dirname, 'src/main/frontend'),
+        server: {
+            hot: true, // 🥵
+            port: parseInt(process.env.VITE_PORT) ?? 5173
         },
-    },
-})
+        plugins: [vue(), socketReload({port: parseInt(process.env.VITE_SOCKET_RELOAD_PORT) ?? 9000})],
+        build: {
+            // generate .vite/manifest.json in outDir
+            manifest: true,
+            rollupOptions: {
+                // overwrite default .html entry
+                // input: './src/main.js',
+                input: resolveInput()
+            },
+        },
+    })
+}
 
 function resolveInput() {
     return Object

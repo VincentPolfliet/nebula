@@ -1,5 +1,6 @@
 package dev.vinpol.spacetraders.sdk.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
 import java.time.OffsetDateTime;
@@ -50,6 +51,7 @@ public class Cooldown {
         return this;
     }
 
+    @JsonIgnore
     public boolean isActive() {
         return expiration != null;
     }

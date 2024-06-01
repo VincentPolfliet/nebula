@@ -5,12 +5,9 @@
     "type": "module",
     "scripts": {
         "dev": "vite",
-        "dev:remote": "node server.js",
         "build": "vite build",
-        "preview": "vite preview",
-        "socket:build": "tsup SocketReloadPlugin.ts --format esm,cjs --clean --dts"
+        "preview": "vite preview"
     },
-    "types": "dist/SocketRemote.d.ts",
     "dependencies": {
         "bulma": "^1.0.0",
         "htmx.org": "^1.9.11",
@@ -20,15 +17,14 @@
         "dayjs": "^1.11.11"
     },
     "devDependencies": {
-        "@http-util/status-i18n": "^0.8.1",
+        "@types/node": "^20.12.12",
+        "typescript": "^5.4.5",
+        "vite": "^5.2.0",
         "@vitejs/plugin-vue": "^5.0.4",
+        "@http-util/status-i18n": "^0.8.1",
         "express": "^4.19.2",
         "glob": "^10.3.12",
         "lodash": "^4.17.21",
-        "vite": "^5.2.0",
-        "@types/node": "^20.12.12",
-        "tsup": "^8.0.2",
-        "typescript": "^5.4.5",
         "picocolors": "^1.0.1"
     }
 }

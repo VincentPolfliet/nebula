@@ -50,10 +50,12 @@ class ViteProcessRunner implements AutoCloseable {
     private final class StreamGobbler implements Runnable {
         private final InputStream is;
         private final Type type;
+        private final Logger logger;
 
         private StreamGobbler(InputStream is, Type type) {
             this.is = is;
             this.type = type;
+            this.logger = ViteProcessRunner.this.logger;
         }
 
         public void run() {
@@ -61,7 +63,15 @@ class ViteProcessRunner implements AutoCloseable {
                 String line = null;
 
                 while ((line = source.readUtf8Line()) != null) {
-                    ViteProcessRunner.this.logger.info("{}VITE: {}" + ANSI_RESET, type == Type.ERROR ? ANSI_RED : "", line);
+                    if (type == Type.ERROR) {
+                        if (logger.isErrorEnabled()) {
+                            logger.error(ANSI_RED + "{}" + ANSI_RESET, line);
+                        }
+                    } else {
+                        if (logger.isDebugEnabled()) {
+                            logger.debug("{}", line);
+                        }
+                    }
                 }
             } catch (IOException e) {
                 throw new RuntimeException(e);

@@ -51,7 +51,7 @@ class ActualShipBehaviourTask implements ShipBehaviourTask {
 
         try {
             if (runnerThread.isInterrupted()) {
-                future.complete(ShipBehaviourResult.failure(FailureReason.CANCELLED));
+                future.complete(ShipBehaviourResult.failure(FailureReason.FAILURE));
                 return;
             }
 
