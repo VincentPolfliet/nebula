@@ -30,9 +30,10 @@ public class ConditionNode implements BehaviourTreeNode {
 
 	@Override
 	public BehaviourTreeStatus tick(float deltaTime) {
-		if(function != null && function.apply(new Float(deltaTime))) {
+		if(function != null && function.apply(deltaTime)) {
 			return BehaviourTreeStatus.SUCCESS;
 		}
+
 		return BehaviourTreeStatus.FAILURE;
 	}
 

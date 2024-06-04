@@ -96,22 +96,6 @@ public class FleetController {
         model.addAttribute("currentBehaviour", shipCommander.getCurrentBehaviour(retrievedShip).orElse(null));
     }
 
-    @PostMapping(value = "/fleet/{shipSymbol}/refuel")
-    public String refuel(@PathVariable("shipSymbol") String shipSymbol, Model model) {
-        Ship beforeRefuel = fleetApi.getMyShip(shipSymbol).getData();
-
-        fleetApi.refuelShip(shipSymbol,
-            new RefuelShipRequest()
-                .fromCargo(true)
-                // 1 unit is 100 fuel
-                .units((int) Math.max((beforeRefuel.getFuel().getCurrent() - (double) beforeRefuel.getFuel().getCapacity() / 100), 1d))
-        );
-
-        Ship afterRefuel = fleetApi.getMyShip(shipSymbol).getData();
-        setShipStateOnModel(model, afterRefuel);
-        return "fleet/ship-row";
-    }
-
     @GetMapping("/fleet/{shipSymbol}/navigate")
     public String navigate(@PathVariable("shipSymbol") String shipSymbol, Model model) {
         Ship ship = fleetApi.getMyShip(shipSymbol).getData();
@@ -129,17 +113,7 @@ public class FleetController {
     public String navigate(@PathVariable("shipSymbol") String shipSymbol, @RequestParam("target") String targetSymbol, Model model) {
         Ship ship = fleetApi.getMyShip(shipSymbol).getData();
 
-        shipCommander.command(ship, shipBehaviourFactoryCreator.treeOf(
-                List.of(
-                    sequence(
-                        "tryOrbit",
-                        ShipLeafs.isDocked(),
-                        ShipBehaviourLeafs.orbit()
-                    ),
-                    ShipBehaviourLeafs.navigate(WaypointSymbol.tryParse(targetSymbol))
-                )
-            )
-        );
+        shipCommander.command(ship, shipBehaviourFactoryCreator.treeOf(ShipBehaviourLeafs.navigate(WaypointSymbol.tryParse(targetSymbol))));
 
         setShipStateOnModel(model, ship);
         return "fleet/ship-row";

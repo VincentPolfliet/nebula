@@ -15,6 +15,8 @@ import java.util.concurrent.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import static dev.vinpol.nebula.dragonship.utils.RuntimeExceptionUtils.rethrowIfPossible;
+
 public class ShipBehaviourScheduler {
 
     private final Logger logger = LoggerFactory.getLogger(ShipBehaviourScheduler.class);
@@ -127,7 +129,7 @@ public class ShipBehaviourScheduler {
                     return result;
                 }
 
-                throw new RuntimeException(throwable);
+                rethrowIfPossible(throwable);
             }
 
             return result;

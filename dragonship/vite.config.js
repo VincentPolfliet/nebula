@@ -4,6 +4,7 @@ import vue from '@vitejs/plugin-vue'
 import {globSync} from 'glob';
 import {fileURLToPath} from 'url';
 import socketReload from "./SocketReloadPlugin.js";
+import liveReload from 'vite-plugin-live-reload'
 
 export default ({mode}) => {
     process.env = {...process.env, ...loadEnv(mode, process.cwd())};
@@ -14,7 +15,7 @@ export default ({mode}) => {
             hot: true, // 🥵
             port: parseInt(process.env.VITE_PORT) ?? 5173
         },
-        plugins: [vue(), socketReload({port: parseInt(process.env.VITE_SOCKET_RELOAD_PORT) ?? 9000})],
+        plugins: [vue(), socketReload({port: parseInt(process.env.VITE_SOCKET_RELOAD_PORT) ?? 9000}), liveReload('./target/jte-classes/**.java'),],
         build: {
             // generate .vite/manifest.json in outDir
             manifest: true,

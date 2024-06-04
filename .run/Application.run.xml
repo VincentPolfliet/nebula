@@ -8,7 +8,6 @@
     <option name="WORKING_DIRECTORY" value="file://$PROJECT_DIR$/dragonship" />
     <method v="2">
       <option name="Make" enabled="true" />
-      <option name="Maven.BeforeRunTask" enabled="true" file="$PROJECT_DIR$/dragonship/pom.xml" goal="com.github.eirslett:frontend-maven-plugin:1.15.0:install-node-and-npm" />
     </method>
   </configuration>
 </component>

@@ -107,7 +107,7 @@
     <td>
         <div class="level">
             <div class="level-left">
-                @if(automationSupport.contains(ship.getRole()))
+                @if(automationSupport.contains(ship.getRole()) && !ship.isInTransit())
                     <button class="button" hx-post="/fleet/${ship.getSymbol()}/automation/start"
                             hx-target="#ship-row-${ship.getSymbol()}" hx-swap="outerHTML"
                             disabled="${currentBehaviour != null}">
@@ -156,12 +156,6 @@
                                    hx-swap="innerHTML"
                                    hx-target="#modal-container">🧭 Navigate
                                 </a>
-
-                                @if(fuel.isNotInfinite() && ship.getNav().getRoute().getDestination().getType() == WaypointType.FUEL_STATION && ship.isDocked())
-                                    <a class="dropdown-item" hx-swap="none" hx-post="/fleet/${ship.getSymbol()}/refuel">⛽
-                                        Refuel
-                                    </a>
-                                @endif
 
                                 @if(automationSupport.contains(ship.getRole()))
                                     <a href="/automation/${ship.getSymbol()}" class="dropdown-item icon-text">

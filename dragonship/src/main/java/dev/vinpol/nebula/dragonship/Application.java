@@ -27,5 +27,4 @@ public class Application implements CommandLineRunner {
     public void onApplicationEvent(final ServletWebServerInitializedEvent event) {
         this.port = event.getWebServer().getPort();
     }
-
 }

@@ -5,6 +5,7 @@ import dev.vinpol.spacetraders.sdk.models.GetFactions200Response;
 import retrofit2.Call;
 import retrofit2.http.GET;
 
+@RateLimited
 public interface FactionsApi {
     /**
      * Get Faction

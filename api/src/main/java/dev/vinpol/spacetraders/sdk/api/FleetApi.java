@@ -6,6 +6,7 @@ import dev.vinpol.spacetraders.sdk.utils.page.PageIterator;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+@RateLimited
 public interface FleetApi {
     /**
      * Create Chart

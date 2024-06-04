@@ -2,8 +2,9 @@ package dev.vinpol.nebula.dragonship.automation.events;
 
 import dev.vinpol.nebula.dragonship.automation.events.out.CargoIsFullEvent;
 import dev.vinpol.nebula.dragonship.automation.events.out.FuelIsAlmostEmptyEvent;
-import dev.vinpol.nebula.dragonship.automation.events.out.WaitUntilArrivalEvent;
+import dev.vinpol.nebula.dragonship.automation.events.out.NavigatingToEvent;
 import dev.vinpol.nebula.dragonship.automation.events.out.WaitUntilCooldownEvent;
+import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.nebula.dragonship.utils.time.TimeWizard;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,9 +28,9 @@ public class ShipEventNotifierImpl implements ShipEventNotifier {
     }
 
     @Override
-    public void setWaitUntilArrival(String shipSymbol, OffsetDateTime arrival) {
+    public void setNavigatingTo(String shipSymbol, WaypointSymbol waypointSymbol, OffsetDateTime arrival) {
         logEvent("WaitUntilArrival", shipSymbol);
-        eventPublisher.publishEvent(new WaitUntilArrivalEvent(shipSymbol, arrival));
+        eventPublisher.publishEvent(new NavigatingToEvent(shipSymbol, waypointSymbol, arrival));
     }
 
     @Override

@@ -139,11 +139,16 @@ public class ShipFBTFactory implements ShipBehaviourTreeFactory {
             }
 
             return extractResult(() -> {
-                    if (state.isInSequence() && state.result.isFailure()) {
+                    ShipBehaviourResult result = state.result;
+                    if (result.isFailure()) {
+                        logger.error("failed: {}", result);
+                    }
+
+                    if (state.isInSequence() && result.isFailure()) {
                         return ShipBehaviourResult.success();
                     }
 
-                    return state.result;
+                    return result;
                 }
             );
         }

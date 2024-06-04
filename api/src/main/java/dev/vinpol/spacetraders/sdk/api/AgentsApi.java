@@ -7,6 +7,7 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 import retrofit2.http.Query;
 
+@RateLimited
 public interface AgentsApi {
     /**
      * Get Public Agent
@@ -16,7 +17,7 @@ public interface AgentsApi {
      * @return Call&lt;GetMyAgent200Response&gt;
      */
     @GET("agents/{agentSymbol}")
-   GetMyAgent200Response getAgent(@Path("agentSymbol") String agentSymbol);
+    GetMyAgent200Response getAgent(@Path("agentSymbol") String agentSymbol);
 
     /**
      * List Agents

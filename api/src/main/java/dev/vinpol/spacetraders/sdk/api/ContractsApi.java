@@ -8,6 +8,7 @@ import retrofit2.http.*;
 
 import java.util.stream.Stream;
 
+@RateLimited
 public interface ContractsApi {
     /**
      * Accept Contract

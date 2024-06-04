@@ -69,9 +69,9 @@ class ShipCommanderTest {
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any()))
             .thenReturn(
-            CompletableFuture.completedFuture(ShipBehaviourResult.success()),
-            CompletableFuture.completedFuture(ShipBehaviourResult.done())
-        );
+                CompletableFuture.completedFuture(ShipBehaviourResult.success()),
+                CompletableFuture.completedFuture(ShipBehaviourResult.done())
+            );
 
         CompletionStage<?> stage = sut.command(ship);
 
@@ -118,10 +118,12 @@ class ShipCommanderTest {
             CompletableFuture.completedFuture(ShipBehaviourResult.failure("fail this"))
         );
 
-        CompletionStage<?> stage = sut.command(ship);
+        CompletableFuture<?> stage = sut.command(ship).toCompletableFuture();
 
-        assertThat(stage)
-            .failsWithin(Duration.ofSeconds(1));
+        await().until(stage::isDone);
+
+        assertThatThrownBy(() -> stage.getNow(null))
+            .hasRootCauseInstanceOf(RuntimeException.class);
     }
 
 

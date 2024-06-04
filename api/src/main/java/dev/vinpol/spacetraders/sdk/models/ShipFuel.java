@@ -12,6 +12,10 @@ public class ShipFuel {
     private int capacity;
     private ShipFuelConsumed consumed;
 
+    public static ShipFuel infinite() {
+        return new ShipFuel();
+    }
+
     public ShipFuel current(int current) {
         this.current = current;
         return this;

@@ -1,6 +1,5 @@
 package dev.vinpol.nebula.dragonship.automation.command;
 
-import dev.vinpol.nebula.dragonship.automation.ActivityState;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ShipBehaviourScheduler;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.*;
@@ -14,7 +13,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+
+import static dev.vinpol.nebula.dragonship.utils.RuntimeExceptionUtils.rethrowIfPossible;
 
 public class ShipCommander {
 
@@ -80,7 +82,15 @@ public class ShipCommander {
 
     private CompletableFuture<?> handlerFuture(Ship ship, CompletableFuture<ShipBehaviourResult> future, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
         return future
-            .thenCompose(result -> handleResult(ship, result, shipBehaviourResolver));
+            .thenCompose(result -> handleResult(ship, result, shipBehaviourResolver))
+            .handle((BiFunction<Object, Throwable, Object>) (o, throwable) -> {
+                if (throwable != null) {
+                    logger.error("Something went wrong with executing the behaviour", throwable);
+                    rethrowIfPossible(throwable);
+                }
+
+                return o;
+            });
     }
 
     private CompletionStage<?> handleResult(Ship ship, ShipBehaviourResult result, Function<Ship, ShipBehaviour> shipBehaviourResolver) {

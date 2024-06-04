@@ -1,10 +1,13 @@
 package dev.vinpol.nebula.dragonship.automation.events;
 
+import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.spacetraders.sdk.models.Waypoint;
+
 import java.time.OffsetDateTime;
 
 public interface ShipEventNotifier {
 
-    default void setWaitUntilArrival(String shipSymbol, OffsetDateTime arrival) {
+    default void setNavigatingTo(String shipSymbol, WaypointSymbol destination, OffsetDateTime arrival) {
 
     }
 
