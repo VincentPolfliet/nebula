@@ -126,16 +126,6 @@ public class ShipCommander {
         }
     }
 
-    public ActivityState getCurrentState(Ship ship) {
-        return getCurrentBehaviour(ship)
-            .map(this::toActivityState)
-            .orElse(ActivityState.IDLE);
-    }
-
-    private ActivityState toActivityState(ShipBehaviour shipBehaviour) {
-        return ActivityState.IDLE;
-    }
-
     public Optional<ShipBehaviour> getCurrentBehaviour(Ship ship) {
         if (!scheduler.isTickScheduled(ship)) {
             return Optional.empty();

@@ -1,5 +1,6 @@
 package dev.vinpol.spacetraders.sdk.retrofit;
 
+import okhttp3.Request;
 import org.jetbrains.annotations.NotNull;
 import retrofit2.Call;
 import retrofit2.CallAdapter;
@@ -42,7 +43,8 @@ public class SynchronousCallAdapterFactory extends CallAdapter.Factory {
                     throw new RuntimeException("Response not successful: " + response.code() + response.errorBody().string());
                 }
             } catch (IOException e) {
-                throw new RuntimeException("Error executing call synchronously", e);
+                Request request = call.request();
+                throw new RuntimeException("error executing call to '%s'".formatted(request.url()), e);
             }
         }
     }

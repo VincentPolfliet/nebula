@@ -138,6 +138,10 @@ public class Ship {
         return cargo.isFull();
     }
 
+    public boolean isCargoEmpty() {
+        return cargo.isEmpty();
+    }
+
     public Ship fuel(ShipFuel fuel) {
         this.fuel = fuel;
         return this;

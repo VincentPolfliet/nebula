@@ -4,8 +4,9 @@ import dev.vinpol.nebula.dragonship.automation.ShipCloner;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
+import dev.vinpol.nebula.dragonship.sdk.WaypointGenerator;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
-import dev.vinpol.nebula.dragonship.support.junit.MockWebServerExtension;
+import dev.vinpol.nebula.dragonship.support.junit.TestHttpServer;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -26,18 +27,18 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DirtiesContext
 @ContextConfiguration
-@ExtendWith(MockWebServerExtension.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class FindMarketAndSellBehaviourFactoryTest {
 
-    private static MockWebServerExtension SERVER = null;
+    private static TestHttpServer SERVER = new TestHttpServer();
 
     @Autowired
     ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
 
+    private final WaypointGenerator waypointGenerator = new WaypointGenerator();
+
     @BeforeAll
-    static void beforeAll(MockWebServerExtension extension) {
-        SERVER = extension;
+    static void beforeAll() {
     }
 
     @DynamicPropertySource
@@ -75,15 +76,11 @@ class FindMarketAndSellBehaviourFactoryTest {
         });
 
         excavator.withNav(nav -> {
-            nav.withRoute(route -> {
-                route.destination(
-                    new ShipNavRouteWaypoint()
-                        .systemSymbol(waypointSymbol.system())
-                );
-            });
+            nav.systemSymbol(waypointSymbol.system())
+                .waypointSymbol(waypointSymbol.waypoint());
         });
 
-        enqueue(new GetSystemWaypoints200Response().data(Collections.emptyList()));
+        enqueue(new GetSystemWaypoints200Response().data(Collections.emptyList()).meta(new Meta().page(1).limit(10).total(0)));
 
         ShipBehaviourResult result = behaviour.update(excavator);
 
@@ -96,6 +93,9 @@ class FindMarketAndSellBehaviourFactoryTest {
         ShipBehaviour behaviour = factory.create();
 
         WaypointSymbol waypointSymbol = WaypointSymbol.tryParse("XX-XXX1-LEUK");
+        Waypoint waypoint = waypointGenerator.waypoint();
+        waypoint.symbol(waypointSymbol.waypoint())
+            .systemSymbol(waypointSymbol.system());
 
         Ship excavator = MotherShip.excavator();
 
@@ -112,12 +112,8 @@ class FindMarketAndSellBehaviourFactoryTest {
 
         excavator.withNav(nav -> {
             nav.status(ShipNavStatus.IN_ORBIT);
-            nav.withRoute(route -> {
-                route.destination(
-                    new ShipNavRouteWaypoint()
-                        .systemSymbol(waypointSymbol.system())
-                );
-            });
+            nav.systemSymbol(waypointSymbol.system())
+                .waypointSymbol(waypointSymbol.waypoint());
         });
 
         enqueue(new GetSystemWaypoints200Response().data(
@@ -131,7 +127,7 @@ class FindMarketAndSellBehaviourFactoryTest {
                             .symbol(WaypointTraitSymbol.MARKETPLACE)
                     )
             )
-        ));
+        ).meta(new Meta().total(1).page(1).limit(10)));
 
         // in orbit check
         assertThat(behaviour.update(excavator).isSuccess()).isTrue();
@@ -141,6 +137,30 @@ class FindMarketAndSellBehaviourFactoryTest {
         assertThat(notAtLocation.isSuccess()).isTrue();
 
         // navigate
+        enqueue(
+            new GetWaypoint200Response()
+                .data(waypoint)
+        );
+
+        enqueue(
+            new GetWaypoint200Response()
+                .data(new Waypoint()
+                    .x(15)
+                    .y(15)
+                    .symbol(waypointSymbol.system() + "-market")
+                    .systemSymbol(waypointSymbol.system())
+                    .addTraitsItem(
+                        new WaypointTrait()
+                            .name("market")
+                            .symbol(WaypointTraitSymbol.MARKETPLACE)
+                    ))
+        );
+
+        enqueue(
+            new GetShipNav200Response()
+                .data(excavator.getNav())
+        );
+
         OffsetDateTime arrivalDateTime = OffsetDateTime.now();
 
         enqueue(new NavigateShip200Response()

@@ -19,7 +19,11 @@ public record ShipBehaviourSequence(String name,
     }
 
     public static ShipBehaviourSequence sequence(ShipBehaviour... shipBehaviours) {
-        return new ShipBehaviourSequence("sequence-" + UUID.randomUUID(), List.of(shipBehaviours));
+        return sequence(List.of(shipBehaviours));
+    }
+
+    public static ShipBehaviourSequence sequence(List<ShipBehaviour> shipBehaviours) {
+        return new ShipBehaviourSequence("sequence-" + UUID.randomUUID(), shipBehaviours);
     }
 
 

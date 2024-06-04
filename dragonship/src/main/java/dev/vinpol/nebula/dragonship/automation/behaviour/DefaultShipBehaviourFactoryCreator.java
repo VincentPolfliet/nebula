@@ -1,8 +1,11 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
+import dev.vinpol.nebula.dragonship.automation.behaviour.navigation.NavigateBehaviourFactory;
+import dev.vinpol.nebula.dragonship.automation.behaviour.sell.SellCargoBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.nebula.dragonship.ships.TravelFuelAndTimerCalculator;
 import dev.vinpol.spacetraders.sdk.ApiClient;
 import dev.vinpol.spacetraders.sdk.models.TradeSymbol;
 import dev.vinpol.spacetraders.sdk.models.WaypointType;
@@ -12,10 +15,12 @@ import org.springframework.stereotype.Component;
 public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryCreator {
 
     private final ApiClient apiClient;
+    private final TravelFuelAndTimerCalculator travelFuelAndTimerCalculator;
     private final ShipEventNotifier eventNotifier;
 
-    public DefaultShipBehaviourFactoryCreator(ApiClient apiClient, ShipEventNotifier eventNotifier) {
+    public DefaultShipBehaviourFactoryCreator(ApiClient apiClient, TravelFuelAndTimerCalculator travelFuelAndTimerCalculator, ShipEventNotifier eventNotifier) {
         this.apiClient = apiClient;
+        this.travelFuelAndTimerCalculator = travelFuelAndTimerCalculator;
         this.eventNotifier = eventNotifier;
     }
 
@@ -31,7 +36,7 @@ public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryC
 
     @Override
     public NavigateBehaviourFactory navigateAutomation(WaypointSymbol waypointSymbol) {
-        return new NavigateBehaviourFactory(apiClient.fleetApi(), eventNotifier, waypointSymbol);
+        return new NavigateBehaviourFactory(apiClient.fleetApi(), apiClient.systemsApi(), travelFuelAndTimerCalculator, eventNotifier, waypointSymbol);
     }
 
     @Override
@@ -51,7 +56,7 @@ public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryC
 
     @Override
     public FindMarketAndSellBehaviourFactory navigateToClosestMarket() {
-        return new FindMarketAndSellBehaviourFactory(this, apiClient.systemsApi());
+        return new FindMarketAndSellBehaviourFactory(this, apiClient.systemsApi(), travelFuelAndTimerCalculator);
     }
 
     @Override

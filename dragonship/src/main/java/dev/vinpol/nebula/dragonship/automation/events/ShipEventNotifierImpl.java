@@ -50,7 +50,6 @@ public class ShipEventNotifierImpl implements ShipEventNotifier {
         eventPublisher.publishEvent(new FuelIsAlmostEmptyEvent(shipSymbol));
     }
 
-
     private void logEvent(String eventType, String shipSymbol) {
         if (!logger.isTraceEnabled()) {
             return;

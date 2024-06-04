@@ -13,6 +13,10 @@ public class MotherShip {
 
         return new Ship()
             .symbol(shipSymbol)
+            .engine(
+                new ShipEngine()
+                    .speed(100)
+            )
             .nav(new ShipNav()
                 .route(new ShipNavRoute())
                 .status(ShipNavStatus.IN_ORBIT)
