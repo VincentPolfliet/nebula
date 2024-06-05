@@ -86,9 +86,7 @@ public interface SystemsApi {
      * @return Call&lt;GetMarket200Response&gt;
      */
     @GET("systems/{systemSymbol}/waypoints/{waypointSymbol}/market")
-    Call<GetMarket200Response> getMarket(
-        @Path("systemSymbol") String systemSymbol, @Path("waypointSymbol") String waypointSymbol
-    );
+    GetMarket200Response getMarket(@Path("systemSymbol") String systemSymbol, @Path("waypointSymbol") String waypointSymbol);
 
     /**
      * Get Shipyard

@@ -1,5 +1,6 @@
 package dev.vinpol.spacetraders.sdk.retrofit;
 
+import dev.failsafe.Failsafe;
 import dev.failsafe.RateLimiter;
 import dev.vinpol.spacetraders.sdk.api.RateLimited;
 import okhttp3.Interceptor;
@@ -14,38 +15,33 @@ import java.util.Objects;
 
 public class RateLimitInterceptor implements Interceptor {
 
-    private final RateLimiter<Object> rateLimiter;
+    private final RateLimiter<Object> smooth;
+    private final RateLimiter<Object> bursty;
 
-    public RateLimitInterceptor(RateLimiter<Object> rateLimiter) {
-        this.rateLimiter = rateLimiter;
+    public RateLimitInterceptor(RateLimiter<Object> smooth, RateLimiter<Object> bursty) {
+        assert smooth.isSmooth();
+        assert bursty.isBursty();
+
+        this.smooth = smooth;
+        this.bursty = bursty;
     }
 
     @NotNull
     @Override
     public Response intercept(Chain chain) throws IOException {
-        try {
-            Request req = chain.request();
+        Request req = chain.request();
+        Invocation invocation = req.tag(Invocation.class);
 
-            Invocation invocation = req.tag(Invocation.class);
+        Method method = Objects.requireNonNull(invocation).method();
+        Class<?> clazz = method.getDeclaringClass();
 
-            if (invocation == null) {
-                return chain.proceed(req);
-            }
+        boolean methodIsRateLimited = clazz.isAnnotationPresent(RateLimited.class) || method.isAnnotationPresent(RateLimited.class);
 
-            Method method = invocation.method();
-            Class<?> clazz = method.getDeclaringClass();
-
-            boolean isRateLimited = clazz.isAnnotationPresent(RateLimited.class) || method.isAnnotationPresent(RateLimited.class);
-
-            if (isRateLimited) {
-                rateLimiter.acquirePermit();
-            }
-
+        if (!methodIsRateLimited) {
             return chain.proceed(req);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
         }
+
+        return Failsafe.with(smooth, bursty)
+            .get(() -> chain.proceed(req));
     }
-
-
 }

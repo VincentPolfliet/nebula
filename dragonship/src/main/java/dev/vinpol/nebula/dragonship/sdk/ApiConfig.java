@@ -2,6 +2,8 @@ package dev.vinpol.nebula.dragonship.sdk;
 
 
 import dev.failsafe.RateLimiter;
+import dev.failsafe.RateLimiterBuilder;
+import dev.failsafe.RateLimiterConfig;
 import dev.vinpol.nebula.dragonship.bigbrain.BigBrain;
 import dev.vinpol.spacetraders.sdk.ApiClient;
 import dev.vinpol.spacetraders.sdk.RetrofitApiClient;
@@ -26,6 +28,10 @@ import java.util.List;
 @EnableConfigurationProperties({NebulaProperties.class})
 public class ApiConfig {
 
+    // https://github.com/SpaceTradersAPI/api-docs/wiki/Ratelimit
+    private static final RateLimiter<Object> smoothRateLimiter = RateLimiter.smoothBuilder(2, Duration.ofSeconds(1)).build();
+    private static final RateLimiter<Object> burstyRateLimiter = RateLimiter.burstyBuilder(10, Duration.ofSeconds(10)).build();
+
     @Bean
     public ApiClient apiClient(NebulaProperties nebulaProperties, List<Interceptor> interceptors, Nitrite nitrite) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
@@ -33,7 +39,7 @@ public class ApiConfig {
         builder.addInterceptor(new HttpBearerAuth("Bearer", nebulaProperties.token()));
 
         // api is always rate limited
-        builder.addInterceptor(new RateLimitInterceptor(RateLimiter.smoothBuilder(2, Duration.ofSeconds(1)).build()));
+        builder.addInterceptor(new RateLimitInterceptor(smoothRateLimiter, burstyRateLimiter));
 
         // follow order used by spring @Order
         for (Interceptor interceptor : interceptors) {

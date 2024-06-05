@@ -51,7 +51,7 @@ public class ShipEventListenerImpl implements ShipEventListener {
     private void publish(String shipSymbol, Object payload) {
         var event = new JsonEvent(shipSymbol, clock.now(), payload);
         template.convertAndSend("/topic/ships", event);
-        template.convertAndSend("/topic/ships/" + shipSymbol);
+        template.convertAndSend("/topic/ships/" + shipSymbol, event);
     }
 
     record JsonEvent(@JsonProperty("ship") String shipSymbol, @JsonProperty("timestamp") OffsetDateTime timestamp,

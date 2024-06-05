@@ -61,7 +61,10 @@ class NavigationShipBehaviour implements ShipBehaviour {
         Waypoint currentLocationWaypoint = systemsApi.getWaypoint(currentLocationWaypointSymbol.system(), currentLocationWaypointSymbol.waypoint()).getData();
         Waypoint waypoint = systemsApi.getWaypoint(waypointSymbol.system(), waypointSymbolString).getData();
 
-        if (ship.getFuel().isNotInfinite()) {
+        // TODO: make it possible to navigate via multiple waypoints (jgraph or something) that contain refuel options so that flight can be faster
+        //  but at a higher cost instead of drifting all over the place because that is the only possible option :(
+
+        if (ship.isFuelNotInfinite()) {
             flightModeOptimizer.optimizeFlightMode(ship, currentLocationWaypoint, waypoint);
         }
 

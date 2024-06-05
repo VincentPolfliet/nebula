@@ -161,6 +161,11 @@ public class Ship {
         return fuel.isEmpty();
     }
 
+
+    public boolean isFuelNotInfinite() {
+        return fuel.isNotInfinite();
+    }
+
     public boolean considerFuelEmpty(double maxValue) {
         return fuel.shouldConsiderEmpty(maxValue);
     }

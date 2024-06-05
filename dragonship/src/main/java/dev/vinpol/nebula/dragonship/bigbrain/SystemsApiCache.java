@@ -76,7 +76,7 @@ public class SystemsApiCache implements SystemsApi {
     }
 
     @Override
-    public Call<GetMarket200Response> getMarket(String systemSymbol, String waypointSymbol) {
+    public GetMarket200Response getMarket(String systemSymbol, String waypointSymbol) {
         return systemsApi.getMarket(systemSymbol, waypointSymbol);
     }
 
