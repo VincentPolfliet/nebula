@@ -13,18 +13,17 @@ import java.util.*;
 
 import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs.*;
 import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourSequence.sequence;
-import static dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs.*;
 
 public class MiningBehaviourFactory implements ShipBehaviourFactory {
 
     private final Logger logger = LoggerFactory.getLogger(MiningBehaviourFactory.class);
 
     private final SystemsApi systemsApi;
-    private final ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
+    private final AutomationFactory shipBehaviourFactoryCreator;
     private final SystemSymbol system;
     private final WaypointType waypointType;
 
-    public MiningBehaviourFactory(SystemsApi systemsApi, ShipBehaviourFactoryCreator shipBehaviourFactoryCreator, SystemSymbol system, WaypointType waypointType) {
+    public MiningBehaviourFactory(SystemsApi systemsApi, AutomationFactory shipBehaviourFactoryCreator, SystemSymbol system, WaypointType waypointType) {
         this.systemsApi = systemsApi;
         this.shipBehaviourFactoryCreator = shipBehaviourFactoryCreator;
         this.system = system;

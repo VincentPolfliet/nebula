@@ -37,6 +37,10 @@ public class ShipNav {
         return route(currentRoute);
     }
 
+    public ShipNav docked() {
+        return status(ShipNavStatus.DOCKED);
+    }
+
     public ShipNav status(ShipNavStatus status) {
         this.status = status;
         return this;

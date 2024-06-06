@@ -2,9 +2,8 @@ package dev.vinpol.nebula.dragonship.web.fleet;
 
 import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmResolver;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
+import dev.vinpol.nebula.dragonship.automation.behaviour.AutomationFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourLeafs;
-import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipLeafs;
 import dev.vinpol.nebula.dragonship.automation.command.ShipCommander;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.nebula.dragonship.utils.time.TimeWizard;
@@ -32,11 +31,11 @@ public class FleetController {
     private final FleetApi fleetApi;
     private final SystemsApi systemsApi;
     private final ShipCommander shipCommander;
-    private final ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
+    private final AutomationFactory shipBehaviourFactoryCreator;
     private final ShipAlgorithmResolver shipAlgorithmResolver;
     private final Clock clock;
 
-    public FleetController(FleetApi fleetApi, SystemsApi systemsApi, ShipCommander shipCommander, ShipBehaviourFactoryCreator shipBehaviourFactoryCreator, ShipAlgorithmResolver shipAlgorithmResolver, Clock clock) {
+    public FleetController(FleetApi fleetApi, SystemsApi systemsApi, ShipCommander shipCommander, AutomationFactory shipBehaviourFactoryCreator, ShipAlgorithmResolver shipAlgorithmResolver, Clock clock) {
         this.fleetApi = fleetApi;
         this.systemsApi = systemsApi;
         this.shipCommander = shipCommander;

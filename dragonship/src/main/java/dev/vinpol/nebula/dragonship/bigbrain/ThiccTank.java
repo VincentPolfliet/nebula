@@ -7,12 +7,12 @@ import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import org.dizitart.no2.Nitrite;
 
-public final class BigBrain implements ApiClient {
+public final class ThiccTank implements ApiClient {
 
     private final ApiClient inner;
     private final Nitrite nitrite;
 
-    public BigBrain(ApiClient inner, Nitrite nitrite) {
+    public ThiccTank(ApiClient inner, Nitrite nitrite) {
         this.inner = inner;
         this.nitrite = nitrite;
     }
@@ -24,7 +24,7 @@ public final class BigBrain implements ApiClient {
 
     @Override
     public FleetApi fleetApi() {
-        return new FleetApiCache(inner.fleetApi(), nitrite);
+        return inner.fleetApi();
     }
 
     @Override

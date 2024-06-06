@@ -2,9 +2,7 @@ package dev.vinpol.nebula.dragonship.sdk;
 
 
 import dev.failsafe.RateLimiter;
-import dev.failsafe.RateLimiterBuilder;
-import dev.failsafe.RateLimiterConfig;
-import dev.vinpol.nebula.dragonship.bigbrain.BigBrain;
+import dev.vinpol.nebula.dragonship.bigbrain.ThiccTank;
 import dev.vinpol.spacetraders.sdk.ApiClient;
 import dev.vinpol.spacetraders.sdk.RetrofitApiClient;
 import dev.vinpol.spacetraders.sdk.api.AgentsApi;
@@ -33,7 +31,7 @@ public class ApiConfig {
     private static final RateLimiter<Object> burstyRateLimiter = RateLimiter.burstyBuilder(10, Duration.ofSeconds(10)).build();
 
     @Bean
-    public ApiClient apiClient(NebulaProperties nebulaProperties, List<Interceptor> interceptors, Nitrite nitrite) {
+    public ApiClient apiClient(NebulaProperties nebulaProperties, List<Interceptor> interceptors, Nitrite n) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         // api currently needs an authorization token until auto registration is created
         builder.addInterceptor(new HttpBearerAuth("Bearer", nebulaProperties.token()));
@@ -46,7 +44,8 @@ public class ApiConfig {
             builder.addInterceptor(interceptor);
         }
 
-        return new RetrofitApiClient(builder.build(), nebulaProperties.url());
+        var realClient = new RetrofitApiClient(builder.build(), nebulaProperties.url());
+        return realClient;
     }
 
     @Bean

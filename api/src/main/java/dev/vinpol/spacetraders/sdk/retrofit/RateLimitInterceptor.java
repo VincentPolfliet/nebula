@@ -1,6 +1,5 @@
 package dev.vinpol.spacetraders.sdk.retrofit;
 
-import dev.failsafe.Failsafe;
 import dev.failsafe.RateLimiter;
 import dev.vinpol.spacetraders.sdk.api.RateLimited;
 import okhttp3.Interceptor;
@@ -41,7 +40,10 @@ public class RateLimitInterceptor implements Interceptor {
             return chain.proceed(req);
         }
 
-        return Failsafe.with(smooth, bursty)
-            .get(() -> chain.proceed(req));
+        if (smooth.tryAcquirePermit() || bursty.tryAcquirePermit()) {
+            return chain.proceed(req);
+        }
+
+        throw new RuntimeException("Rate limit lock is required but couldn't be acquired for %s#%s".formatted(clazz.getSimpleName(), method.getName()));
     }
 }

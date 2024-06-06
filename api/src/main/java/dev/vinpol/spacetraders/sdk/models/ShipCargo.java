@@ -48,7 +48,6 @@ public class ShipCargo {
     private List<ShipCargoItem> inventory = new ArrayList<>();
 
     public ShipCargo capacity(Integer capacity) {
-
         this.capacity = capacity;
         return this;
     }

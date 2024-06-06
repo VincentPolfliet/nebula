@@ -4,7 +4,7 @@ import dev.vinpol.nebula.dragonship.automation.algorithms.Behaviour;
 import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithm;
 import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmDescription;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
+import dev.vinpol.nebula.dragonship.automation.behaviour.AutomationFactory;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.ShipNavRouteWaypoint;
@@ -18,9 +18,9 @@ import java.util.Objects;
 @Component
 public class ExcavatorAlgorithm implements ShipAlgorithm {
 
-    private final ShipBehaviourFactoryCreator shipBehaviourFactoryCreator;
+    private final AutomationFactory shipBehaviourFactoryCreator;
 
-    public ExcavatorAlgorithm(ShipBehaviourFactoryCreator shipBehaviourFactoryCreator) {
+    public ExcavatorAlgorithm(AutomationFactory shipBehaviourFactoryCreator) {
         this.shipBehaviourFactoryCreator = shipBehaviourFactoryCreator;
     }
 
@@ -45,16 +45,19 @@ public class ExcavatorAlgorithm implements ShipAlgorithm {
     public ShipBehaviour decideBehaviour(Ship ship) {
         Objects.requireNonNull(ship);
 
-        if (ship.hasActiveCooldown()) {
-            return shipBehaviourFactoryCreator.cooldownActive(ship.getCooldown().getExpiration());
-        }
-
+        // if we're in transit, we can do absolutely nothing
         if (ship.isInTransit()) {
             return shipBehaviourFactoryCreator.inTransit(ship.getNav().getRoute().getArrival());
         }
 
+        // cargo full, try to fly to the closest market to lose some loot
         if (ship.isCargoFull()) {
             return shipBehaviourFactoryCreator.navigateToClosestMarket().create();
+        }
+
+        // if we have an active cooldown, we can't mine
+        if (ship.hasActiveCooldown()) {
+            return shipBehaviourFactoryCreator.cooldownActive(ship.getCooldown().getExpiration());
         }
 
         ShipNavRouteWaypoint target = getTarget(ship);
@@ -64,6 +67,4 @@ public class ExcavatorAlgorithm implements ShipAlgorithm {
     private ShipNavRouteWaypoint getTarget(Ship ship) {
         return ship.getNav().getRoute().getDestination();
     }
-
-
 }

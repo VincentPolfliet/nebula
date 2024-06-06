@@ -1,4 +1,4 @@
-package dev.vinpol.nebula.dragonship.automation.sdk;
+package dev.vinpol.nebula.dragonship.sdk;
 
 import dev.vinpol.spacetraders.sdk.models.Cooldown;
 

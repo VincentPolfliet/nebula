@@ -1,4 +1,4 @@
-package dev.vinpol.nebula.dragonship.automation.sdk;
+package dev.vinpol.nebula.dragonship.sdk;
 
 import dev.vinpol.spacetraders.sdk.models.ShipCargo;
 import dev.vinpol.spacetraders.sdk.models.ShipCargoItem;
@@ -14,15 +14,16 @@ public class ShipCargoUtil {
 
     public static ShipCargo cargo(int capacity, int units) {
         return new ShipCargo()
-                .capacity(capacity)
-                .units(units);
+            .capacity(capacity)
+            .units(units);
     }
 
     public static ShipCargoItem cargoItem(TradeSymbol tradeSymbol) {
         Objects.requireNonNull(tradeSymbol);
 
         return new ShipCargoItem()
-                .symbol(tradeSymbol)
-                .name(tradeSymbol.name());
+            .units(1)
+            .symbol(tradeSymbol)
+            .name(tradeSymbol.name());
     }
 }

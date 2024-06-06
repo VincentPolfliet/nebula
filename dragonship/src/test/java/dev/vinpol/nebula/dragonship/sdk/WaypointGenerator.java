@@ -23,6 +23,15 @@ public class WaypointGenerator {
     public Waypoint waypoint() {
         WaypointSymbol waypointSymbol = waypointSymbol();
 
+        return generateWaypoint(waypointSymbol);
+    }
+
+    public Waypoint waypointOf(String waypointSymbolStr) {
+        WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(waypointSymbolStr);
+        return generateWaypoint(waypointSymbol);
+    }
+
+    private static Waypoint generateWaypoint(WaypointSymbol waypointSymbol) {
         return Instancio.of(Waypoint.class)
             .supply(field(Waypoint::getSymbol), waypointSymbol::waypoint)
             .supply(field(Waypoint::getSystemSymbol), waypointSymbol::system)

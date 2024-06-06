@@ -8,7 +8,7 @@ import okhttp3.mockwebserver.MockWebServer;
 
 import java.io.UncheckedIOException;
 
-public class TestHttpServer {
+public class TestHttpServer implements AutoCloseable {
 
     private final MockWebServer server = new MockWebServer();
     private final ObjectMapper objectMapper;
@@ -37,5 +37,10 @@ public class TestHttpServer {
 
     public HttpUrl url(String path) {
         return server.url(path);
+    }
+
+    @Override
+    public void close() throws Exception {
+        server.close();
     }
 }

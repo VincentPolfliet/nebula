@@ -5,7 +5,7 @@ import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
-import dev.vinpol.nebula.dragonship.automation.sdk.ShipExtractionUtil;
+import dev.vinpol.nebula.dragonship.sdk.ShipExtractionUtil;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -13,7 +13,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.OffsetDateTime;
 
-import static dev.vinpol.nebula.dragonship.automation.sdk.ShipCargoUtil.cargoItem;
+import static dev.vinpol.nebula.dragonship.sdk.ShipCargoUtil.cargoItem;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 

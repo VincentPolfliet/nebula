@@ -53,6 +53,10 @@ public interface ShipBehaviour {
         return new LazyLoadShipBehaviour(function);
     }
 
+    static ShipBehaviour safe(ShipBehaviour behaviour) {
+        return new SafeShipBehaviour(behaviour);
+    }
+
     default String getName() {
         return this.getClass().getSimpleName();
     }

@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
+import dev.vinpol.nebula.dragonship.automation.behaviour.market.FindMarketAndSellBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.navigation.NavigateBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.sell.SellCargoBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
@@ -15,7 +16,7 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Objects;
 
-public interface ShipBehaviourFactoryCreator {
+public interface AutomationFactory {
 
     MiningBehaviourFactory miningAutomation(SystemSymbol system, WaypointType waypointType);
 
@@ -27,7 +28,7 @@ public interface ShipBehaviourFactoryCreator {
 
     DockBehaviourFactory dock();
 
-    RefuelBehaviour refuel();
+    RefuelBehaviourFactory refuel();
 
     default ShipBehaviour cooldownActive(OffsetDateTime expiration) {
         Objects.requireNonNull(expiration, "expiration");
@@ -57,6 +58,8 @@ public interface ShipBehaviourFactoryCreator {
                 ref.setBehaviourFactory(this);
             } else if (leaf instanceof ShipBehaviourSequence sequence) {
                 inject(sequence.behaviours());
+            } else if (leaf instanceof SafeShipBehaviour safe) {
+                inject(List.of(safe.unwrap()));
             }
         }
     }

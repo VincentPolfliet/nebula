@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation;
 
 import dev.vinpol.nebula.dragonship.automation.ai.AgentAI;
 import dev.vinpol.nebula.dragonship.automation.command.ShipCommander;
-import dev.vinpol.nebula.dragonship.automation.sdk.ApiClientStub;
+import dev.vinpol.nebula.dragonship.sdk.ApiClientStub;
 import dev.vinpol.nebula.javaGOAP.DefaultGoapAgent;
 import dev.vinpol.nebula.javaGOAP.GoapAgent;
 import dev.vinpol.nebula.javaGOAP.GoapState;

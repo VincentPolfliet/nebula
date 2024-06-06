@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
+import dev.vinpol.nebula.dragonship.automation.behaviour.market.FindMarketAndSellBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.navigation.NavigateBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.sell.SellCargoBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
@@ -12,13 +13,13 @@ import dev.vinpol.spacetraders.sdk.models.WaypointType;
 import org.springframework.stereotype.Component;
 
 @Component
-public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryCreator {
+public class DefaultAutomationFactory implements AutomationFactory {
 
     private final ApiClient apiClient;
     private final TravelFuelAndTimerCalculator travelFuelAndTimerCalculator;
     private final ShipEventNotifier eventNotifier;
 
-    public DefaultShipBehaviourFactoryCreator(ApiClient apiClient, TravelFuelAndTimerCalculator travelFuelAndTimerCalculator, ShipEventNotifier eventNotifier) {
+    public DefaultAutomationFactory(ApiClient apiClient, TravelFuelAndTimerCalculator travelFuelAndTimerCalculator, ShipEventNotifier eventNotifier) {
         this.apiClient = apiClient;
         this.travelFuelAndTimerCalculator = travelFuelAndTimerCalculator;
         this.eventNotifier = eventNotifier;
@@ -50,8 +51,8 @@ public class DefaultShipBehaviourFactoryCreator implements ShipBehaviourFactoryC
     }
 
     @Override
-    public RefuelBehaviour refuel() {
-        return new RefuelBehaviour(apiClient.fleetApi());
+    public RefuelBehaviourFactory refuel() {
+        return new RefuelBehaviourFactory(apiClient.fleetApi(), apiClient.systemsApi());
     }
 
     @Override

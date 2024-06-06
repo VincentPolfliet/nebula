@@ -2,18 +2,17 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactory;
-import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactoryCreator;
+import dev.vinpol.nebula.dragonship.automation.behaviour.AutomationFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 
-import java.util.List;
 import java.util.Objects;
 
 public final class ShipBehaviourRefLeaf implements ShipBehaviour {
 
     private final String name;
     private final ShipBehaviourRef ref;
-    private ShipBehaviourFactoryCreator behaviourFactory;
+    private AutomationFactory behaviourFactory;
     private ShipBehaviour inner;
 
     public ShipBehaviourRefLeaf(ShipBehaviourRef ref) {
@@ -26,7 +25,7 @@ public final class ShipBehaviourRefLeaf implements ShipBehaviour {
         this.ref = Objects.requireNonNull(ref);
     }
 
-    public void setBehaviourFactory(ShipBehaviourFactoryCreator behaviourFactory) {
+    public void setBehaviourFactory(AutomationFactory behaviourFactory) {
         this.behaviourFactory = behaviourFactory;
     }
 

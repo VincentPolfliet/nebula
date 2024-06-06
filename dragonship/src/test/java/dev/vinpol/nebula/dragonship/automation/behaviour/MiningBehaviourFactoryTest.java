@@ -2,12 +2,12 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResultAssert;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
-import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
-import dev.vinpol.nebula.dragonship.sdk.WaypointGenerator;
-import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.nebula.dragonship.sdk.*;
 import dev.vinpol.nebula.dragonship.support.junit.TestHttpServer;
 import dev.vinpol.spacetraders.sdk.models.*;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +21,9 @@ import java.time.OffsetDateTime;
 import java.util.Collections;
 import java.util.List;
 
-import static dev.vinpol.nebula.dragonship.automation.sdk.CooldownUtil.cooldown;
-import static dev.vinpol.nebula.dragonship.automation.sdk.ShipCargoUtil.cargoItem;
+import static dev.vinpol.nebula.dragonship.sdk.CooldownUtil.cooldown;
+import static dev.vinpol.nebula.dragonship.sdk.ShipCargoUtil.cargoItem;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
 
 @DirtiesContext
 @ContextConfiguration
@@ -34,19 +33,24 @@ class MiningBehaviourFactoryTest {
     private static TestHttpServer server;
 
     @Autowired
-    private ShipBehaviourFactoryCreator registry;
+    private AutomationFactory registry;
 
     private WaypointGenerator waypointGenerator = new WaypointGenerator();
+
+    @DynamicPropertySource
+    static void dynamicProperties(DynamicPropertyRegistry registry) {
+        registry.add("nebula.st.url", () -> server.url("/").toString());
+        registry.add("nebula.st.token", () -> "token");
+    }
 
     @BeforeAll
     static void setup() {
         server = new TestHttpServer();
     }
 
-    @DynamicPropertySource
-    static void dynamicProperties(DynamicPropertyRegistry registry) {
-        registry.add("nebula.st.url", () -> server.url("/").toString());
-        registry.add("nebula.st.token", () -> "token");
+    @AfterAll
+    static void close() throws Exception {
+        server.close();
     }
 
     @Test
@@ -84,16 +88,21 @@ class MiningBehaviourFactoryTest {
 
         ship.withNav(nav -> {
             nav.setStatus(ShipNavStatus.IN_ORBIT);
+            nav.setSystemSymbol(currentLocationSymbol.system());
             nav.setWaypointSymbol(currentLocationSymbol.waypoint());
         });
 
         enqueue(new GetSystemWaypoints200Response().data(List.of(asteroidWaypoint)));
 
-        // check in orbit
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        // orbit
+        Ship afterOrbitShip = ShipCloner.clone(ship).withNav(nav -> {
+            nav.setStatus(ShipNavStatus.IN_ORBIT);
+        });
 
-        // check at location
+        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitShip.getNav())));
+
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
+        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
 
         // navigate
         Ship afterNavigationShip = ShipCloner.clone(ship).withNav(nav -> {
@@ -126,12 +135,10 @@ class MiningBehaviourFactoryTest {
 
         assertThat(ship.getNav().getWaypointSymbol()).isEqualTo(afterNavigationShip.getNav().getWaypointSymbol());
 
-        // not docked check
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
         // dock
         Ship afterDockingShip = ShipCloner.clone(ship).withNav(nav -> {
-            nav.setWaypointSymbol(asteroidWaypointSymbol.waypoint());
+            nav.waypointSymbol(asteroidWaypointSymbol.waypoint());
+            nav.systemSymbol(asteroidWaypointSymbol.system());
             nav.setStatus(ShipNavStatus.DOCKED);
         });
 
@@ -141,14 +148,15 @@ class MiningBehaviourFactoryTest {
         assertThat(dockResult.isSuccess()).isTrue();
         assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.DOCKED);
 
-        // check if we need to refuel
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
         // refuel
         Ship afterRefueling = ShipCloner.clone(ship).withFuel(fuel -> {
             fuel.setCurrent(100);
             fuel.setCapacity(100);
         });
+
+        asteroidWaypoint.addTraitsItem(WaypointTraits.market());
+        enqueue(new GetWaypoint200Response().data(asteroidWaypoint));
+        enqueue(new GetMarket200Response().data(new Market().addExportsItem(TradeGoods.fuel())));
 
         enqueue(new RefuelShip200Response()
             .data(
@@ -160,15 +168,12 @@ class MiningBehaviourFactoryTest {
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
         assertThat(ship.getFuel().isFull()).isTrue();
 
-        // not in orbit check
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
         // orbit
-        Ship afterOrbitShip = ShipCloner.clone(ship).withNav(nav -> {
+        Ship afterOrbitShip2 = ShipCloner.clone(ship).withNav(nav -> {
             nav.setStatus(ShipNavStatus.IN_ORBIT);
         });
 
-        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitShip.getNav())));
+        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitShip2.getNav())));
 
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
         assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
@@ -213,29 +218,6 @@ class MiningBehaviourFactoryTest {
 
         enqueue(new GetSystemWaypoints200Response().data(List.of(new Waypoint().symbol(symbol.system() + "-" + waypointType).type(waypointType))));
 
-        // check in orbit
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // check at location
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // check is not docked
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // dock
-        enqueue(new DockShip200Response()
-            .data(new ShipNavModifiedResponseData()
-                .nav(ShipCloner.clone(ship).getNav().status(ShipNavStatus.DOCKED)))
-        );
-
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // check fuel is not full
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // check not in orbit
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
         // orbit
         Ship afterOrbitShip = ShipCloner.clone(ship).withNav(nav -> {
             nav.setStatus(ShipNavStatus.IN_ORBIT);
@@ -245,6 +227,9 @@ class MiningBehaviourFactoryTest {
 
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
         assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
+
+        // try navigate
+        behaviour.update(ship);
 
         // extraction
         Ship afterExtractionShip = ShipCloner.clone(ship)
@@ -264,7 +249,7 @@ class MiningBehaviourFactoryTest {
         );
 
         ShipBehaviourResult extractionResult = behaviour.update(ship);
-        assertThat(extractionResult.isWaitUntil()).isTrue();
+        ShipBehaviourResultAssert.assertThat(extractionResult).isWaitUntil();
     }
 
     @Test
@@ -286,9 +271,6 @@ class MiningBehaviourFactoryTest {
 
         enqueue(new GetSystemWaypoints200Response().data(List.of(new Waypoint().symbol(symbol.system() + "-" + waypointType).type(waypointType))));
 
-        // check in orbit
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
         // orbit
         Ship afterOrbitShip = ShipCloner.clone(ship).withNav(nav -> {
             nav.setStatus(ShipNavStatus.IN_ORBIT);
@@ -299,36 +281,8 @@ class MiningBehaviourFactoryTest {
         assertThat(behaviour.update(ship).isSuccess()).isTrue();
         assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
 
-        // check at location
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // check is not docked
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // dock
-        enqueue(new DockShip200Response()
-            .data(new ShipNavModifiedResponseData()
-                .nav(ShipCloner.clone(ship).getNav().status(ShipNavStatus.DOCKED)))
-        );
-
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.DOCKED);
-
-        // fuel is not full
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // not in orbit check
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-
-        // orbit again
-        Ship afterOrbitAgain = ShipCloner.clone(ship).withNav(nav -> {
-            nav.setStatus(ShipNavStatus.IN_ORBIT);
-        });
-
-        enqueue(new OrbitShip200Response().data(new ShipNavModifiedResponseData().nav(afterOrbitAgain.getNav())));
-
-        assertThat(behaviour.update(ship).isSuccess()).isTrue();
-        assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);
+        // tryNavigate
+        ShipBehaviourResultAssert.assertThat(behaviour.update(ship)).isSuccess();
 
         // extraction
         Ship afterExtractionShip = ShipCloner.clone(ship)
