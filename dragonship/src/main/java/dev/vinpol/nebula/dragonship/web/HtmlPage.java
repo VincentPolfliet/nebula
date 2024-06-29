@@ -1,12 +1,12 @@
 package dev.vinpol.nebula.dragonship.web;
 
-public class Page {
+public class HtmlPage {
     private String title;
 
-    public Page() {
+    public HtmlPage() {
     }
 
-    public Page withTitle(String title) {
+    public HtmlPage withTitle(String title) {
         this.title = title;
         return this;
     }
@@ -21,8 +21,8 @@ public class Page {
 
     public boolean equals(final Object o) {
         if (o == this) return true;
-        if (!(o instanceof Page)) return false;
-        final Page other = (Page) o;
+        if (!(o instanceof HtmlPage)) return false;
+        final HtmlPage other = (HtmlPage) o;
         if (!other.canEqual((Object) this)) return false;
         final Object this$title = this.getTitle();
         final Object other$title = other.getTitle();
@@ -31,7 +31,7 @@ public class Page {
     }
 
     protected boolean canEqual(final Object other) {
-        return other instanceof Page;
+        return other instanceof HtmlPage;
     }
 
     public int hashCode() {

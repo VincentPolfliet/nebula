@@ -18,7 +18,9 @@ import org.dizitart.no2.Nitrite;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.util.List;
 
@@ -27,11 +29,11 @@ import java.util.List;
 public class ApiConfig {
 
     // https://github.com/SpaceTradersAPI/api-docs/wiki/Ratelimit
-    private static final RateLimiter<Object> smoothRateLimiter = RateLimiter.smoothBuilder(2, Duration.ofSeconds(1)).build();
-    private static final RateLimiter<Object> burstyRateLimiter = RateLimiter.burstyBuilder(10, Duration.ofSeconds(10)).build();
+    private static final RateLimiter<Object> smoothRateLimiter = RateLimiter.smoothBuilder(2, Duration.ofSeconds(1)).withMaxWaitTime(Duration.ofSeconds(1)).build();
+    private static final RateLimiter<Object> burstyRateLimiter = RateLimiter.burstyBuilder(10, Duration.ofSeconds(10)).withMaxWaitTime(Duration.ofSeconds(10)).build();
 
     @Bean
-    public ApiClient apiClient(NebulaProperties nebulaProperties, List<Interceptor> interceptors, Nitrite n) {
+    public ApiClient apiClient(NebulaProperties nebulaProperties, List<Interceptor> interceptors, Nitrite n, Clock clock, TaskScheduler scheduler) {
         OkHttpClient.Builder builder = new OkHttpClient.Builder();
         // api currently needs an authorization token until auto registration is created
         builder.addInterceptor(new HttpBearerAuth("Bearer", nebulaProperties.token()));
@@ -45,7 +47,7 @@ public class ApiConfig {
         }
 
         var realClient = new RetrofitApiClient(builder.build(), nebulaProperties.url());
-        return realClient;
+        return new ThiccTank(realClient, n, clock, scheduler);
     }
 
     @Bean

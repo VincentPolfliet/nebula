@@ -1,12 +1,9 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.navigation;
 
-import dev.vinpol.nebula.dragonship.geo.Coordinate;
-import dev.vinpol.nebula.dragonship.ships.TravelFuelAndTimerCalculator;
+import dev.vinpol.nebula.dragonship.geo.GridXY;
+import dev.vinpol.nebula.dragonship.ships.TravelCostCalculator;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
-import dev.vinpol.spacetraders.sdk.models.PatchShipNavRequest;
-import dev.vinpol.spacetraders.sdk.models.Ship;
-import dev.vinpol.spacetraders.sdk.models.ShipNavFlightMode;
-import dev.vinpol.spacetraders.sdk.models.Waypoint;
+import dev.vinpol.spacetraders.sdk.models.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -17,42 +14,35 @@ class FlightModeOptimizer {
     private final Logger logger = LoggerFactory.getLogger(FlightModeOptimizer.class);
 
     private final FleetApi fleetApi;
-    private final TravelFuelAndTimerCalculator travelFuelAndTimerCalculator;
+    private final TravelCostCalculator travelCostCalculator;
 
-    FlightModeOptimizer(FleetApi fleetApi, TravelFuelAndTimerCalculator travelFuelAndTimerCalculator) {
+    FlightModeOptimizer(FleetApi fleetApi, TravelCostCalculator travelCostCalculator) {
         this.fleetApi = fleetApi;
-        this.travelFuelAndTimerCalculator = travelFuelAndTimerCalculator;
+        this.travelCostCalculator = travelCostCalculator;
+    }
+
+    void optimizeFlightMode(Ship ship, SystemWaypoint currentLocation, SystemWaypoint targetLocation) {
+        internalCalculate(ship, targetLocation.getSymbol(), GridXY.toCoordinate(currentLocation), GridXY.toCoordinate(targetLocation));
     }
 
     void optimizeFlightMode(Ship ship, Waypoint currentLocationWaypoint, Waypoint waypoint) {
-        Coordinate origin = Coordinate.toCoordinate(currentLocationWaypoint);
-        Coordinate target = Coordinate.toCoordinate(waypoint);
-        int currentFuel = ship.getFuel().getCurrent();
+        internalCalculate(ship, waypoint.getSymbol(), GridXY.toCoordinate(currentLocationWaypoint), GridXY.toCoordinate(waypoint));
+    }
 
-        Map<ShipNavFlightMode, Long> fuelCost = travelFuelAndTimerCalculator.calculateFuel(origin, target);
-        Map<ShipNavFlightMode, Double> timeCost = travelFuelAndTimerCalculator.calculateTime(origin, target, ship.getEngine().getSpeed());
-
-        for (ShipNavFlightMode flightMode : ShipNavFlightMode.values()) {
-            Long costOfFlightMode = fuelCost.getOrDefault(flightMode, 1L);
-
-            if (currentFuel - costOfFlightMode <= 0) {
-                fuelCost.remove(flightMode);
-                timeCost.remove(flightMode);
-            }
-        }
+    private void internalCalculate(Ship ship, String symbol, GridXY origin, GridXY target) {
+        Map<ShipNavFlightMode, Long> fuelCost = travelCostCalculator.calculateFuel(origin, target);
 
         if (fuelCost.isEmpty()) {
-            throw new RuntimeException("fuel cost is not allowed to be null, that means that there is not way to navigate to the selected waypoint, has the current ship no fuel?");
+            throw new RuntimeException("fuel cost is not allowed to be null, that means that there is not way to navigate to the selected origin, has the current ship no fuel?");
         }
 
-        ShipNavFlightMode bestFlightMode = travelFuelAndTimerCalculator.selectBestFlightMode(timeCost, fuelCost);
+        ShipNavFlightMode bestFlightMode = travelCostCalculator.selectBestFlightMode(fuelCost);
         logger.debug("bestFlightMode for '{}': {}", ship.getSymbol(), bestFlightMode);
 
-        if (fuelCost.containsKey(bestFlightMode) && timeCost.containsKey(bestFlightMode)) {
+        if (fuelCost.containsKey(bestFlightMode)) {
             long bestFuelCostInUnits = fuelCost.get(bestFlightMode);
-            double bestTimeInSeconds = timeCost.get(bestFlightMode);
-
-            logger.info("Travelling to {} for {} will take +-{}s and will cost {} fuel units ({})", waypoint.getSymbol(), ship.getSymbol(), bestTimeInSeconds, bestFuelCostInUnits, bestFlightMode);
+            double bestTimeInSeconds = travelCostCalculator.calculateTime(origin, target, ship.getEngine().getSpeed()).get(bestFlightMode);
+            logger.info("Travelling to {} for {} will take +-{}s and will cost {} fuel units ({})", symbol, ship.getSymbol(), bestTimeInSeconds, bestFuelCostInUnits, bestFlightMode);
         }
 
         fleetApi.patchShipNav(ship.getSymbol(), new PatchShipNavRequest().flightMode(bestFlightMode));

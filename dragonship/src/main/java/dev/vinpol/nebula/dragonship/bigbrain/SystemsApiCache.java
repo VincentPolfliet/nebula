@@ -4,18 +4,40 @@ import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.System;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.dizitart.no2.Nitrite;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.scheduling.TaskScheduler;
 import retrofit2.Call;
+
+import java.time.Clock;
+import java.time.OffsetDateTime;
 
 public class SystemsApiCache implements SystemsApi {
 
+    private final Logger logger = LoggerFactory.getLogger(SystemsApiCache.class);
+
     private final SystemsApi systemsApi;
+
     private final NitriteApiCache<String, System> systemCache;
     private final NitriteApiCache<String, Waypoint> waypointsPerSystemCache;
 
-    public SystemsApiCache(SystemsApi systemsApi, Nitrite nitrite) {
+    private final NitriteApiCache<String, MarketData> marketDataCache;
+
+    private final Clock clock;
+    private final TaskScheduler taskScheduler;
+
+    public SystemsApiCache(SystemsApi systemsApi, Nitrite nitrite, Clock clock, TaskScheduler taskScheduler) {
         this.systemsApi = systemsApi;
+
         this.systemCache = new NitriteApiCache<>(nitrite, System.class, "symbol");
         this.waypointsPerSystemCache = new NitriteApiCache<>(nitrite, Waypoint.class, "symbol");
+
+        this.marketDataCache = new NitriteApiCache<>(nitrite, MarketData.class, "symbol");
+
+        this.clock = clock;
+        this.taskScheduler = taskScheduler;
+
+        //marketDataCache.clear();
     }
 
     @Override
@@ -77,7 +99,23 @@ public class SystemsApiCache implements SystemsApi {
 
     @Override
     public GetMarket200Response getMarket(String systemSymbol, String waypointSymbol) {
-        return systemsApi.getMarket(systemSymbol, waypointSymbol);
+        return marketDataCache.getByIdAsOptional(waypointSymbol)
+            .map(market -> new GetMarket200Response().data(market.market()))
+            .orElseGet(() -> {
+                OffsetDateTime now = OffsetDateTime.now(clock);
+                OffsetDateTime expiresOn = now.plusMinutes(5);
+
+                GetMarket200Response response = systemsApi.getMarket(systemSymbol, waypointSymbol);
+                marketDataCache.updateOrInsert(waypointSymbol, new MarketData(waypointSymbol, response.getData(), now, expiresOn));
+
+                logger.info("Removing market for '{}' on '{}'", waypointSymbol, expiresOn);
+
+                taskScheduler.schedule(() -> {
+                    marketDataCache.deleteIfExistsByKey(waypointSymbol);
+                }, expiresOn.toInstant());
+
+                return response;
+            });
     }
 
     @Override
@@ -88,5 +126,9 @@ public class SystemsApiCache implements SystemsApi {
     @Override
     public Call<SupplyConstruction201Response> supplyConstruction(String systemSymbol, String waypointSymbol, SupplyConstructionRequest supplyConstructionRequest) {
         return systemsApi.supplyConstruction(systemSymbol, waypointSymbol, supplyConstructionRequest);
+    }
+
+    private record MarketData(String symbol, Market market, OffsetDateTime fetchedOn, OffsetDateTime expiresOn) {
+
     }
 }

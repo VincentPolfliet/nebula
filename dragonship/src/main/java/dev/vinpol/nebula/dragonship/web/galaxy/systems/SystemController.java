@@ -1,7 +1,8 @@
 package dev.vinpol.nebula.dragonship.web.galaxy.systems;
 
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
-import dev.vinpol.nebula.dragonship.web.Page;
+import dev.vinpol.nebula.dragonship.web.HtmlPage;
+import dev.vinpol.nebula.dragonship.web.HtmlPage;
 import dev.vinpol.nebula.dragonship.web.utils.PagingUtils;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.GetSystemWaypoints200Response;
@@ -30,7 +31,7 @@ public class SystemController {
                                 @RequestParam(value = "total", defaultValue = "10") int total,
                                 @RequestParam(value = "type", required = false) WaypointType type,
                                 Model model) {
-        Page content = new Page();
+        HtmlPage content = new HtmlPage();
         content.setTitle("System");
 
         model.addAttribute("page", content);

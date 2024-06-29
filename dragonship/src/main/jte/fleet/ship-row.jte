@@ -1,15 +1,12 @@
-@import dev.vinpol.nebula.dragonship.automation.ActivityState
 @import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour
 @import dev.vinpol.nebula.dragonship.utils.time.TimeWizard
+@import dev.vinpol.nebula.dragonship.web.fleet.FleetUtils
 @import dev.vinpol.nebula.dragonship.web.support.jte.JteLocalizer
 @import dev.vinpol.spacetraders.sdk.models.*
 @import dev.vinpol.spacetraders.sdk.models.ShipNavFlightMode
-@import dev.vinpol.spacetraders.sdk.models.ShipNavStatus
-@import dev.vinpol.spacetraders.sdk.models.WaypointType
 
 @import java.util.Set
 @import static dev.vinpol.nebula.dragonship.web.fleet.FleetUtils.*
-@import static dev.vinpol.nebula.dragonship.web.support.jte.RawContent.raw
 
 @param Ship ship
 @param Set<ShipRole> automationSupport
@@ -28,9 +25,12 @@
            double engineCondition = ship.getEngine().getCondition() * 100;
         }
 
-        <p>${String.format("%.2f", reactorCondition)} / ${String.format("%.2f", frameCondition)}
-            / ${String.format("%.2f", engineCondition)} (${String.format("%.2f %%", calculateAverageCondition(ship))}
-            )</p>
+        <ul class="condition-list">
+            <li class="condition-item">${formatCondition(reactorCondition)}</li>
+            <li class="condition-item">${formatCondition(frameCondition)}</li>
+            <li class="condition-item-last">${formatCondition(frameCondition)}</li>
+            <li class="condition-item-average">${formatCondition(calculateAverageCondition(ship))}</li>
+        </ul>
 
         !{
             double reactorIntegrity = ship.getReactor().getIntegrity() * 100;
@@ -38,9 +38,12 @@
             double engineIntegrity = ship.getEngine().getIntegrity() * 100;
         }
 
-        <p>${String.format("%.2f", reactorIntegrity)} / ${String.format("%.2f", frameIntegrity)}
-            / ${String.format("%.2f", engineIntegrity)} (${String.format("%.2f %%", calculateAverageIntegrity(ship))}
-            )</p>
+        <ul class="condition-list">
+            <li class="condition-item">${formatCondition(reactorIntegrity)}</li>
+            <li class="condition-item">${formatCondition(frameIntegrity)}</li>
+            <li class="condition-item-last">${formatCondition(engineIntegrity)}</li>
+            <li class="condition-item-average">${formatCondition(calculateAverageIntegrity(ship))}</li>
+        </ul>
     </td>
 
     <td>
@@ -48,11 +51,21 @@
         !{var destination = ship.getNav().getRoute().getDestination();}
 
         @if(ship.getNav().isInTransit())
-            <a href="/galaxy/waypoint/${origin.getSymbol()}">${origin.getSymbol()}</a> ->
+            <a href="/galaxy/waypoint/${origin.getSymbol()}">${origin.getSymbol()}</a> <i class="gg-arrow-right"></i>
             <a href="/galaxy/waypoint/${destination.getSymbol()}">${destination.getSymbol()}</a>
         @else
             <a href="/galaxy/waypoint/${destination.getSymbol()}">${destination.getSymbol()}
                 <span>(${destination.getType()})</span></a>
+        @endif
+    </td>
+
+    <td>
+        <p>${ship.getNav().getStatus().name()}</p>
+
+        @if(ship.isInTransit())
+            !{var targetDate = ship.getNav().getRoute().getArrival();}
+            <time class="humanize humanize-relativetime humanize-update is-small"
+                  datetime="${targetDate.toString()}">${clock.differenceInSeconds(targetDate)}</time>
         @endif
     </td>
 
@@ -66,6 +79,14 @@
                 @endfor
             </select>
         </span>
+    </td>
+
+    <td>
+        @if(ship.hasActiveCooldown())
+            !{var targetDate = ship.getCooldown().getExpiration();}
+            <time class="humanize humanize-relativetime humanize-update is-small"
+                  datetime="${targetDate.toString()}">${clock.differenceInSeconds(targetDate)}</time>
+        @endif
     </td>
 
     <td class="is-number">
@@ -85,22 +106,6 @@
             ${cargo.getUnits()} / ${cargo.getCapacity()}
         @else
             -
-        @endif
-    </td>
-
-    <td>
-        @if(ship.hasActiveCooldown())
-            <span>COOLDOWN</span>
-            <time class="humanize humanize-relativetime"
-                  datetime="${ship.getCooldown().getExpiration().toString()}">${clock.differenceInSeconds(ship.getCooldown().getExpiration())}</time>)
-        @elseif(ship.isInTransit())
-            ${ShipNavStatus.IN_TRANSIT} (est
-            <time class="humanize humanize-relativetime"
-                  datetime="${ship.getNav().getRoute().getArrival().toString()}">${clock.differenceInSeconds(ship.getNav().getRoute().getArrival())}</time>)
-        @elseif(!ship.getNav().isInTransit())
-            ${ship.getNav().getStatus()}
-        @else
-            ${ActivityState.IDLE}
         @endif
     </td>
 

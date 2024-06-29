@@ -1,9 +1,9 @@
-@import dev.vinpol.nebula.dragonship.web.Page
+@import dev.vinpol.nebula.dragonship.web.HtmlPage
 @import dev.vinpol.spacetraders.sdk.models.System
 @import java.util.List
 @import java.util.stream.Collectors
 
-@param Page page
+@param HtmlPage page
 @param int currentPage
 @param int total
 @param List<System> systems

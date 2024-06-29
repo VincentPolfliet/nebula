@@ -1,9 +1,9 @@
-@import dev.vinpol.nebula.dragonship.web.Page
+@import dev.vinpol.nebula.dragonship.web.HtmlPage
 @import static dev.vinpol.nebula.dragonship.web.support.jte.RawContent.raw
 
 @param String map
 
-@template.template(page = new Page().withTitle("Map"),
+@template.template(page = new HtmlPage().withTitle("Map"),
 head = @`
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
           integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>`,

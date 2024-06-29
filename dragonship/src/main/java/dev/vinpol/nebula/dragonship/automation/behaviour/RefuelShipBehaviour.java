@@ -6,7 +6,7 @@ import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 
-class RefuelShipBehaviour implements ShipBehaviour {
+public class RefuelShipBehaviour implements ShipBehaviour {
     private final FleetApi fleetApi;
     private final SystemsApi systemsApi;
 
@@ -44,9 +44,7 @@ class RefuelShipBehaviour implements ShipBehaviour {
             return ShipBehaviourResult.failure(FailureReason.MARKET_DOES_NOT_SELL_FUEL);
         }
 
-        RefuelShipRequest refuelShipRequest = new RefuelShipRequest()
-            .fromCargo(checkIfCargoHasFuel(ship.getCargo())) // set true to also include fuel in cargo to refuel
-            .units(null); // null will try to maximize refueling
+        RefuelShipRequest refuelShipRequest = getRefuelRequestForShip(ship);
 
         RefuelShip200Response refuelResponse = fleetApi.refuelShip(ship.getSymbol(), refuelShipRequest);
         ShipFuel fuel = refuelResponse.getData().getFuel();
@@ -55,15 +53,24 @@ class RefuelShipBehaviour implements ShipBehaviour {
         return ShipBehaviourResult.done();
     }
 
-    private static boolean sellsFuel(Market market) {
+    public static RefuelShipRequest getRefuelRequestForShip(Ship ship) {
+        RefuelShipRequest refuelShipRequest = new RefuelShipRequest()
+            .fromCargo(checkIfCargoHasFuel(ship.getCargo())) // set true to also include fuel in cargo to refuel
+            .units(null); // null will try to maximize refueling
+
+        return refuelShipRequest;
+    }
+
+
+    public static boolean sellsFuel(Market market) {
         return market.getExports().stream().anyMatch(tg -> tg.getSymbol() == TradeSymbol.FUEL);
     }
 
-    private static boolean isMarketPlace(Waypoint waypoint) {
+    public static boolean isMarketPlace(Waypoint waypoint) {
         return waypoint.getTraits().stream().anyMatch(t -> t.getSymbol() == WaypointTraitSymbol.MARKETPLACE);
     }
 
-    private boolean checkIfCargoHasFuel(ShipCargo cargo) {
+    private static boolean checkIfCargoHasFuel(ShipCargo cargo) {
         return cargo.getInventory().stream().anyMatch(i -> i.getSymbol() == TradeSymbol.FUEL);
     }
 }

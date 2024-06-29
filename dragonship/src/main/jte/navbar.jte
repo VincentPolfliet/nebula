@@ -16,6 +16,7 @@
     <div id="navbar-content" class="navbar-menu">
         <div class="navbar-start">
             <a href="https://docs.spacetraders.io/" class="navbar-item" target="_blank">📄 ${i18n("nav.docs")}</a>
+            <a href="https://spacetraders.rechenberger.io/" class="navbar-item" target="_blank">External UI</a>
         </div>
 
         <div class="navbar-center">

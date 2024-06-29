@@ -1,7 +1,7 @@
 @import dev.vinpol.nebula.dragonship.automation.ActivityState
 @import dev.vinpol.nebula.dragonship.automation.algorithms.ShipAlgorithmDescription
 @import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour
-@import dev.vinpol.nebula.dragonship.web.Page
+@import dev.vinpol.nebula.dragonship.web.HtmlPage
 @import dev.vinpol.spacetraders.sdk.models.Ship
 
 @param Ship ship
@@ -10,7 +10,7 @@
 
 
 @template.template(
-page = new Page().withTitle(ship.getSymbol() + " | " + "Automation"),
+page = new HtmlPage().withTitle(ship.getSymbol() + " | " + "Automation"),
 content = @`
     <div class="container is-widescreen">
         <h1 class="title">Automation</h1>

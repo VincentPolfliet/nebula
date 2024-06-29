@@ -1,6 +1,7 @@
 package dev.vinpol.nebula.dragonship.web.contracts;
 
-import dev.vinpol.nebula.dragonship.web.Page;
+import dev.vinpol.nebula.dragonship.web.HtmlPage;
+import dev.vinpol.nebula.dragonship.web.HtmlPage;
 import dev.vinpol.spacetraders.sdk.api.ContractsApi;
 import dev.vinpol.spacetraders.sdk.models.AcceptContract200Response;
 import dev.vinpol.spacetraders.sdk.models.AcceptContract200ResponseData;
@@ -27,7 +28,7 @@ public class ContractsController {
                                @RequestParam(value = "total", defaultValue = "10") int total,
                                Model model) {
 
-        Page contentPage = new Page();
+        HtmlPage contentPage = new HtmlPage();
         contentPage.setTitle("Contracts");
 
         model.addAttribute("page", contentPage);

@@ -1,5 +1,7 @@
 logging.level.dev.vinpol.nebula.dragonship: INFO
 logging.level.dev.vinpol.nebula.dragonship.automation: INFO
+logging.level.dev.vinpol.nebula.dragonship.bigbrain: DEBUG
+logging.level.dev.vinpol.nebula.dragonship.automation.behaviour.navigation: DEBUG
 logging.level.dev.vinpol.nebula.dragonship.web.support.vite: DEBUG
 
 nebula.ext.sync-on-boot: false

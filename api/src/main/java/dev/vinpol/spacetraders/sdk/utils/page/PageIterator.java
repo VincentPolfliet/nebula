@@ -6,10 +6,8 @@ import org.jetbrains.annotations.NotNull;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Objects;
-import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
-import java.util.function.ToIntBiFunction;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -18,6 +16,7 @@ public class PageIterator<T> implements Iterator<T>, Iterable<T> {
 
     public static final int INITIAL_PAGE = 1;
     public static final int INITIAL_SIZE = 10;
+    public static final int MAX_SIZE = 20;
 
     private int currentPage;
     private final int pageSize;
@@ -32,7 +31,7 @@ public class PageIterator<T> implements Iterator<T>, Iterable<T> {
 
     public PageIterator(int page, int size, Function<PageRequest, Page<T>> pageFetch) {
         this.currentPage = page;
-        this.pageSize = size;
+        this.pageSize = Math.min(size, MAX_SIZE);
         this.pageFetch = pageFetch;
         this.totalSize = -1; // Initialize to -1 to indicate that total size is unknown
     }
@@ -42,6 +41,14 @@ public class PageIterator<T> implements Iterator<T>, Iterable<T> {
         Objects.requireNonNull(pageFetchFunction);
 
         return new PageIterator<>(pageFetchFunction);
+    }
+
+    @NotNull
+    public static <T> Iterable<T> iterate(PageRequest request, Function<PageRequest, Page<T>> pageFetchFunction) {
+        Objects.requireNonNull(request);
+        Objects.requireNonNull(pageFetchFunction);
+
+        return new PageIterator<>(request.page(), request.size(), pageFetchFunction);
     }
 
     public static <T> Iterable<T> iterable(BiFunction<Integer, Integer, Page<T>> pageBiConsumer) {
@@ -61,6 +68,12 @@ public class PageIterator<T> implements Iterator<T>, Iterable<T> {
 
     public static <T> Stream<T> stream(Function<PageRequest, Page<T>> pageFetcher) {
         Iterable<T> contractIterable = PageIterator.iterate(pageFetcher);
+        return StreamSupport.stream(contractIterable.spliterator(), false);
+    }
+
+
+    public static <T> Stream<T> stream(int page, int pageSize, Function<PageRequest, Page<T>> pageFetcher) {
+        Iterable<T> contractIterable = PageIterator.iterate(new PageRequest(page, pageSize), pageFetcher);
         return StreamSupport.stream(contractIterable.spliterator(), false);
     }
 

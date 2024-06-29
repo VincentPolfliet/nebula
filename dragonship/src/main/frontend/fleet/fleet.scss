@@ -1,0 +1,33 @@
+.condition-list {
+    list-style-type: none; /* Remove default bullets */
+    padding: 0; /* Remove default padding */
+    margin: 0; /* Remove default margin */
+}
+
+.condition-item {
+    display: inline;
+}
+
+.condition-item::after {
+    content: " /";
+}
+
+.condition-item-last {
+    @extend .condition-item
+}
+
+.condition-item-last::after {
+    content: "";
+}
+
+.condition-item-average {
+    display: inline;
+}
+
+.condition-item-average::before {
+    content: "("
+}
+
+.condition-item-average::after {
+    content: " %)"
+}

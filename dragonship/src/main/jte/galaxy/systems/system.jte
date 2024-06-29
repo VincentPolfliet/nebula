@@ -1,9 +1,9 @@
-@import dev.vinpol.nebula.dragonship.web.Page
+@import dev.vinpol.nebula.dragonship.web.HtmlPage
 @import dev.vinpol.spacetraders.sdk.models.System
 @import dev.vinpol.spacetraders.sdk.models.Waypoint
 @import java.util.List
 
-@param Page page
+@param HtmlPage page
 @param System system
 @param List<Waypoint> waypoints
 

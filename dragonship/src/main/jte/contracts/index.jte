@@ -1,9 +1,9 @@
-@import dev.vinpol.nebula.dragonship.web.Page
+@import dev.vinpol.nebula.dragonship.web.HtmlPage
 @import java.util.List
 @import dev.vinpol.spacetraders.sdk.models.Contract
 @import static dev.vinpol.nebula.dragonship.web.support.vite.StaticViteEnv.isDev
 
-@param Page page
+@param HtmlPage page
 @param List<Contract> contracts
 
 @template.template(page = page, content = @`

@@ -8,4 +8,5 @@ public class ShipEvent {
     private String symbol;
     private String component;
     private String description;
+    private String type;
 }

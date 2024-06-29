@@ -23,4 +23,8 @@ public class FleetUtils {
 
         return ((reactorCondition + frameCondition + engineCondition) / 3) * 100;
     }
+
+    public static String formatCondition(double value) {
+        return String.format("%5.2f", value);
+    }
 }

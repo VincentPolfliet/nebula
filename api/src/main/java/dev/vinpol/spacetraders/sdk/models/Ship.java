@@ -161,6 +161,9 @@ public class Ship {
         return fuel.isEmpty();
     }
 
+    public boolean isFuelInfinite() {
+        return fuel.isInfinite();
+    }
 
     public boolean isFuelNotInfinite() {
         return fuel.isNotInfinite();
@@ -173,4 +176,5 @@ public class Ship {
     public ShipRole getRole() {
         return getRegistration().getRole();
     }
+
 }

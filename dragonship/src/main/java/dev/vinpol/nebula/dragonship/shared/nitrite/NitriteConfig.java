@@ -6,10 +6,14 @@ import org.dizitart.no2.Nitrite;
 import org.dizitart.no2.common.mapper.JacksonMapperModule;
 import org.dizitart.no2.common.module.NitriteModule;
 import org.dizitart.no2.migration.Migration;
+import org.dizitart.no2.mvstore.MVStoreModule;
 import org.dizitart.no2.store.memory.InMemoryStoreModule;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 
+import java.nio.file.Path;
 import java.util.List;
 
 @Configuration
@@ -35,7 +39,7 @@ public class NitriteConfig {
     }
 
     @Bean
-    public JacksonMapperModule module() {
+    public JacksonMapperModule jacksonModule() {
         Module[] modules = ObjectMapper.findModules().toArray(new Module[0]);
         return new JacksonMapperModule(modules);
     }

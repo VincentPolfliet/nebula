@@ -8,7 +8,7 @@ public record WayPoint(
      */
     @JsonProperty("symbol") String symbol,
     /*
-      Type of the waypoint, waypoints of the same type will be grouped together. It's case-sensitive.
+      Type of the origin, waypoints of the same type will be grouped together. It's case-sensitive.
      */
     @JsonProperty("type") String type,
     @JsonProperty("x") double x,

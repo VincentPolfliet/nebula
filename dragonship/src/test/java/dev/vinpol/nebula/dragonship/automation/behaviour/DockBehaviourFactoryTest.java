@@ -3,6 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -20,7 +21,7 @@ class DockBehaviourFactoryTest {
     void setup() {
         fleetApi = mock(FleetApi.class);
 
-        sut = new DockBehaviourFactory(fleetApi);
+        sut = new DockBehaviourFactory(fleetApi, mock(ShipEventNotifier.class));
     }
 
     @Test

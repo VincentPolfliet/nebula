@@ -33,7 +33,7 @@ public class JteModuleCheck {
         Path jteTemplateLocation = currentPath.resolve(templateLocation);
 
         if (!Files.exists(jteTemplateLocation)) {
-            logger.warn("JteTemplateLocation '{}' does not exist, has it been set as the working directory in IntelliJ?", jteTemplateLocation);
+            logger.error("JteTemplateLocation '{}' does not exist, has it been set as the working directory in IntelliJ?", jteTemplateLocation);
             throw new RuntimeException("JteTemplateLocation '%s' does not exist".formatted(jteTemplateLocation));
         }
     }

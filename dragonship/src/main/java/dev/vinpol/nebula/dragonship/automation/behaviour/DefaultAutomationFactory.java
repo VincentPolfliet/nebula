@@ -1,12 +1,14 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import dev.vinpol.nebula.dragonship.automation.behaviour.docking.DockShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.market.FindMarketAndSellBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.navigation.NavigateBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.sell.SellCargoBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
-import dev.vinpol.nebula.dragonship.ships.TravelFuelAndTimerCalculator;
+import dev.vinpol.nebula.dragonship.ships.TravelCostCalculator;
 import dev.vinpol.spacetraders.sdk.ApiClient;
 import dev.vinpol.spacetraders.sdk.models.TradeSymbol;
 import dev.vinpol.spacetraders.sdk.models.WaypointType;
@@ -16,13 +18,15 @@ import org.springframework.stereotype.Component;
 public class DefaultAutomationFactory implements AutomationFactory {
 
     private final ApiClient apiClient;
-    private final TravelFuelAndTimerCalculator travelFuelAndTimerCalculator;
+    private final TravelCostCalculator travelCostCalculator;
     private final ShipEventNotifier eventNotifier;
+    private final ObjectMapper objectMapper;
 
-    public DefaultAutomationFactory(ApiClient apiClient, TravelFuelAndTimerCalculator travelFuelAndTimerCalculator, ShipEventNotifier eventNotifier) {
+    public DefaultAutomationFactory(ApiClient apiClient, TravelCostCalculator travelCostCalculator, ShipEventNotifier eventNotifier, ObjectMapper objectMapper) {
         this.apiClient = apiClient;
-        this.travelFuelAndTimerCalculator = travelFuelAndTimerCalculator;
+        this.travelCostCalculator = travelCostCalculator;
         this.eventNotifier = eventNotifier;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -37,17 +41,17 @@ public class DefaultAutomationFactory implements AutomationFactory {
 
     @Override
     public NavigateBehaviourFactory navigateAutomation(WaypointSymbol waypointSymbol) {
-        return new NavigateBehaviourFactory(apiClient.fleetApi(), apiClient.systemsApi(), travelFuelAndTimerCalculator, eventNotifier, waypointSymbol);
+        return new NavigateBehaviourFactory(apiClient.fleetApi(), apiClient.systemsApi(), travelCostCalculator, eventNotifier, waypointSymbol);
     }
 
     @Override
     public OrbitBehaviourFactory orbitAutomation() {
-        return new OrbitBehaviourFactory(apiClient.fleetApi());
+        return new OrbitBehaviourFactory(apiClient.fleetApi(), eventNotifier);
     }
 
     @Override
-    public DockBehaviourFactory dock() {
-        return new DockBehaviourFactory(apiClient.fleetApi());
+    public ShipBehaviourFactory dock() {
+        return () -> new DockShipBehaviour(apiClient.fleetApi(), eventNotifier);
     }
 
     @Override
@@ -57,7 +61,7 @@ public class DefaultAutomationFactory implements AutomationFactory {
 
     @Override
     public FindMarketAndSellBehaviourFactory navigateToClosestMarket() {
-        return new FindMarketAndSellBehaviourFactory(this, apiClient.systemsApi(), travelFuelAndTimerCalculator);
+        return new FindMarketAndSellBehaviourFactory(this, apiClient.systemsApi(), travelCostCalculator);
     }
 
     @Override

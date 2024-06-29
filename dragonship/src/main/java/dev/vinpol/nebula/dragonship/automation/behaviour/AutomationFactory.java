@@ -26,7 +26,7 @@ public interface AutomationFactory {
 
     OrbitBehaviourFactory orbitAutomation();
 
-    DockBehaviourFactory dock();
+    ShipBehaviourFactory dock();
 
     RefuelBehaviourFactory refuel();
 

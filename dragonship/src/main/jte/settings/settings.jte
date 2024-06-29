@@ -1,4 +1,4 @@
-@param dev.vinpol.nebula.dragonship.web.Page page
+@param dev.vinpol.nebula.dragonship.web.HtmlPage page
 @param String token
 
 @template.template(page = page, content =  @`

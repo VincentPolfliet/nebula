@@ -73,6 +73,13 @@ public class ShipLeafs {
         });
     }
 
+    public static Predicate<Ship> isAtLocation(WaypointSymbol waypoint) {
+        return predicate("Ship is at location", ship -> {
+            logger.debug("ship is at location: {}", ship.isAtLocation(waypoint.waypoint()));
+            return ship.isAtLocation(waypoint.waypoint());
+        });
+    }
+
     public static ShipBehaviour isNotAtLocation(WaypointSymbol waypoint) {
         return predicateBehaviour("Ship is NOT at location", ship -> {
             logger.debug("ship is NOT at location: {}", !ship.isAtLocation(waypoint.waypoint()));

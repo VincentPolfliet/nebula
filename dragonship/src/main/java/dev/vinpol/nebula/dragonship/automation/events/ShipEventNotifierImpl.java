@@ -34,6 +34,18 @@ public class ShipEventNotifierImpl implements ShipEventNotifier {
     }
 
     @Override
+    public void setOrbited(String symbol) {
+        logEvent("Orbited", symbol);
+        eventPublisher.publishEvent(new OrbitedEvent(symbol));
+    }
+
+    @Override
+    public void setDocked(String symbol) {
+        logEvent("Docked", symbol);
+        eventPublisher.publishEvent(new DockedEvent(symbol));
+    }
+
+    @Override
     public void setWaitUntilCooldown(String shipSymbol, OffsetDateTime expiration) {
         logEvent("WaitUntilCooldown", shipSymbol);
         eventPublisher.publishEvent(new WaitUntilCooldownEvent(shipSymbol, expiration));

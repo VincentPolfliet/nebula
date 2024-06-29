@@ -33,8 +33,13 @@ public class ShipFuel {
 
     @JsonIgnore
     public boolean isNotInfinite() {
+        return !isInfinite();
+    }
+
+    @JsonIgnore
+    public boolean isInfinite() {
         // fuel should be considered infinite if the capacity and current volume are both 0
-        return current != 0 || capacity != 0;
+        return current == 0 && capacity == 0;
     }
 
     @JsonIgnore
@@ -54,6 +59,10 @@ public class ShipFuel {
     public boolean shouldConsiderEmpty(double minPercentage, double maxPercentage) {
         double currentPercentage = (double) current / capacity;
         return currentPercentage >= minPercentage && currentPercentage <= maxPercentage;
+    }
+
+    public void refuel() {
+        this.current = capacity;
     }
 }
 

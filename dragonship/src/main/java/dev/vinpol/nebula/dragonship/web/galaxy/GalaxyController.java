@@ -2,9 +2,10 @@ package dev.vinpol.nebula.dragonship.web.galaxy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.vinpol.nebula.dragonship.geo.Coordinate;
+import dev.vinpol.nebula.dragonship.geo.GridXY;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
-import dev.vinpol.nebula.dragonship.web.Page;
+import dev.vinpol.nebula.dragonship.web.HtmlPage;
+import dev.vinpol.nebula.dragonship.web.HtmlPage;
 import dev.vinpol.nebula.dragonship.web.utils.PagingUtils;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
@@ -53,7 +54,7 @@ public class GalaxyController {
     public String getGalaxySystems(@RequestParam(value = "page", defaultValue = "1") int page,
                                    @RequestParam(value = "total", defaultValue = "10") int total,
                                    Model model) {
-        Page content = new Page();
+        HtmlPage content = new HtmlPage();
         content.setTitle("Galaxy");
         model.addAttribute("page", content);
 
@@ -112,17 +113,17 @@ public class GalaxyController {
     private MapData calculateMapData(String systemSymbol, System system) {
         MapData mapData = new MapData();
 
-        Map<SystemWaypoint, List<Coordinate>> availableParking = calculateAvailableParking(system);
-        Map<SystemWaypoint, List<Coordinate>> availableOrbits = calculateAvailableOrbits(system);
+        Map<SystemWaypoint, List<GridXY>> availableParking = calculateAvailableParking(system);
+        Map<SystemWaypoint, List<GridXY>> availableOrbits = calculateAvailableOrbits(system);
 
         mapData.setWaypoints(
             system.getWaypoints()
                 .stream()
                 .map(s -> {
                     if (s.isInOrbit()) {
-                        List<Coordinate> availableOrbitsForWaypoint = availableOrbits.get(s);
+                        List<GridXY> availableOrbitsForWaypoint = availableOrbits.get(s);
 
-                        Coordinate coordinate = popRandom(availableOrbitsForWaypoint);
+                        GridXY coordinate = popRandom(availableOrbitsForWaypoint);
                         return new WayPoint(s.getSymbol(), s.getType().toString(), coordinate.x(), coordinate.y());
                     }
 
@@ -133,9 +134,9 @@ public class GalaxyController {
 
         for (Ship ship : getCurrentShipsInSystem(systemSymbol)) {
             SystemWaypoint shipSystemWayPoint = system.getWaypoints().stream().filter(s -> s.getSymbol().equals(ship.getNav().getWaypointSymbol())).findFirst().orElseThrow();
-            List<Coordinate> parkingOptions = availableParking.get(shipSystemWayPoint);
+            List<GridXY> parkingOptions = availableParking.get(shipSystemWayPoint);
 
-            Coordinate parking = popRandom(parkingOptions);
+            GridXY parking = popRandom(parkingOptions);
 
             mapData.addWayPoint(
                 new WayPoint(
@@ -151,7 +152,7 @@ public class GalaxyController {
         return mapData;
     }
 
-    private static Coordinate popRandom(List<Coordinate> coordinates) {
+    private static GridXY popRandom(List<GridXY> coordinates) {
         if (coordinates == null || coordinates.isEmpty()) {
             // coordinate should not be empty or null
             throw new IllegalStateException("Calculated coordinates can not be null or empty when popping");
@@ -161,7 +162,7 @@ public class GalaxyController {
         return coordinates.remove(parkingOptionIndex);
     }
 
-    private Map<SystemWaypoint, List<Coordinate>> calculateAvailableOrbits(System system) {
+    private Map<SystemWaypoint, List<GridXY>> calculateAvailableOrbits(System system) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
 
         return system.getWaypoints()
@@ -170,14 +171,14 @@ public class GalaxyController {
             .collect(Collectors.toMap(Function.identity(), waypoint -> calculateCoordinatesOfWayPoint(waypoint, random.nextInt(8, 12), waypoint.getOrbitals().size() + 1)));
     }
 
-    private Map<SystemWaypoint, List<Coordinate>> calculateAvailableParking(System system) {
+    private Map<SystemWaypoint, List<GridXY>> calculateAvailableParking(System system) {
         return system.getWaypoints()
             .stream()
             .collect(Collectors.toMap(Function.identity(), waypoint -> calculateCoordinatesOfWayPoint(waypoint, 0.25, 8)));
     }
 
-    private static List<Coordinate> calculateCoordinatesOfWayPoint(SystemWaypoint systemWaypoint, double radius, int wantedNumberOfPoints) {
-        List<Coordinate> coordinates = calculateCoordinates(systemWaypoint.getX(), systemWaypoint.getY(), radius, Math.max(wantedNumberOfPoints, OPTIMAL_NUMBERS));
+    private static List<GridXY> calculateCoordinatesOfWayPoint(SystemWaypoint systemWaypoint, double radius, int wantedNumberOfPoints) {
+        List<GridXY> coordinates = calculateCoordinates(systemWaypoint.getX(), systemWaypoint.getY(), radius, Math.max(wantedNumberOfPoints, OPTIMAL_NUMBERS));
         // this random causes not the same coordinates to not be assigned multiple times on different planets,
         // e.g. planet 1 would have index 0, planet 2 would have index 0, planet 3 would have index 0, ... when there are only a few orbitals
         Collections.shuffle(coordinates);
@@ -197,14 +198,14 @@ public class GalaxyController {
     }
 
 
-    private static List<Coordinate> calculateCoordinates(double centerX, double centerY, double radius, int numPoints) {
-        List<Coordinate> coordinates = new ArrayList<>();
+    private static List<GridXY> calculateCoordinates(double centerX, double centerY, double radius, int numPoints) {
+        List<GridXY> coordinates = new ArrayList<>();
 
         for (int i = 0; i < numPoints; ++i) {
             double angle = Math.toRadians(((double) 360 / numPoints) * i);
             double x = centerX + radius * Math.cos(angle);
             double y = centerY + radius * Math.sin(angle);
-            coordinates.add(new Coordinate(x, y));
+            coordinates.add(new GridXY(x, y));
         }
 
         return coordinates;

@@ -1,6 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeEach;
@@ -21,7 +22,7 @@ class OrbitBehaviourFactoryTest {
     @BeforeEach
     void setup() {
         fleetApi = mock(FleetApi.class);
-        sut = new OrbitBehaviourFactory(fleetApi);
+        sut = new OrbitBehaviourFactory(fleetApi, mock(ShipEventNotifier.class));
 
         when(fleetApi.orbitShip(any()))
             .thenReturn(new OrbitShip200Response()

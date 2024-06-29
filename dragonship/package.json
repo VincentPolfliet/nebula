@@ -15,6 +15,7 @@
         "htmx.org": "^1.9.11",
         "leaflet": "^1.9.4",
         "sockjs-client": "^1.6.1",
+        "@stomp/stompjs": "^7.0.0",
         "vue": "^3.4.26"
     },
     "devDependencies": {

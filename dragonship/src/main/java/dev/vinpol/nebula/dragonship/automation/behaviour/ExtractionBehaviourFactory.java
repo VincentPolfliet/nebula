@@ -7,10 +7,14 @@ import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.ExtractResources201ResponseData;
 import dev.vinpol.spacetraders.sdk.models.ExtractResourcesRequest;
 import dev.vinpol.spacetraders.sdk.models.Ship;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.time.OffsetDateTime;
 
 public class ExtractionBehaviourFactory implements ShipBehaviourFactory {
+
+    private final Logger logger = LoggerFactory.getLogger(ExtractionBehaviourFactory.class);
 
     private final FleetApi fleetApi;
     private final ShipEventNotifier shipEventNotifier;
@@ -56,6 +60,8 @@ public class ExtractionBehaviourFactory implements ShipBehaviourFactory {
                 // cooldown is always active after mining
                 OffsetDateTime expiration = ship.getCooldown().getExpiration();
                 shipEventNotifier.setWaitUntilCooldown(ship.getSymbol(), expiration);
+
+                logger.info("Ship COOLDOWN until '{}' after EXTRACTION", expiration);
                 return ShipBehaviourResult.waitUntil(expiration);
             }
         };

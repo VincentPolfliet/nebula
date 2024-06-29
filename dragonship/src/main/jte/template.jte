@@ -1,9 +1,9 @@
-@import dev.vinpol.nebula.dragonship.web.Page
+@import dev.vinpol.nebula.dragonship.web.HtmlPage
 @import dev.vinpol.nebula.dragonship.web.agent.CurrentAgentAdvice
 @import dev.vinpol.spacetraders.sdk.models.Agent
 @import gg.jte.Content
 
-@param Page page = new dev.vinpol.nebula.dragonship.web.Page().withTitle("*** NO TITLE ***")
+@param HtmlPage page = new dev.vinpol.nebula.dragonship.web.HtmlPage().withTitle("*** NO TITLE ***")
 @param Content head = null
 @param Content content = null
 @param Content scripts = null

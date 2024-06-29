@@ -1,0 +1,121 @@
+[ {
+  "symbol" : "X1-RQ94-D39",
+  "x" : 53,
+  "y" : 67,
+  "type" : "PLANET",
+  "traits" : [ "SWAMP", "SCATTERED_SETTLEMENTS", "METHANE_POOLS", "INDUSTRIAL", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-A1",
+  "x" : 26,
+  "y" : -4,
+  "type" : "PLANET",
+  "traits" : [ "FROZEN", "OUTPOST", "DRY_SEABEDS", "MAGMA_SEAS", "SALT_FLATS", "SCARCE_LIFE", "ASH_CLOUDS", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-CX5E",
+  "x" : 14,
+  "y" : 25,
+  "type" : "ENGINEERED_ASTEROID",
+  "traits" : [ "COMMON_METAL_DEPOSITS", "STRIPPED", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-B6",
+  "x" : 189,
+  "y" : -19,
+  "type" : "FUEL_STATION",
+  "traits" : [ "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-E41",
+  "x" : 3,
+  "y" : -53,
+  "type" : "PLANET",
+  "traits" : [ "FROZEN", "MEGA_STRUCTURES", "CANYONS", "DRY_SEABEDS", "INDUSTRIAL", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-B7",
+  "x" : 258,
+  "y" : -228,
+  "type" : "ASTEROID_BASE",
+  "traits" : [ "HOLLOWED_INTERIOR", "OUTPOST", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-F43",
+  "x" : 75,
+  "y" : -4,
+  "type" : "PLANET",
+  "traits" : [ "ROCKY", "SCATTERED_SETTLEMENTS", "SALT_FLATS", "VIBRANT_AURORAS", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-G46",
+  "x" : -64,
+  "y" : 5,
+  "type" : "PLANET",
+  "traits" : [ "VOLCANIC", "OUTPOST", "TOXIC_ATMOSPHERE", "DRY_SEABEDS", "CORROSIVE_ATMOSPHERE", "INDUSTRIAL", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-H48",
+  "x" : 25,
+  "y" : 36,
+  "type" : "PLANET",
+  "traits" : [ "SWAMP", "SCATTERED_SETTLEMENTS", "BREATHABLE_ATMOSPHERE", "EXPLOSIVE_GASES", "MAGMA_SEAS", "INDUSTRIAL", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-K76",
+  "x" : -90,
+  "y" : -53,
+  "type" : "PLANET",
+  "traits" : [ "BARREN", "SCATTERED_SETTLEMENTS", "MUTATED_FLORA", "EXPLOSIVE_GASES", "BREATHABLE_ATMOSPHERE", "INDUSTRIAL", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-I52",
+  "x" : -206,
+  "y" : -402,
+  "type" : "JUMP_GATE",
+  "traits" : [ "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-I53",
+  "x" : -104,
+  "y" : -203,
+  "type" : "FUEL_STATION",
+  "traits" : [ "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-J54",
+  "x" : -273,
+  "y" : -533,
+  "type" : "FUEL_STATION",
+  "traits" : [ "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-C38",
+  "x" : -103,
+  "y" : 46,
+  "type" : "FUEL_STATION",
+  "traits" : [ "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-J55",
+  "x" : -328,
+  "y" : -641,
+  "type" : "ASTEROID_BASE",
+  "traits" : [ "HOLLOWED_INTERIOR", "PIRATE_BASE", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-A3",
+  "x" : 26,
+  "y" : -4,
+  "type" : "MOON",
+  "traits" : [ "ROCKY", "SCATTERED_SETTLEMENTS", "EXTREME_PRESSURE", "EXTREME_TEMPERATURES", "TERRAFORMED", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-A2",
+  "x" : 26,
+  "y" : -4,
+  "type" : "MOON",
+  "traits" : [ "VOLCANIC", "OUTPOST", "TOXIC_ATMOSPHERE", "THIN_ATMOSPHERE", "MARKETPLACE", "SHIPYARD" ]
+}, {
+  "symbol" : "X1-RQ94-A4",
+  "x" : 26,
+  "y" : -4,
+  "type" : "ORBITAL_STATION",
+  "traits" : [ "RESEARCH_FACILITY", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-H51",
+  "x" : 25,
+  "y" : 36,
+  "type" : "MOON",
+  "traits" : [ "VOLCANIC", "SCATTERED_SETTLEMENTS", "TOXIC_ATMOSPHERE", "VIBRANT_AURORAS", "INDUSTRIAL", "MARKETPLACE" ]
+}, {
+  "symbol" : "X1-RQ94-C37",
+  "x" : -143,
+  "y" : 64,
+  "type" : "ORBITAL_STATION",
+  "traits" : [ "OUTPOST", "INDUSTRIAL", "MARKETPLACE", "SHIPYARD" ]
+} ]
