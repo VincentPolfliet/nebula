@@ -1,6 +1,7 @@
 gg:
     jte:
         developmentMode: true
+
 spring:
     groovy:
         template:

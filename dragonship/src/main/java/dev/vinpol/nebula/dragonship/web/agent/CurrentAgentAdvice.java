@@ -25,6 +25,10 @@ public class CurrentAgentAdvice {
 
     @ModelAttribute("agent")
     public Agent agent() throws JsonProcessingException {
+        if (!kvStorage.contains("token")) {
+            return null;
+        }
+
         if (!kvStorage.contains("agent")) {
             Agent currentAgent = agentsApi.getMyAgent().getData();
             kvStorage.set("agent", objectMapper.writeValueAsString(currentAgent));

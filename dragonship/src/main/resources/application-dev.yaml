@@ -4,7 +4,10 @@ logging.level.dev.vinpol.nebula.dragonship.bigbrain: DEBUG
 logging.level.dev.vinpol.nebula.dragonship.automation.behaviour.navigation: DEBUG
 logging.level.dev.vinpol.nebula.dragonship.web.support.vite: DEBUG
 
-nebula.ext.sync-on-boot: false
+nebula:
+    st:
+        ext:
+            on-boot: true
 
 vite:
     baseUrl: http://localhost:5173/
