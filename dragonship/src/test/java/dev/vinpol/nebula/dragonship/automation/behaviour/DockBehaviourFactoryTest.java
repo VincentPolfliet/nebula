@@ -1,6 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
+import dev.vinpol.nebula.dragonship.automation.behaviour.docking.DockShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
@@ -15,13 +16,13 @@ import static org.mockito.Mockito.*;
 class DockBehaviourFactoryTest {
 
     FleetApi fleetApi;
-    DockBehaviourFactory sut;
+    DockShipBehaviour sut;
 
     @BeforeEach
     void setup() {
         fleetApi = mock(FleetApi.class);
 
-        sut = new DockBehaviourFactory(fleetApi, mock(ShipEventNotifier.class));
+        sut = new DockShipBehaviour(fleetApi, mock(ShipEventNotifier.class));
     }
 
     @Test
@@ -30,9 +31,7 @@ class DockBehaviourFactoryTest {
         ShipNav nav = dockedShip.getNav();
         nav.status(ShipNavStatus.DOCKED);
 
-        ShipBehaviour behaviour = sut.create();
-
-        ShipBehaviourResult result = behaviour.update(dockedShip);
+        ShipBehaviourResult result = sut.update(dockedShip);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.DOCKED)).isTrue();
@@ -45,9 +44,7 @@ class DockBehaviourFactoryTest {
         ShipNav nav = transitShip.getNav();
         nav.status(ShipNavStatus.IN_TRANSIT);
 
-        ShipBehaviour behaviour = sut.create();
-
-        ShipBehaviourResult result = behaviour.update(transitShip);
+        ShipBehaviourResult result = sut.update(transitShip);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.IN_TRANSIT)).isTrue();
@@ -68,8 +65,7 @@ class DockBehaviourFactoryTest {
                 .data(new ShipNavModifiedResponseData().nav(dockedNav))
         );
 
-        ShipBehaviour behaviour = sut.create();
-        ShipBehaviourResult result = behaviour.update(inOrbitShip);
+        ShipBehaviourResult result = sut.update(inOrbitShip);
 
         assertThat(result.isDone()).isTrue();
         assertThat(inOrbitShip.getNav()).isEqualTo(dockedNav);
