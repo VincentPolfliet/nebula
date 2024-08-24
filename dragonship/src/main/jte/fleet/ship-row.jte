@@ -112,7 +112,7 @@
     <td>
         <div class="level">
             <div class="level-left">
-                @if(automationSupport.contains(ship.getRole()) && !ship.isInTransit())
+                @if(automationSupport.contains(ship.getRole()))
                     <button class="button" hx-post="/fleet/${ship.getSymbol()}/automation/start"
                             hx-target="#ship-row-${ship.getSymbol()}" hx-swap="outerHTML"
                             disabled="${currentBehaviour != null}">

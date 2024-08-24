@@ -37,7 +37,7 @@ content = @`
             </thead>
             <tbody>
             @for(var ship : ships)
-                @template.fleet.ship-row(ship = ship, clock = clock, automationSupport = automationSupport, currentBehaviour =behaviours.getOrDefault(ship, null))
+                @template.fleet.ship-row(ship = ship, clock = clock, automationSupport = automationSupport, currentBehaviour = behaviours.getOrDefault(ship, null))
             @endfor
             </tbody>
         </table>
