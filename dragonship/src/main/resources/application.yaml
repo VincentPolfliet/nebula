@@ -1,9 +1,10 @@
 nebula:
     st:
         token: ${NEBULA_TOKEN}
+        auto-register: false
         url: https://api.spacetraders.io/v2/
         ext:
-           on-boot: ${NEBULA_SYNC_ON_BOOT:false}
+           on-boot: ${NEBULA_ON_BOOT:true}
 
 gg:
     jte:

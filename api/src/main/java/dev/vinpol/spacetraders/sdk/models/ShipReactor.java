@@ -60,6 +60,7 @@ public class ShipReactor {
     private double condition;
     private Integer powerOutput;
     private double integrity;
+    private int quality;
     private ShipRequirements requirements;
 
     public ShipReactor symbol(SymbolEnum symbol) {

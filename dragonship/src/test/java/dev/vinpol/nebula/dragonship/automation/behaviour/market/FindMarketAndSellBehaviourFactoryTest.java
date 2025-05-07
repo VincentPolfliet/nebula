@@ -3,12 +3,15 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.market;
 import dev.vinpol.nebula.dragonship.automation.behaviour.AutomationFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.sdk.WaypointGenerator;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
+import dev.vinpol.nebula.dragonship.ships.TravelCostCalculator;
 import dev.vinpol.nebula.dragonship.support.junit.TestHttpServer;
+import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -21,46 +24,38 @@ import java.util.Collections;
 
 import static dev.vinpol.nebula.dragonship.sdk.ShipCargoUtil.cargoItem;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Mockito.mock;
 
-@DirtiesContext
-@ContextConfiguration
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 class FindMarketAndSellBehaviourFactoryTest {
 
-    private static TestHttpServer SERVER = new TestHttpServer();
-
-    @Autowired
-    AutomationFactory shipBehaviourFactoryCreator;
+    FindMarketAndSellBehaviourFactory sut;
 
     private final WaypointGenerator waypointGenerator = new WaypointGenerator();
 
-    @BeforeAll
-    static void beforeAll() {
-    }
-
-    @DynamicPropertySource
-    static void dynamicProperties(DynamicPropertyRegistry registry) {
-        registry.add("nebula.st.url", () -> SERVER.url("/").toString());
-        registry.add("nebula.st.token", () -> "token");
+    @BeforeEach
+    void beforeEach() {
+        sut = new FindMarketAndSellBehaviourFactory(
+            mock(AutomationFactory.class),
+            mock(SystemsApi.class),
+            mock(TravelCostCalculator.class)
+        );
     }
 
     @Test
     void noCargoInShip() {
-        FindMarketAndSellBehaviourFactory factory = shipBehaviourFactoryCreator.navigateToClosestMarket();
-        ShipBehaviour behaviour = factory.create();
+        ShipBehaviour behaviour = sut.create();
 
         Ship excavator = MotherShip.excavator();
         excavator.getCargo().setInventory(Collections.emptyList());
 
-        ShipBehaviourResult result = behaviour.update(excavator);
+        ShipBehaviorResult result = behaviour.update(excavator);
 
         assertThat(result.hasFailedWithReason(FailureReason.NO_CARGO_TO_SELL)).isTrue();
     }
 
     @Test
     void noMarketsInSystem() {
-        FindMarketAndSellBehaviourFactory factory = shipBehaviourFactoryCreator.navigateToClosestMarket();
-        ShipBehaviour behaviour = factory.create();
+        ShipBehaviour behaviour = sut.create();
 
         WaypointSymbol waypointSymbol = WaypointSymbol.tryParse("XX-XXX1-LEUK");
 
@@ -77,14 +72,7 @@ class FindMarketAndSellBehaviourFactoryTest {
                 .waypointSymbol(waypointSymbol.waypoint());
         });
 
-        enqueue(new GetSystemWaypoints200Response().data(Collections.emptyList()).meta(new Meta().page(1).limit(10).total(0)));
-
-        ShipBehaviourResult result = behaviour.update(excavator);
-
+        ShipBehaviorResult result = behaviour.update(excavator);
         assertThat(result.hasFailedWithReason(FailureReason.NO_WAYPOINTS_FOUND_IN_CURRENT_SYSTEM)).isTrue();
-    }
-
-    private void enqueue(Object data) {
-        SERVER.enqueue(data);
     }
 }

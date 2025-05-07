@@ -20,13 +20,11 @@ public class DefaultAutomationFactory implements AutomationFactory {
     private final ApiClient apiClient;
     private final TravelCostCalculator travelCostCalculator;
     private final ShipEventNotifier eventNotifier;
-    private final ObjectMapper objectMapper;
 
-    public DefaultAutomationFactory(ApiClient apiClient, TravelCostCalculator travelCostCalculator, ShipEventNotifier eventNotifier, ObjectMapper objectMapper) {
+    public DefaultAutomationFactory(ApiClient apiClient, TravelCostCalculator travelCostCalculator, ShipEventNotifier eventNotifier) {
         this.apiClient = apiClient;
         this.travelCostCalculator = travelCostCalculator;
         this.eventNotifier = eventNotifier;
-        this.objectMapper = objectMapper;
     }
 
     @Override

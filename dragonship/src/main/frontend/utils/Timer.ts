@@ -1,6 +1,6 @@
 import dayjs from "dayjs";
 
-class CountdownTimer {
+export default class CountdownTimer {
     private readonly targetDate: dayjs.Dayjs;
     private readonly onTick: () => void;
     private readonly onComplete: () => void;
@@ -37,5 +37,3 @@ class CountdownTimer {
         }
     }
 }
-
-export default CountdownTimer;

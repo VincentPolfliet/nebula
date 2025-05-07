@@ -13,111 +13,18 @@
 
 package dev.vinpol.spacetraders.sdk.models;
 
-import java.util.Objects;
-import java.util.Arrays;
-
-
-import java.io.IOException;
 import java.time.OffsetDateTime;
+import java.util.Objects;
 
 /**
  * An object that only shows up when an action has consumed fuel in the process. Shows the fuel consumption data.
+ *
+ * @param amount    The amount of fuel consumed by the most recent transit or action (minimum: 0)
+ * @param timestamp The time at which the fuel was consumed
  */
-
-public class ShipFuelConsumed {
-  public static final String SERIALIZED_NAME_AMOUNT = "amount";
-  
-  private Integer amount;
-
-  public static final String SERIALIZED_NAME_TIMESTAMP = "timestamp";
-  
-  private OffsetDateTime timestamp;
-
-  public ShipFuelConsumed() {
-  }
-
-  public ShipFuelConsumed amount(Integer amount) {
-
-    this.amount = amount;
-    return this;
-  }
-
-   /**
-   * The amount of fuel consumed by the most recent transit or action.
-   * minimum: 0
-   * @return amount
-  **/
-  
-
-  public Integer getAmount() {
-    return amount;
-  }
-
-
-  public void setAmount(Integer amount) {
-    this.amount = amount;
-  }
-
-
-  public ShipFuelConsumed timestamp(OffsetDateTime timestamp) {
-
-    this.timestamp = timestamp;
-    return this;
-  }
-
-   /**
-   * The time at which the fuel was consumed.
-   * @return timestamp
-  **/
-  
-
-  public OffsetDateTime getTimestamp() {
-    return timestamp;
-  }
-
-
-  public void setTimestamp(OffsetDateTime timestamp) {
-    this.timestamp = timestamp;
-  }
-
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    ShipFuelConsumed shipFuelConsumed = (ShipFuelConsumed) o;
-    return Objects.equals(this.amount, shipFuelConsumed.amount) &&
-        Objects.equals(this.timestamp, shipFuelConsumed.timestamp);
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(amount, timestamp);
-  }
-
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    sb.append("class ShipFuelConsumed {\n");
-    sb.append("    amount: ").append(toIndentedString(amount)).append("\n");
-    sb.append("    timestamp: ").append(toIndentedString(timestamp)).append("\n");
-    sb.append("}");
-    return sb.toString();
-  }
-
-  /**
-   * Convert the given object to string with each line indented by 4 spaces
-   * (except the first line).
-   */
-  private String toIndentedString(Object o) {
-    if (o == null) {
-      return "null";
-    }
-    return o.toString().replace("\n", "\n    ");
-  }
+public record ShipFuelConsumed(
+    Integer amount,
+    OffsetDateTime timestamp
+) {
 
 }
-

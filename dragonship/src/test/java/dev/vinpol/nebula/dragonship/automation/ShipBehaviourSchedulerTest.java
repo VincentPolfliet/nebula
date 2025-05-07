@@ -4,7 +4,7 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ScheduledExecutor;
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ShipBehaviourScheduler;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.Done;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
 import dev.vinpol.spacetraders.sdk.models.MotherShip;
 import dev.vinpol.spacetraders.sdk.models.Ship;
@@ -58,16 +58,16 @@ class ShipBehaviourSchedulerTest {
 
     @Test
     void scheduleTick() {
-        ShipBehaviourResult result = ShipBehaviourResult.done();
+        ShipBehaviorResult result = ShipBehaviorResult.done();
 
-        CompletableFuture<ShipBehaviourResult> stage = sut.scheduleTick(shipSymbol, shipFunction, ofResult(result));
+        CompletableFuture<ShipBehaviorResult> stage = sut.scheduleTick(shipSymbol, shipFunction, ofResult(result));
 
-        ShipBehaviourResult actual = stage.resultNow();
+        ShipBehaviorResult actual = stage.resultNow();
         assertThat(actual).isInstanceOf(Done.class);
         assertThat(sut.isTickScheduled(ship)).isFalse();
     }
 
-    private static Function<Ship, ShipBehaviour> ofResult(ShipBehaviourResult result) {
+    private static Function<Ship, ShipBehaviour> ofResult(ShipBehaviorResult result) {
         return _ -> ShipBehaviour.ofResult(result);
     }
 
@@ -75,11 +75,11 @@ class ShipBehaviourSchedulerTest {
     void scheduleTickAt() {
         OffsetDateTime timestamp = OffsetDateTime.now();
 
-        ShipBehaviourResult result = ShipBehaviourResult.done();
-        CompletableFuture<ShipBehaviourResult> stage = sut.scheduleTickAt(shipSymbol, shipFunction, ofResult(result), timestamp).toCompletableFuture();
+        ShipBehaviorResult result = ShipBehaviorResult.done();
+        CompletableFuture<ShipBehaviorResult> stage = sut.scheduleTickAt(shipSymbol, shipFunction, ofResult(result), timestamp).toCompletableFuture();
 
         await().until(stage::isDone);
-        ShipBehaviourResult actual = stage.resultNow();
+        ShipBehaviorResult actual = stage.resultNow();
         assertThat(actual).isInstanceOf(Done.class);
         assertThat(sut.isTickScheduled(ship)).isFalse();
     }
@@ -110,7 +110,7 @@ class ShipBehaviourSchedulerTest {
     @Test
     void isTickScheduledReturnsTrueWhenScheduledAtNow() {
         OffsetDateTime timestamp = OffsetDateTime.now().plusNanos(300);
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, shipFunction, ofResult(ShipBehaviourResult.done()), timestamp).toCompletableFuture();
+        CompletableFuture<ShipBehaviorResult> future = sut.scheduleTickAt(shipSymbol, shipFunction, ofResult(ShipBehaviorResult.done()), timestamp).toCompletableFuture();
 
         assertTrue(sut.isTickScheduled(ship));
         await().until(future::isDone);
@@ -119,7 +119,7 @@ class ShipBehaviourSchedulerTest {
 
     @Test
     void tickScheduledThrowsExceptionWhenAlgorithmThrowsException() {
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
+        CompletableFuture<ShipBehaviorResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
             assertTrue(sut.isTickScheduled(ship));
             throw new RuntimeException();
         });
@@ -131,7 +131,7 @@ class ShipBehaviourSchedulerTest {
 
     @Test
     void tickScheduledThrowsExceptionWhenBehaviourThrowsException() {
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
+        CompletableFuture<ShipBehaviorResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
             assertTrue(sut.isTickScheduled(ship));
             throw new RuntimeException();
         });
@@ -144,7 +144,7 @@ class ShipBehaviourSchedulerTest {
     @Test
     void tickScheduledAtThrowsExceptionWhenBehaviourThrowsException() {
         OffsetDateTime timestamp = OffsetDateTime.now();
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTickAt(shipSymbol, shipFunction, _ -> {
+        CompletableFuture<ShipBehaviorResult> future = sut.scheduleTickAt(shipSymbol, shipFunction, _ -> {
             assertTrue(sut.isTickScheduled(ship));
             throw new RuntimeException();
         }, timestamp);
@@ -173,9 +173,9 @@ class ShipBehaviourSchedulerTest {
 
     @Test
     void getCurrentBehaviourViaScheduleTick() {
-        var behaviour = ShipBehaviour.ofResult(ShipBehaviourResult.done());
+        var behaviour = ShipBehaviour.ofResult(ShipBehaviorResult.done());
 
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
+        CompletableFuture<ShipBehaviorResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
             assertTrue(sut.isTickScheduled(ship));
 
             Optional<ShipBehaviour> currentBehaviourOptional = sut.getCurrentBehaviour(shipSymbol);
@@ -192,7 +192,7 @@ class ShipBehaviourSchedulerTest {
 
     @Test
     void cancelTick() {
-        CompletableFuture<ShipBehaviourResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
+        CompletableFuture<ShipBehaviorResult> future = sut.scheduleTick(shipSymbol, shipFunction, _ -> {
             assertThat(sut.isTickScheduled(shipSymbol)).isTrue();
 
             var cancelFuture = CompletableFuture.runAsync(() -> {
@@ -201,7 +201,7 @@ class ShipBehaviourSchedulerTest {
             });
 
             await().until(cancelFuture::isDone);
-            return ShipBehaviour.ofResult(ShipBehaviourResult.done());
+            return ShipBehaviour.ofResult(ShipBehaviorResult.done());
         });
 
         await().until(future::isDone);

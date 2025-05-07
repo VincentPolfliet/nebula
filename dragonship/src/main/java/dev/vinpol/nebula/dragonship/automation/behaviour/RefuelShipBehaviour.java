@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.*;
@@ -21,13 +21,13 @@ public class RefuelShipBehaviour implements ShipBehaviour {
     }
 
     @Override
-    public ShipBehaviourResult update(Ship ship) {
+    public ShipBehaviorResult update(Ship ship) {
         if (!ship.isDocked()) {
-            return ShipBehaviourResult.failure(FailureReason.NOT_DOCKED);
+            return ShipBehaviorResult.failure(FailureReason.NOT_DOCKED);
         }
 
         if (ship.isFuelFull()) {
-            return ShipBehaviourResult.failure(FailureReason.FUEL_IS_FULL);
+            return ShipBehaviorResult.failure(FailureReason.FUEL_IS_FULL);
         }
 
         String currentSystem = ship.getNav().getSystemSymbol();
@@ -35,13 +35,13 @@ public class RefuelShipBehaviour implements ShipBehaviour {
         Waypoint waypoint = systemsApi.getWaypoint(currentSystem, currentLocationSymbol).getData();
 
         if (!isMarketPlace(waypoint)) {
-            return ShipBehaviourResult.failure(FailureReason.NOT_AT_MARKET_WAYPOINT);
+            return ShipBehaviorResult.failure(FailureReason.NOT_AT_MARKET_WAYPOINT);
         }
 
         Market market = systemsApi.getMarket(currentSystem, currentLocationSymbol).getData();
 
         if (!sellsFuel(market)) {
-            return ShipBehaviourResult.failure(FailureReason.MARKET_DOES_NOT_SELL_FUEL);
+            return ShipBehaviorResult.failure(FailureReason.MARKET_DOES_NOT_SELL_FUEL);
         }
 
         RefuelShipRequest refuelShipRequest = getRefuelRequestForShip(ship);
@@ -50,7 +50,7 @@ public class RefuelShipBehaviour implements ShipBehaviour {
         ShipFuel fuel = refuelResponse.getData().getFuel();
         ship.setFuel(fuel);
 
-        return ShipBehaviourResult.done();
+        return ShipBehaviorResult.done();
     }
 
     public static RefuelShipRequest getRefuelRequestForShip(Ship ship) {

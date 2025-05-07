@@ -9,25 +9,27 @@
         "preview": "vite preview"
     },
     "dependencies": {
-        "bulma": "^1.0.0",
-        "css.gg": "^2.1.1",
-        "dayjs": "^1.11.11",
-        "htmx.org": "^1.9.11",
+        "@tailwindcss/vite": "^4.1.4",
+        "animate.css": "^4.1.1",
+        "bulma": "^1.0.4",
+        "bulma-toast": "^2.4.4",
+        "css.gg": "^2.1.4",
+        "dayjs": "^1.11.13",
+        "dot-object": "^2.1.5",
+        "htmx.org": "^1.9.12",
         "leaflet": "^1.9.4",
-        "sockjs-client": "^1.6.1",
-        "@stomp/stompjs": "^7.0.0",
-        "vue": "^3.4.26"
+        "tailwindcss": "^4.1.4",
+        "vue": "^3.5.13"
     },
     "devDependencies": {
-        "@http-util/status-i18n": "^0.8.1",
-        "@types/node": "^20.12.12",
-        "@vitejs/plugin-vue": "^5.0.4",
-        "express": "^4.19.2",
-        "glob": "^10.3.12",
-        "lodash": "^4.17.21",
-        "picocolors": "^1.0.1",
-        "typescript": "^5.4.5",
-        "vite": "^5.2.0",
-        "vite-plugin-live-reload": "^3.0.3"
+        "@types/dot-object": "^2.1.6",
+        "@types/leaflet": "^1.9.17",
+        "@types/node": "^22.14.1",
+        "@vitejs/plugin-vue": "^5.2.3",
+        "glob": "^11.0.1",
+        "sass": "^1.87.0",
+        "typescript": "^5.8.3",
+        "vite": "^6.3.3",
+        "vite-plugin-live-reload": "^3.0.4"
     }
 }

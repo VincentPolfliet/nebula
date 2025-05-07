@@ -28,8 +28,7 @@ public class ContractsController {
                                @RequestParam(value = "total", defaultValue = "10") int total,
                                Model model) {
 
-        HtmlPage contentPage = new HtmlPage();
-        contentPage.setTitle("Contracts");
+        HtmlPage contentPage = new HtmlPage("Contracts");
 
         model.addAttribute("page", contentPage);
 

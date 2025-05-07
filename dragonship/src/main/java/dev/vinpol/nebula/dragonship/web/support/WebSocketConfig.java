@@ -1,5 +1,6 @@
 package dev.vinpol.nebula.dragonship.web.support;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
@@ -10,16 +11,14 @@ import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 @Configuration
 @EnableWebSocket
 public class WebSocketConfig implements WebSocketConfigurer {
-    private final BeanFactory beanFactory;
+    private final ObjectMapper objectMapper;
 
-    public WebSocketConfig(BeanFactory beanFactory) {
-        this.beanFactory = beanFactory;
+    public WebSocketConfig(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
     }
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
-        var handler = new PerConnectionWebSocketHandler(ShipRowUpdateHandler.class);
-        handler.setBeanFactory(beanFactory);
-        registry.addHandler(handler, "/ws/ship").setAllowedOrigins("*");
+        registry.addHandler(new ShipRowUpdateHandler(objectMapper), "/ws/ship").setAllowedOrigins("*");
     }
 }

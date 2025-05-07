@@ -44,7 +44,9 @@ public class FleetApiCache implements FleetApi {
     public DockShip200Response dockShip(String shipSymbol) {
         DockShip200Response dockShipResponse = fleetApi.dockShip(shipSymbol);
 
-        cache.updateIfExists(shipSymbol, dockShipResponse);
+        cache.updateIfExists(shipSymbol, ship -> {
+            ship.setNav(dockShipResponse.getData().getNav());
+        });
         return dockShipResponse;
     }
 
@@ -115,7 +117,12 @@ public class FleetApiCache implements FleetApi {
     @Override
     public NavigateShip200Response navigateShip(String shipSymbol, NavigateShipRequest navigateShipRequest) {
         NavigateShip200Response navigateResponse = fleetApi.navigateShip(shipSymbol, navigateShipRequest);
-        cache.updateIfExists(shipSymbol, navigateResponse);
+
+        cache.updateIfExists(shipSymbol, ship -> {
+            ship.setFuel(navigateResponse.getData().getFuel());
+            ship.setNav(navigateResponse.getData().getNav());
+        });
+
         return navigateResponse;
     }
 
@@ -127,14 +134,20 @@ public class FleetApiCache implements FleetApi {
     @Override
     public OrbitShip200Response orbitShip(String shipSymbol) {
         OrbitShip200Response orbitResponse = fleetApi.orbitShip(shipSymbol);
-        cache.updateIfExists(shipSymbol, orbitResponse);
+
+        cache.updateIfExists(shipSymbol, ship -> {
+            ship.setNav(orbitResponse.getData().getNav());
+        });
+
         return orbitResponse;
     }
 
     @Override
     public GetShipNav200Response patchShipNav(String shipSymbol, PatchShipNavRequest patchShipNavRequest) {
         GetShipNav200Response response = fleetApi.patchShipNav(shipSymbol, patchShipNavRequest);
-        cache.updateIfExists(shipSymbol, response);
+
+        cache.updateIfExists(shipSymbol, ship -> ship.setNav(response.getData().getNav()));
+
         return response;
     }
 
@@ -151,7 +164,11 @@ public class FleetApiCache implements FleetApi {
     @Override
     public RefuelShip200Response refuelShip(String shipSymbol, RefuelShipRequest refuelShipRequest) {
         RefuelShip200Response refuelResponse = fleetApi.refuelShip(shipSymbol, refuelShipRequest);
-        cache.updateIfExists(shipSymbol, refuelResponse);
+
+        cache.updateIfExists(shipSymbol, ship -> {
+            ship.setFuel(refuelResponse.getData().getFuel());
+        });
+
         return refuelResponse;
     }
 

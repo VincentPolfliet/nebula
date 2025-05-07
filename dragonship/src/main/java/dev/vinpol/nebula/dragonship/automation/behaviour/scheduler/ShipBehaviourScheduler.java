@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.scheduler;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
@@ -31,7 +31,7 @@ public class ShipBehaviourScheduler {
         this.worker = worker;
     }
 
-    public CompletableFuture<ShipBehaviourResult> scheduleTick(String shipSymbol, Function<String, Ship> shipSupplier, Function<Ship, ShipBehaviour> behaviourResolver) {
+    public CompletableFuture<ShipBehaviorResult> scheduleTick(String shipSymbol, Function<String, Ship> shipSupplier, Function<Ship, ShipBehaviour> behaviourResolver) {
         Objects.requireNonNull(shipSymbol);
         Objects.requireNonNull(shipSupplier);
         Objects.requireNonNull(behaviourResolver);
@@ -43,9 +43,9 @@ public class ShipBehaviourScheduler {
         ));
     }
 
-    public CompletableFuture<ShipBehaviourResult> scheduleTickAt(String shipSymbol,
-                                                                 Function<String, Ship> shipResolver,
-                                                                 Function<Ship, ShipBehaviour> behaviourResolver, OffsetDateTime at) {
+    public CompletableFuture<ShipBehaviorResult> scheduleTickAt(String shipSymbol,
+                                                                Function<String, Ship> shipResolver,
+                                                                Function<Ship, ShipBehaviour> behaviourResolver, OffsetDateTime at) {
         Objects.requireNonNull(shipSymbol);
         Objects.requireNonNull(shipResolver);
         Objects.requireNonNull(behaviourResolver);
@@ -60,7 +60,7 @@ public class ShipBehaviourScheduler {
             behaviourResolver
         );
 
-        CompletableFuture<ShipBehaviourResult> scheduledFuture = timer.scheduleAt(() -> internalScheduleTick(task), at)
+        CompletableFuture<ShipBehaviorResult> scheduledFuture = timer.scheduleAt(() -> internalScheduleTick(task), at)
             .thenCompose(Function.identity());
 
         activeBehaviours.put(shipSymbol, new ScheduledFutureTask(shipSymbol, at, scheduledFuture));
@@ -99,7 +99,7 @@ public class ShipBehaviourScheduler {
         return true;
     }
 
-    private CompletableFuture<ShipBehaviourResult> internalScheduleTick(ShipBehaviourTask task) {
+    private CompletableFuture<ShipBehaviorResult> internalScheduleTick(ShipBehaviourTask task) {
         String shipSymbol = task.shipSymbol();
 
         logger.debug("adding {} to active", shipSymbol);
@@ -110,7 +110,7 @@ public class ShipBehaviourScheduler {
             .handle(shipBehaviourHandler(task, shipSymbol));
     }
 
-    private @NotNull BiFunction<ShipBehaviourResult, Throwable, ShipBehaviourResult> shipBehaviourHandler(ShipBehaviourTask task, String shipSymbol) {
+    private @NotNull BiFunction<ShipBehaviorResult, Throwable, ShipBehaviorResult> shipBehaviourHandler(ShipBehaviourTask task, String shipSymbol) {
         return (result, throwable) -> {
             activeBehaviours.remove(shipSymbol);
 

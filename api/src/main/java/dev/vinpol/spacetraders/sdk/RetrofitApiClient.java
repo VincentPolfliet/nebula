@@ -3,10 +3,7 @@ package dev.vinpol.spacetraders.sdk;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
-import dev.vinpol.spacetraders.sdk.api.AgentsApi;
-import dev.vinpol.spacetraders.sdk.api.ContractsApi;
-import dev.vinpol.spacetraders.sdk.api.FleetApi;
-import dev.vinpol.spacetraders.sdk.api.SystemsApi;
+import dev.vinpol.spacetraders.sdk.api.*;
 import dev.vinpol.spacetraders.sdk.retrofit.SynchronousCallAdapterFactory;
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
@@ -56,6 +53,11 @@ public class RetrofitApiClient implements ApiClient {
 
     public <S> S createService(Class<S> serviceClass) {
         return retrofit.create(serviceClass);
+    }
+
+    @Override
+    public DefaultApi defaults() {
+        return createService(DefaultApi.class);
     }
 
     @Override

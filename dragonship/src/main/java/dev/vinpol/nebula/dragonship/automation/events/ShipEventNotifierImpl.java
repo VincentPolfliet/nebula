@@ -64,11 +64,11 @@ public class ShipEventNotifierImpl implements ShipEventNotifier {
     }
 
     private void logEvent(String eventType, String shipSymbol) {
-        if (!logger.isTraceEnabled()) {
+        if (!logger.isInfoEnabled()) {
             return;
         }
 
-        logger.trace("sending '{}' event for '{}' at '{}'", eventType, shipSymbol, time.now());
+        logger.info("sending '{}' event for '{}' at '{}'", eventType, shipSymbol, time.now());
     }
 
 }

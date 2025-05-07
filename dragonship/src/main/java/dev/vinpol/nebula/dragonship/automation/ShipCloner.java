@@ -2,11 +2,10 @@ package dev.vinpol.nebula.dragonship.automation;
 
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
 import org.mapstruct.control.DeepClone;
 import org.mapstruct.factory.Mappers;
 
-@Mapper(mappingControl = DeepClone.class, unmappedTargetPolicy = ReportingPolicy.IGNORE)
+@Mapper(mappingControl = DeepClone.class)
 public interface ShipCloner {
     ShipCloner INSTANCE = Mappers.getMapper(ShipCloner.class);
 

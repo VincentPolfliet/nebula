@@ -34,9 +34,10 @@ public class JacksonManifestParser implements ManifestParser {
 
     private final static class JsonNodeManifest implements Manifest {
 
-        private final Map<String, Chunk> chunkCache = new LinkedHashMap<>();
         private final JsonNode node;
         private final ObjectMapper objectMapper;
+
+        private final Map<String, Chunk> chunkCache = new LinkedHashMap<>();
 
         private JsonNodeManifest(JsonNode node, ObjectMapper objectMapper) {
             this.node = node;

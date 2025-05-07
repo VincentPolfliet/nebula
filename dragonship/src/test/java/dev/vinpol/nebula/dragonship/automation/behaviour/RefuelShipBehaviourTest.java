@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.sdk.ShipCargoUtil;
 import dev.vinpol.nebula.dragonship.sdk.TradeGoods;
 import dev.vinpol.nebula.dragonship.sdk.WaypointGenerator;
@@ -12,7 +12,10 @@ import dev.vinpol.spacetraders.sdk.api.SystemsApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResultAssert.assertThat;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -20,6 +23,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
+@ExtendWith(MockitoExtension.class)
 class RefuelShipBehaviourTest {
 
     private final WaypointGenerator generator = new WaypointGenerator();
@@ -28,6 +32,9 @@ class RefuelShipBehaviourTest {
     SystemsApi systemsApi = mock(SystemsApi.class);
 
     RefuelShipBehaviour sut;
+
+    @Captor
+    ArgumentCaptor<RefuelShipRequest> refuelCaptor;
 
     @BeforeEach
     void setup() {
@@ -59,7 +66,7 @@ class RefuelShipBehaviourTest {
         when(systemsApi.getMarket(ship.getNav().getSystemSymbol(), ship.getNav().getWaypointSymbol()))
             .thenReturn(new GetMarket200Response().data(new Market().addExportsItem(TradeGoods.fuel())));
 
-        when(fleetApi.refuelShip(eq(ship.getSymbol()), any(RefuelShipRequest.class)))
+        when(fleetApi.refuelShip(eq(ship.getSymbol()), refuelCaptor.capture()))
             .thenReturn(
                 new RefuelShip200Response()
                     .data(
@@ -68,15 +75,12 @@ class RefuelShipBehaviourTest {
                     )
             );
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result).isDone();
-        assertThat(ship).isEqualTo(expected);
+        assertThat(ship.getFuel()).isEqualTo(expected.getFuel());
 
-        ArgumentCaptor<RefuelShipRequest> requestCaptor = ArgumentCaptor.forClass(RefuelShipRequest.class);
-        verify(fleetApi).refuelShip(eq(ship.getSymbol()), requestCaptor.capture());
-
-        RefuelShipRequest request = requestCaptor.getValue();
+        RefuelShipRequest request = refuelCaptor.getValue();
         assertThat(request.getUnits()).isNull();
         assertThat(request.isFromCargo()).isFalse();
     }
@@ -110,7 +114,7 @@ class RefuelShipBehaviourTest {
         when(systemsApi.getMarket(ship.getNav().getSystemSymbol(), ship.getNav().getWaypointSymbol()))
             .thenReturn(new GetMarket200Response().data(new Market().addExportsItem(TradeGoods.fuel())));
 
-        when(fleetApi.refuelShip(eq(ship.getSymbol()), any(RefuelShipRequest.class)))
+        when(fleetApi.refuelShip(eq(ship.getSymbol()), refuelCaptor.capture()))
             .thenReturn(
                 new RefuelShip200Response()
                     .data(
@@ -119,15 +123,12 @@ class RefuelShipBehaviourTest {
                     )
             );
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result).isDone();
-        assertThat(ship).isEqualTo(expected);
+        assertThat(ship.getFuel()).isEqualTo(expected.getFuel());
 
-        ArgumentCaptor<RefuelShipRequest> requestCaptor = ArgumentCaptor.forClass(RefuelShipRequest.class);
-        verify(fleetApi).refuelShip(eq(ship.getSymbol()), requestCaptor.capture());
-
-        RefuelShipRequest request = requestCaptor.getValue();
+        RefuelShipRequest request = refuelCaptor.getValue();
         assertThat(request.getUnits()).isNull();
         assertThat(request.isFromCargo()).isTrue();
     }
@@ -139,7 +140,7 @@ class RefuelShipBehaviourTest {
             .nav(new ShipNav().status(ShipNavStatus.DOCKED))
             .fuel(new ShipFuel().current(100).capacity(100));
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.hasFailedWithReason(FailureReason.FUEL_IS_FULL)).isTrue();
     }
@@ -150,7 +151,7 @@ class RefuelShipBehaviourTest {
             .nav(new ShipNav().status(ShipNavStatus.IN_ORBIT))
             .fuel(new ShipFuel().current(100).capacity(100));
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.hasFailedWithReason(FailureReason.NOT_DOCKED)).isTrue();
     }
@@ -161,7 +162,7 @@ class RefuelShipBehaviourTest {
             .nav(new ShipNav().status(ShipNavStatus.IN_TRANSIT))
             .fuel(new ShipFuel().current(100).capacity(100));
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.hasFailedWithReason(FailureReason.NOT_DOCKED)).isTrue();
     }

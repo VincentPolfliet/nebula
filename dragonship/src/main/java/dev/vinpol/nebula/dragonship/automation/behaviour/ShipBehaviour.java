@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 
 import java.util.Objects;
@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 
 @FunctionalInterface
 public interface ShipBehaviour {
-    static ShipBehaviour ofResult(ShipBehaviourResult result) {
+    static ShipBehaviour ofResult(ShipBehaviorResult result) {
         return new ShipBehaviour() {
             @Override
             public String getName() {
@@ -18,7 +18,7 @@ public interface ShipBehaviour {
             }
 
             @Override
-            public ShipBehaviourResult update(Ship inShip) {
+            public ShipBehaviorResult update(Ship inShip) {
                 return result;
             }
 
@@ -30,14 +30,14 @@ public interface ShipBehaviour {
     }
 
     static ShipBehaviour succeed() {
-        return ofResult(ShipBehaviourResult.success());
+        return ofResult(ShipBehaviorResult.success());
     }
 
     static ShipBehaviour fail() {
-        return ofResult(ShipBehaviourResult.failure(FailureReason.FAILURE));
+        return ofResult(ShipBehaviorResult.failure(FailureReason.FAILURE));
     }
 
-    ShipBehaviourResult update(Ship ship);
+    ShipBehaviorResult update(Ship ship);
 
     static ShipBehaviour finished() {
         return new FinishedBehaviour();
@@ -68,9 +68,9 @@ public interface ShipBehaviour {
         }
 
         @Override
-        public ShipBehaviourResult update(Ship ship) {
+        public ShipBehaviorResult update(Ship ship) {
             // do nothing
-            return ShipBehaviourResult.done();
+            return ShipBehaviorResult.done();
         }
     }
 
@@ -84,7 +84,7 @@ public interface ShipBehaviour {
         }
 
         @Override
-        public ShipBehaviourResult update(Ship ship) {
+        public ShipBehaviorResult update(Ship ship) {
             if (loadedBehaviour == null) {
                 loadedBehaviour = shipBehaviourFunction.apply(ship);
             }

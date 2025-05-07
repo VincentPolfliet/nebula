@@ -1,12 +1,10 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.navigation;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.vinpol.nebula.dragonship.automation.behaviour.RefuelShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.nebula.dragonship.ships.TravelCostCalculator;
@@ -17,14 +15,10 @@ import dev.vinpol.spacetraders.sdk.models.System;
 import dev.vinpol.spacetraders.sdk.utils.page.Page;
 import dev.vinpol.spacetraders.sdk.utils.page.PageIterator;
 import org.jgrapht.Graph;
-import org.jgrapht.graph.SimpleGraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.time.OffsetDateTime;
 import java.util.*;
 
@@ -55,18 +49,18 @@ public class NavigationUsingGraphBehaviourFactory implements ShipBehaviourFactor
 
             if (ship.isFuelEmpty() && ship.getFuel().isNotInfinite()) {
                 logger.trace("fuel is empty");
-                return ShipBehaviour.ofResult(ShipBehaviourResult.failure(FailureReason.FUEL_IS_EMPTY));
+                return ShipBehaviour.ofResult(ShipBehaviorResult.failure(FailureReason.FUEL_IS_EMPTY));
             }
 
             if (ship.isNotInOrbit()) {
                 logger.trace("ship is not in orbit");
-                return ShipBehaviour.ofResult(ShipBehaviourResult.failure(FailureReason.NOT_IN_ORBIT));
+                return ShipBehaviour.ofResult(ShipBehaviorResult.failure(FailureReason.NOT_IN_ORBIT));
             }
 
             String waypointSymbolString = waypointSymbol.waypoint();
             if (ship.isAtLocation(waypointSymbolString)) {
                 logger.trace("ship is already at location");
-                return ShipBehaviour.ofResult(ShipBehaviourResult.failure(FailureReason.ALREADY_AT_LOCATION));
+                return ShipBehaviour.ofResult(ShipBehaviorResult.failure(FailureReason.ALREADY_AT_LOCATION));
             }
 
             WaypointSymbol currentLocationWaypointSymbol = WaypointSymbol.tryParse(ship.getNav().getWaypointSymbol());
@@ -89,11 +83,11 @@ public class NavigationUsingGraphBehaviourFactory implements ShipBehaviourFactor
                 private Waypoint currentLocationWaypoint;
 
                 @Override
-                public ShipBehaviourResult update(Ship ship) {
+                public ShipBehaviorResult update(Ship ship) {
                     currentLocationWaypoint = systemsApi.getWaypoint(currentLocationWaypointSymbol.system(), currentLocationWaypointSymbol.waypoint()).getData();
 
                     if (Objects.equals(currentLocationWaypoint, targetWaypoint)) {
-                        return ShipBehaviourResult.done();
+                        return ShipBehaviorResult.done();
                     }
 
                     if (currentPath == null) {
@@ -103,7 +97,7 @@ public class NavigationUsingGraphBehaviourFactory implements ShipBehaviourFactor
                     logger.debug("currentPath: {}", currentPath);
 
                     if (currentPath == null || currentPath.isEmpty()) {
-                        return ShipBehaviourResult.failure(FailureReason.NO_PATH_AVAILABLE);
+                        return ShipBehaviorResult.failure(FailureReason.NO_PATH_AVAILABLE);
                     }
 
                     for (RoutePart route : currentPath.routes()) {
@@ -117,7 +111,7 @@ public class NavigationUsingGraphBehaviourFactory implements ShipBehaviourFactor
                                 // in case they don't sell fuel TODO check if they sell fuel
                                 try {
                                     RefuelShip200Response response = fleetApi.refuelShip(ship.getSymbol(), RefuelShipBehaviour.getRefuelRequestForShip(ship));
-                                    response.accept(ship);
+                                    ship.setFuel(response.getData().getFuel());
                                 } catch (Exception e) {
                                     // swallow exception
                                 }
@@ -140,11 +134,11 @@ public class NavigationUsingGraphBehaviourFactory implements ShipBehaviourFactor
                             OffsetDateTime arrival = currentRoute.getArrival();
                             shipEventNotifier.setNavigatingTo(ship.getSymbol(), waypointSymbol, currentRoute.getArrival());
 
-                            return ShipBehaviourResult.waitUntil(arrival);
+                            return ShipBehaviorResult.waitUntil(arrival);
                         }
                     }
 
-                    return ShipBehaviourResult.success();
+                    return ShipBehaviorResult.success();
                 }
             };
         });
@@ -153,7 +147,7 @@ public class NavigationUsingGraphBehaviourFactory implements ShipBehaviourFactor
     private List<Waypoint> getMarketWaypointsInSystem(System currentSystem) throws UncheckedIOException {
         return PageIterator.stream(PageIterator.INITIAL_PAGE, PageIterator.MAX_SIZE, req -> {
             GetSystemWaypoints200Response response = systemsApi.getSystemWaypoints(currentSystem.getSymbol(), req.page(), req.size(), null, WaypointTraitSymbol.MARKETPLACE);
-            return new Page<>(response.getData(), response.getMeta().getTotal());
+            return new Page<>(response.getData(), response.getMeta().total());
         }).toList();
     }
 

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dev.vinpol.nebula.dragonship.automation.events.out.*;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.event.EventListener;
-import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-@Component
 public class ShipRowUpdateHandler extends TextWebSocketHandler implements ShipEventListener {
 
     private final ObjectMapper objectMapper;
@@ -26,7 +24,7 @@ public class ShipRowUpdateHandler extends TextWebSocketHandler implements ShipEv
 
     @Override
     public void afterConnectionEstablished(@NotNull WebSocketSession session) throws Exception {
-        this.sessions.remove(session);
+        this.sessions.add(session);
     }
 
     @EventListener

@@ -37,7 +37,7 @@ public class ShipNavigator {
         GraphPath<String, TravelEdge> bestPath = null;
 
         for (ShipNavFlightMode mode : ShipNavFlightMode.values()) {
-            Graph<String, TravelEdge> currentGraph = new AsWeightedGraph<>(graph, (edge) -> edge.timeCost().get(mode), false, false);
+            Graph<String, TravelEdge> currentGraph = new AsWeightedGraph<>(graph, edge -> calculateWeight(mode, edge), false, false);
 
             GraphPath<String, TravelEdge> directPath = new DijkstraShortestPath<>(currentGraph).getPath(origin.getSymbol(), target.getSymbol());
 
@@ -63,6 +63,10 @@ public class ShipNavigator {
         }
 
         return convertToRoute(bestPath, bestMode);
+    }
+
+    private Double calculateWeight(ShipNavFlightMode mode, TravelEdge travelEdge) {
+        return travelEdge.timeCost().getOrDefault(mode, 0d);
     }
 
     private Route convertToRoute(GraphPath<String, TravelEdge> path, ShipNavFlightMode mode) {

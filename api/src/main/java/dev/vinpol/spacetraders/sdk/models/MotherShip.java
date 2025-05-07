@@ -11,61 +11,63 @@ public class MotherShip {
     public static Ship satellite() {
         String shipSymbol = ShipSymbolGenerator.generate();
 
-        return new Ship()
-            .symbol(shipSymbol)
-            .engine(
+        return new ShipBuilder()
+            .withSymbol(shipSymbol)
+            .withEngine(
                 new ShipEngine()
                     .speed(100)
             )
-            .nav(new ShipNav()
+            .withNav(new ShipNav()
                 .route(new ShipNavRoute())
                 .status(ShipNavStatus.IN_ORBIT)
             )
-            .registration(
+            .withRegistration(
                 new ShipRegistration()
                     .role(ShipRole.SATELLITE)
                     .factionSymbol(randomFaction().getValue())
                     .name(shipSymbol)
             )
-            .cargo(
+            .withCargo(
                 new ShipCargo()
                     .units(0)
                     .capacity(0)
             )
-            .cooldown(Cooldown.noCooldown(shipSymbol))
-            .fuel(ShipFuel.infinite());
+            .withCooldown(Cooldown.noCooldown(shipSymbol))
+            .withFuel(ShipFuel.infinite())
+            .build();
     }
 
     public static Ship excavator() {
         String shipSymbol = ShipSymbolGenerator.generate();
 
-        return new Ship()
-            .symbol(shipSymbol)
-            .engine(
+        return new ShipBuilder()
+            .withSymbol(shipSymbol)
+            .withEngine(
                 new ShipEngine()
                     .speed(100)
             )
-            .nav(new ShipNav()
+            .withNav(new ShipNav()
                 .route(new ShipNavRoute())
                 .status(ShipNavStatus.IN_ORBIT)
             )
-            .registration(
+            .withRegistration(
                 new ShipRegistration()
                     .role(ShipRole.EXCAVATOR)
                     .factionSymbol(randomFaction().getValue())
                     .name(shipSymbol)
             )
-            .cargo(
+            .withCargo(
                 new ShipCargo()
                     .units(0)
                     .capacity(16)
             )
-            .cooldown(Cooldown.noCooldown(shipSymbol))
-            .fuel(
+            .withCooldown(Cooldown.noCooldown(shipSymbol))
+            .withFuel(
                 new ShipFuel()
                     .capacity(100)
                     .current(100)
-            );
+            )
+            .build();
     }
 
     private static FactionSymbol randomFaction() {

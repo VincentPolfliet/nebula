@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.scheduler.ShipBehaviourScheduler;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.command.MaxRescheduleCountExceededException;
 import dev.vinpol.nebula.dragonship.automation.command.ShipCommander;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
@@ -69,8 +69,8 @@ class ShipCommanderTest {
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any()))
             .thenReturn(
-                CompletableFuture.completedFuture(ShipBehaviourResult.success()),
-                CompletableFuture.completedFuture(ShipBehaviourResult.done())
+                CompletableFuture.completedFuture(ShipBehaviorResult.success()),
+                CompletableFuture.completedFuture(ShipBehaviorResult.done())
             );
 
         CompletionStage<?> stage = sut.command(ship);
@@ -89,12 +89,12 @@ class ShipCommanderTest {
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any())).thenReturn(
-            CompletableFuture.completedFuture(ShipBehaviourResult.success()),
-            CompletableFuture.completedFuture(ShipBehaviourResult.waitUntil(waitUntilTimestamp)),
-            CompletableFuture.completedFuture(ShipBehaviourResult.done())
+            CompletableFuture.completedFuture(ShipBehaviorResult.success()),
+            CompletableFuture.completedFuture(ShipBehaviorResult.waitUntil(waitUntilTimestamp)),
+            CompletableFuture.completedFuture(ShipBehaviorResult.done())
         );
 
-        when(scheduler.scheduleTickAt(eq(ship.getSymbol()), any(), any(), eq(waitUntilTimestamp))).thenReturn(CompletableFuture.completedFuture(ShipBehaviourResult.success()));
+        when(scheduler.scheduleTickAt(eq(ship.getSymbol()), any(), any(), eq(waitUntilTimestamp))).thenReturn(CompletableFuture.completedFuture(ShipBehaviorResult.success()));
 
         CompletionStage<?> stage = sut.command(ship);
 
@@ -115,7 +115,7 @@ class ShipCommanderTest {
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any())).thenReturn(
-            CompletableFuture.completedFuture(ShipBehaviourResult.failure("fail this"))
+            CompletableFuture.completedFuture(ShipBehaviorResult.failure("fail this"))
         );
 
         CompletableFuture<?> stage = sut.command(ship).toCompletableFuture();
@@ -135,11 +135,11 @@ class ShipCommanderTest {
         when(scheduler.isTickScheduled(ship)).thenReturn(false);
 
         when(scheduler.scheduleTick(eq(ship.getSymbol()), any(), any())).thenReturn(
-            CompletableFuture.completedFuture(ShipBehaviourResult.success())
+            CompletableFuture.completedFuture(ShipBehaviorResult.success())
         );
 
-        // override the next behaviour to never send a "Done" event
-        CompletableFuture<?> command = commander.command(ship, ShipBehaviour.ofResult(ShipBehaviourResult.success())).toCompletableFuture();
+        // override the next behavior to never send a "Done" event
+        CompletableFuture<?> command = commander.command(ship, ShipBehaviour.ofResult(ShipBehaviorResult.success())).toCompletableFuture();
 
         await().until(command::isDone);
         assertThat(command).isCompletedExceptionally();

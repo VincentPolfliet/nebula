@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.docking;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.DockShip200Response;
@@ -17,13 +17,13 @@ public record DockShipBehaviour(FleetApi fleetApi, ShipEventNotifier notifier) i
     }
 
     @Override
-    public ShipBehaviourResult update(Ship ship) {
+    public ShipBehaviorResult update(Ship ship) {
         if (ship.isDocked()) {
-            return ShipBehaviourResult.failure(FailureReason.DOCKED);
+            return ShipBehaviorResult.failure(FailureReason.DOCKED);
         }
 
         if (ship.isInTransit()) {
-            return ShipBehaviourResult.failure(FailureReason.IN_TRANSIT);
+            return ShipBehaviorResult.failure(FailureReason.IN_TRANSIT);
         }
 
         DockShip200Response dockResponse = fleetApi.dockShip(ship.getSymbol());
@@ -32,6 +32,6 @@ public record DockShipBehaviour(FleetApi fleetApi, ShipEventNotifier notifier) i
         ship.setNav(nav);
 
         notifier.setDocked(ship.getSymbol());
-        return ShipBehaviourResult.done();
+        return ShipBehaviorResult.done();
     }
 }

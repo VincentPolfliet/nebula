@@ -27,4 +27,8 @@ public class FleetUtils {
     public static String formatCondition(double value) {
         return String.format("%5.2f", value);
     }
+
+    public static String formatDistance(double value) {
+        return String.format("%d", Math.round(value));
+    }
 }

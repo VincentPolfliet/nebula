@@ -3,7 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
 import dev.vinpol.nebula.dragonship.sdk.ShipExtractionUtil;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
@@ -67,7 +67,7 @@ class ExtractionBehaviourFactoryTest {
             .thenReturn(new ExtractResources201Response().data(responseData));
 
         ShipBehaviour behaviour = sut.create();
-        ShipBehaviourResult result = behaviour.update(ship);
+        ShipBehaviorResult result = behaviour.update(ship);
 
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result)
@@ -90,7 +90,7 @@ class ExtractionBehaviourFactoryTest {
             );
 
         ShipBehaviour behaviour = sut.create();
-        ShipBehaviourResult result = behaviour.update(ship);
+        ShipBehaviorResult result = behaviour.update(ship);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.CARGO_IS_FULL)).isTrue();
@@ -108,7 +108,7 @@ class ExtractionBehaviourFactoryTest {
             );
 
         ShipBehaviour behaviour = sut.create();
-        ShipBehaviourResult result = behaviour.update(ship);
+        ShipBehaviorResult result = behaviour.update(ship);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.NOT_IN_ORBIT)).isTrue();
@@ -126,7 +126,7 @@ class ExtractionBehaviourFactoryTest {
             );
 
         ShipBehaviour behaviour = sut.create();
-        ShipBehaviourResult result = behaviour.update(ship);
+        ShipBehaviorResult result = behaviour.update(ship);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.NOT_IN_ORBIT)).isTrue();
@@ -146,7 +146,7 @@ class ExtractionBehaviourFactoryTest {
             );
 
         ShipBehaviour behaviour = sut.create();
-        ShipBehaviourResult result = behaviour.update(ship);
+        ShipBehaviorResult result = behaviour.update(ship);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.ACTIVE_COOLDOWN)).isTrue();

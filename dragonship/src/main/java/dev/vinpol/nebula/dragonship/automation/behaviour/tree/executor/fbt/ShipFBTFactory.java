@@ -6,7 +6,7 @@ import com.github.skidrunner.fbt.BehaviourTreeStatus;
 import com.github.skidrunner.fbt.ParentBehaviourTreeNode;
 import com.github.skidrunner.fbt.nodes.ActionNode;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourSequence;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.executor.ShipBehaviourTree;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.executor.ShipBehaviourTreeFactory;
@@ -111,7 +111,7 @@ public class ShipFBTFactory implements ShipBehaviourTreeFactory {
         }
 
         @Override
-        public ShipBehaviourResult update(Ship ship) {
+        public ShipBehaviorResult update(Ship ship) {
             if (tree == null) {
                 state = new BehaviourTreeState(() -> ship);
                 mapOnTree(treeBuilder, behaviours, state);
@@ -128,24 +128,24 @@ public class ShipFBTFactory implements ShipBehaviourTreeFactory {
 
             if (status == BehaviourTreeStatus.SUCCESS && state.isTreeDone()) {
                 logger.debug("behaviour has no more steps left, returning done");
-                return ShipBehaviourResult.done();
+                return ShipBehaviorResult.done();
             }
 
             logger.debug("state: {}", status);
             logger.debug("callback: tree: {}, sequence: {}", state.getTreeState(), state.getSequenceState());
 
             if (state.isTreeDone()) {
-                return ShipBehaviourResult.done();
+                return ShipBehaviorResult.done();
             }
 
             return extractResult(() -> {
-                    ShipBehaviourResult result = state.result;
+                    ShipBehaviorResult result = state.result;
                     if (result.isFailure()) {
                         logger.error("failed: {}", result);
                     }
 
                     if (state.isInSequence() && result.isFailure()) {
-                        return ShipBehaviourResult.success();
+                        return ShipBehaviorResult.success();
                     }
 
                     return result;
@@ -177,12 +177,12 @@ public class ShipFBTFactory implements ShipBehaviourTreeFactory {
             return "  ".repeat(Math.max(0, depth));
         }
 
-        private ShipBehaviourResult extractResult(Supplier<ShipBehaviourResult> supplier) {
-            ShipBehaviourResult innerResult = supplier.get();
+        private ShipBehaviorResult extractResult(Supplier<ShipBehaviorResult> supplier) {
+            ShipBehaviorResult innerResult = supplier.get();
             logger.debug("innerResult before isDoneConversion: {}", innerResult);
             // 'Done' should only be sent by the final behaviour,
             // we interpreted it as a success so the parent behaviour can continue
-            return innerResult.isDone() ? ShipBehaviourResult.success() : innerResult;
+            return innerResult.isDone() ? ShipBehaviorResult.success() : innerResult;
         }
 
         private final static class BehaviourTreeState {
@@ -194,7 +194,7 @@ public class ShipFBTFactory implements ShipBehaviourTreeFactory {
             private SequenceState sequenceState = SequenceState.NONE;
 
             private ShipBehaviour currentStep;
-            private ShipBehaviourResult result;
+            private ShipBehaviorResult result;
             private Float tick;
 
             private BehaviourTreeState(Supplier<Ship> shipSupplier) {
@@ -210,7 +210,7 @@ public class ShipFBTFactory implements ShipBehaviourTreeFactory {
                 logger.debug("step: {}", currentStep);
             }
 
-            public void setResult(ShipBehaviourResult result, Float tick) {
+            public void setResult(ShipBehaviorResult result, Float tick) {
                 this.result = result;
                 this.tick = tick;
             }
@@ -281,13 +281,13 @@ public class ShipFBTFactory implements ShipBehaviourTreeFactory {
 
                 Ship currentShip = callback.getShip();
                 logger.debug("running {} for ship '{}'", leaf.getName(), currentShip.getSymbol());
-                ShipBehaviourResult result = leaf.update(currentShip);
+                ShipBehaviorResult result = leaf.update(currentShip);
                 callback.setResult(result, tick);
 
                 return transformResultToBehaviourTreeStatus(result);
             }
 
-            private BehaviourTreeStatus transformResultToBehaviourTreeStatus(ShipBehaviourResult result) {
+            private BehaviourTreeStatus transformResultToBehaviourTreeStatus(ShipBehaviorResult result) {
                 if (result.isFailure()) {
                     return BehaviourTreeStatus.FAILURE;
                 }

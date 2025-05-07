@@ -1,0 +1,33 @@
+{
+    hq: HQ,
+    credits: Credits
+    faction: Faction
+    "nav": {
+        "docs": "Docs",
+        "home": "Home",
+        "fleet": "Fleet",
+        "galaxy": "Galaxy",
+        "settings": "Settings"
+    },
+    fleet: {
+        orbit: Orbit
+        dock: Dock
+        navigate: {
+            text: Navigate
+            placeholder: Please select a destination system to view travel estimates.
+        }
+        automation: Automation
+    },
+    fleet.navigate.placeholder: Please select a destination system to view travel estimates.
+    page: {
+        next: Next
+        prev: Previous
+    },
+    token: {
+        copied: The token is copied to clipboard
+        copy-failed: Failed to copy token to clipboard. Please try again.
+    },
+    hide: Hide
+    copy: Copy
+    view: View
+}

@@ -2,10 +2,8 @@ package dev.vinpol.nebula.dragonship.web.galaxy;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import dev.vinpol.nebula.dragonship.geo.GridXY;
+import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
-import dev.vinpol.nebula.dragonship.web.HtmlPage;
-import dev.vinpol.nebula.dragonship.web.HtmlPage;
 import dev.vinpol.nebula.dragonship.web.utils.PagingUtils;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.api.SystemsApi;
@@ -20,28 +18,25 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Controller
 public class GalaxyController {
 
-    public static final int OPTIMAL_NUMBERS = 36;
-
+    private static final UUID SEED = UUID.randomUUID();
 
     private final FleetApi fleetApi;
     private final SystemsApi systemsApi;
 
-    private final MapDataCache mapDataCache;
-
     private final ObjectMapper objectMapper;
 
-    public GalaxyController(FleetApi fleetApi, SystemsApi systemsApi, MapDataCache mapDataCache, ObjectMapper objectMapper) {
+    public GalaxyController(FleetApi fleetApi, SystemsApi systemsApi, ObjectMapper objectMapper) {
         this.fleetApi = fleetApi;
         this.systemsApi = systemsApi;
-        this.mapDataCache = mapDataCache;
         this.objectMapper = objectMapper;
     }
 
@@ -52,16 +47,18 @@ public class GalaxyController {
 
     @GetMapping("/galaxy/systems")
     public String getGalaxySystems(@RequestParam(value = "page", defaultValue = "1") int page,
-                                   @RequestParam(value = "total", defaultValue = "10") int total,
+                                   @RequestParam(value = "pageSize", defaultValue = "10") int pageSize,
                                    Model model) {
-        HtmlPage content = new HtmlPage();
-        content.setTitle("Galaxy");
-        model.addAttribute("page", content);
-
-        GetSystems200Response systems = systemsApi.getSystems(page, total);
+        GetSystems200Response systems = systemsApi.getSystems(page, pageSize);
         PagingUtils.setMetaOnModel(model, systems.getMeta());
         model.addAttribute("systems", systems.getData());
         return "galaxy/systems";
+    }
+
+    @GetMapping("/galaxy/system/{systemSymbol}")
+    public String system(@PathVariable("systemSymbol") String symbol) {
+        SystemSymbol systemSymbol = SystemSymbol.tryParse(symbol);
+        return "redirect:/galaxy/system/%s/map".formatted(systemSymbol.system());
     }
 
     @GetMapping("/galaxy/system/{system}/markets.json")
@@ -71,9 +68,9 @@ public class GalaxyController {
     }
 
     @GetMapping("/galaxy/waypoint/{waypointSymbol}")
-    public String waypoint(@PathVariable("waypointSymbol") String symbol, @RequestParam(value = "map", required = false, defaultValue = "true") boolean map) {
+    public String waypoint(@PathVariable("waypointSymbol") String symbol) {
         WaypointSymbol waypointSymbol = WaypointSymbol.tryParse(symbol);
-        return "redirect:/galaxy/system/%s?target=%s".formatted(waypointSymbol.system() + (map ? "/map" : ""), waypointSymbol.waypoint());
+        return "redirect:/galaxy/system/%s/map?target=%s".formatted(waypointSymbol.system(), waypointSymbol.waypoint());
     }
 
     @GetMapping("/galaxy/waypoint/{waypointSymbol}.json")
@@ -90,104 +87,39 @@ public class GalaxyController {
 
         System system = systemsApi.getSystem(systemSymbol).getData();
 
-        MapData mapData = Optional.ofNullable(mapDataCache.get(systemSymbol))
-            // clone because mutable and not threadsafe
-            .map(MapDataCloner::clone)
-            .orElseGet(() -> {
-                MapData calculateMapData = calculateMapData(systemSymbol, system);
-                mapDataCache.set(systemSymbol, calculateMapData);
-                return calculateMapData;
-            });
+        MapData.MapDataBuilder mapDataBuilder = MapData.builder();
 
-        if (targetSymbol != null && !targetSymbol.isEmpty()) {
-            mapData.setTarget(targetSymbol);
+        if (targetSymbol != null && !targetSymbol.isBlank()) {
+            mapDataBuilder.target(targetSymbol);
         }
 
+        List<MapWaypoint> shipWaypoints = getCurrentShipsInSystem(systemSymbol).stream()
+            .map(GalaxyController::mapToShipWaypoint)
+            .toList();
+
+        List<MapWaypoint> mapWaypoints = system.getWaypoints()
+            .stream()
+            .map(waypoint -> new MapWaypoint(
+                waypoint.getSymbol(),
+                waypoint.getType().toString(),
+                waypoint.getX(),
+                waypoint.getY(),
+                0,
+                waypoint.getOrbits()
+            ))
+            .collect(Collectors.toList());
+
+        mapWaypoints.addAll(shipWaypoints);
+
+        mapDataBuilder
+            .waypoints(mapWaypoints)
+            .seed(SEED.toString());
+
         String mapDataJson = objectMapper.writerWithDefaultPrettyPrinter()
-            .writeValueAsString(mapData);
+            .writeValueAsString(mapDataBuilder.build());
 
         model.addAttribute("map", mapDataJson);
         return "galaxy/map";
-    }
-
-    private MapData calculateMapData(String systemSymbol, System system) {
-        MapData mapData = new MapData();
-
-        Map<SystemWaypoint, List<GridXY>> availableParking = calculateAvailableParking(system);
-        Map<SystemWaypoint, List<GridXY>> availableOrbits = calculateAvailableOrbits(system);
-
-        mapData.setWaypoints(
-            system.getWaypoints()
-                .stream()
-                .map(s -> {
-                    if (s.isInOrbit()) {
-                        List<GridXY> availableOrbitsForWaypoint = availableOrbits.get(s);
-
-                        GridXY coordinate = popRandom(availableOrbitsForWaypoint);
-                        return new WayPoint(s.getSymbol(), s.getType().toString(), coordinate.x(), coordinate.y());
-                    }
-
-                    return new WayPoint(s.getSymbol(), s.getType().toString(), s.getX(), s.getY());
-                })
-                .toList()
-        );
-
-        for (Ship ship : getCurrentShipsInSystem(systemSymbol)) {
-            SystemWaypoint shipSystemWayPoint = system.getWaypoints().stream().filter(s -> s.getSymbol().equals(ship.getNav().getWaypointSymbol())).findFirst().orElseThrow();
-            List<GridXY> parkingOptions = availableParking.get(shipSystemWayPoint);
-
-            GridXY parking = popRandom(parkingOptions);
-
-            mapData.addWayPoint(
-                new WayPoint(
-                    ship.getSymbol(),
-                    "SHIP",
-                    parking.x(),
-                    parking.y(),
-                    100
-                )
-            );
-        }
-
-        return mapData;
-    }
-
-    private static GridXY popRandom(List<GridXY> coordinates) {
-        if (coordinates == null || coordinates.isEmpty()) {
-            // coordinate should not be empty or null
-            throw new IllegalStateException("Calculated coordinates can not be null or empty when popping");
-        }
-
-        int parkingOptionIndex = ThreadLocalRandom.current().nextInt(0, coordinates.size());
-        return coordinates.remove(parkingOptionIndex);
-    }
-
-    private Map<SystemWaypoint, List<GridXY>> calculateAvailableOrbits(System system) {
-        ThreadLocalRandom random = ThreadLocalRandom.current();
-
-        return system.getWaypoints()
-            .stream()
-            // this random introduces different rings of orbitals
-            .collect(Collectors.toMap(Function.identity(), waypoint -> calculateCoordinatesOfWayPoint(waypoint, random.nextInt(8, 12), waypoint.getOrbitals().size() + 1)));
-    }
-
-    private Map<SystemWaypoint, List<GridXY>> calculateAvailableParking(System system) {
-        return system.getWaypoints()
-            .stream()
-            .collect(Collectors.toMap(Function.identity(), waypoint -> calculateCoordinatesOfWayPoint(waypoint, 0.25, 8)));
-    }
-
-    private static List<GridXY> calculateCoordinatesOfWayPoint(SystemWaypoint systemWaypoint, double radius, int wantedNumberOfPoints) {
-        List<GridXY> coordinates = calculateCoordinates(systemWaypoint.getX(), systemWaypoint.getY(), radius, Math.max(wantedNumberOfPoints, OPTIMAL_NUMBERS));
-        // this random causes not the same coordinates to not be assigned multiple times on different planets,
-        // e.g. planet 1 would have index 0, planet 2 would have index 0, planet 3 would have index 0, ... when there are only a few orbitals
-        Collections.shuffle(coordinates);
-
-        while (coordinates.size() > wantedNumberOfPoints) {
-            coordinates.removeLast();
-        }
-
-        return coordinates;
     }
 
     private List<Ship> getCurrentShipsInSystem(String systemSymbol) {
@@ -197,17 +129,10 @@ public class GalaxyController {
             .collect(Collectors.toList());
     }
 
+    private static MapWaypoint mapToShipWaypoint(Ship s) {
+        ShipNavRoute shipRoute = s.getNav().getRoute();
+        ShipNavRouteWaypoint origin = shipRoute.getOrigin();
 
-    private static List<GridXY> calculateCoordinates(double centerX, double centerY, double radius, int numPoints) {
-        List<GridXY> coordinates = new ArrayList<>();
-
-        for (int i = 0; i < numPoints; ++i) {
-            double angle = Math.toRadians(((double) 360 / numPoints) * i);
-            double x = centerX + radius * Math.cos(angle);
-            double y = centerY + radius * Math.sin(angle);
-            coordinates.add(new GridXY(x, y));
-        }
-
-        return coordinates;
+        return new MapWaypoint(s.getSymbol(), "SHIP", origin.getX(), origin.getY(), 100, origin.getSymbol());
     }
 }

@@ -5,7 +5,7 @@ import java.util.Collections;
 import java.util.Objects;
 
 public record Page<T>(Collection<T> data, int total) {
-    public static <T> Page<T> singleton(T data) {
+    public static <T> Page<T> of(T data) {
         Objects.requireNonNull(data);
 
         return ofCollection(Collections.singleton(data));

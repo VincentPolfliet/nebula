@@ -9,7 +9,7 @@ import org.jgrapht.graph.Multigraph;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
+import java.time.Duration;import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -87,11 +87,11 @@ public class RouteGraphCalculator {
 
 
     private Map<ShipNavFlightMode, Double> calculateTime(GridXY origin, GridXY target) {
-        Map<ShipNavFlightMode, Double> timeCost = calculator.calculateTime(origin, target, config.getEngineSpeed());
+        Map<ShipNavFlightMode,Duration> timeCost = calculator.calculateTime(origin, target, config.getEngineSpeed());
         Map<ShipNavFlightMode, Double> modifiedWithWeight = new HashMap<>();
 
-        for (Map.Entry<ShipNavFlightMode, Double> entry : timeCost.entrySet()) {
-            modifiedWithWeight.put(entry.getKey(), entry.getValue() * Math.min(config.getTimeWeight(), 1));
+        for (Map.Entry<ShipNavFlightMode,Duration> entry : timeCost.entrySet()) {
+            modifiedWithWeight.put(entry.getKey(), (double) (entry.getValue().toSeconds() * Math.min(config.getTimeWeight(), 1)));
         }
 
         return modifiedWithWeight;

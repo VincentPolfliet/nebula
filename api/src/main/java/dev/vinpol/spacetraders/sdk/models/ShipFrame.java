@@ -95,6 +95,7 @@ public class ShipFrame {
     private int mountingPoints;
     private int fuelCapacity;
     private double integrity;
+    private int quality;
     private ShipRequirements requirements;
 
     public ShipFrame symbol(SymbolEnum symbol) {

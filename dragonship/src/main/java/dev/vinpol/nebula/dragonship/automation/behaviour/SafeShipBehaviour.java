@@ -1,6 +1,6 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 
 public class SafeShipBehaviour implements ShipBehaviour {
@@ -16,11 +16,11 @@ public class SafeShipBehaviour implements ShipBehaviour {
     }
 
     @Override
-    public ShipBehaviourResult update(Ship ship) {
-        ShipBehaviourResult result = behaviour.update(ship);
+    public ShipBehaviorResult update(Ship ship) {
+        ShipBehaviorResult result = behaviour.update(ship);
 
         if (result.isFailure()) {
-            return ShipBehaviourResult.success();
+            return ShipBehaviorResult.success();
         }
 
         return result;

@@ -4,6 +4,7 @@ import dev.vinpol.spacetraders.sdk.models.GetStatus200Response;
 import dev.vinpol.spacetraders.sdk.models.Register201Response;
 import dev.vinpol.spacetraders.sdk.models.RegisterRequest;
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.Headers;
 import retrofit2.http.POST;
@@ -30,7 +31,5 @@ public interface DefaultApi {
         "Content-Type:application/json"
     })
     @POST("register")
-    Call<Register201Response> register(
-        @retrofit2.http.Body RegisterRequest registerRequest
-    );
+    Register201Response register(@Body RegisterRequest registerRequest);
 }

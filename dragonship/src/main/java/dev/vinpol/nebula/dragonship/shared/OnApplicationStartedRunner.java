@@ -1,9 +1,9 @@
 package dev.vinpol.nebula.dragonship.shared;
 
 import dev.vinpol.nebula.dragonship.sdk.NebulaProperties;
+import dev.vinpol.nebula.dragonship.shared.autoregister.AutoRegisterAction;
 import dev.vinpol.nebula.dragonship.shared.kv.KVStore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -13,15 +13,23 @@ import org.springframework.stereotype.Component;
 public class OnApplicationStartedRunner implements CommandLineRunner {
 
     private final NebulaProperties properties;
+    private final AutoRegisterAction autoRegisterAction;
     private final KVStore store;
 
-    public OnApplicationStartedRunner(NebulaProperties properties, KVStore store) {
+    public OnApplicationStartedRunner(NebulaProperties properties, AutoRegisterAction autoRegisterAction, KVStore store) {
         this.properties = properties;
+        this.autoRegisterAction = autoRegisterAction;
         this.store = store;
     }
 
     @Override
     public void run(String... args) throws Exception {
-        store.set("token", properties.token());
+        String token = properties.token();
+
+        if (token == null || token.isBlank()) {
+            autoRegisterAction.register(properties.autoRegisterSymbol());
+        } else {
+            store.set("token", properties.token());
+        }
     }
 }

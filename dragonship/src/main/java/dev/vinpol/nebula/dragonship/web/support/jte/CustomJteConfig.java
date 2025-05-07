@@ -21,6 +21,7 @@ public class CustomJteConfig {
         if (properties.isDevelopmentMode() && properties.usePreCompiledTemplates()) {
             throw new JteConfigurationException("You can't use development mode and precompiledTemplates together");
         }
+
         if (properties.usePreCompiledTemplates()) {
             // Templates will need to be compiled by the maven/gradle build task
             return TemplateEngine.createPrecompiled(ContentType.Html);

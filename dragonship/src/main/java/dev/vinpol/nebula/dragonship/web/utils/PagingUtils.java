@@ -36,14 +36,14 @@ public class PagingUtils {
 
     public static void setMetaOnModel(Model model, Meta meta) {
         model.addAttribute("meta", meta);
-        model.addAttribute("currentPage", meta.getPage());
+        model.addAttribute("currentPage", meta.page());
         model.addAttribute("total", calculateTotalPageCount(meta));
-        model.addAttribute("count", meta.getTotal());
-        model.addAttribute("limit", meta.getLimit());
+        model.addAttribute("count", meta.total());
+        model.addAttribute("limit", meta.limit());
     }
 
     private static int calculateTotalPageCount(Meta meta) {
-        return calculateTotalPageCount(meta.getTotal(), meta.getLimit());
+        return calculateTotalPageCount(meta.total(), meta.limit());
     }
 
     private static int calculateTotalPageCount(int total, int limit) {
@@ -58,10 +58,11 @@ public class PagingUtils {
     }
 
     public static <T> void paginateOnModel(Model model, List<T> data, int page, int total) {
-        Meta meta = new Meta()
-                .limit(total)
-                .page(page)
-                .total(data.size());
+        Meta meta = new Meta(
+            total,
+            page,
+            data.size()
+        );
 
         setMetaOnModel(model, meta);
     }
@@ -72,8 +73,8 @@ public class PagingUtils {
 
     public static <T> List<T> paginate(Stream<T> data, int page, int total) {
         return data
-                .skip((long) (page - 1) * total)
-                .limit(total)
-                .toList();
+            .skip((long) (page - 1) * total)
+            .limit(total)
+            .toList();
     }
 }

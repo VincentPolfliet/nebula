@@ -7,6 +7,9 @@ import dev.vinpol.spacetraders.sdk.models.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 class FlightModeOptimizer {
@@ -30,21 +33,35 @@ class FlightModeOptimizer {
     }
 
     private void internalCalculate(Ship ship, String symbol, GridXY origin, GridXY target) {
-        Map<ShipNavFlightMode, Long> fuelCost = travelCostCalculator.calculateFuel(origin, target);
+        Map<ShipNavFlightMode, Duration> durationCost = travelCostCalculator.calculateTime(origin, target, ship.getEngine().getSpeed());
+
+        ShipNavFlightMode bestFlightModeByDuration = travelCostCalculator.selectBestFlightModeByDuration(durationCost);
+        logger.debug("bestFlightModeDuration for '{}': {}", ship.getSymbol(), bestFlightModeByDuration);
+
+
+        Map<ShipNavFlightMode, Long> fuelCost = new HashMap<>(travelCostCalculator.calculateFuel(origin, target));
+
+        for (Iterator<Map.Entry<ShipNavFlightMode, Long>> it = fuelCost.entrySet().iterator(); it.hasNext(); ) {
+            Map.Entry<ShipNavFlightMode, Long> entry = it.next();
+            Long cost = entry.getValue();
+
+            if (ship.getFuel().getCurrent() - cost < 0) {
+                it.remove();
+            }
+        }
 
         if (fuelCost.isEmpty()) {
             throw new RuntimeException("fuel cost is not allowed to be null, that means that there is not way to navigate to the selected origin, has the current ship no fuel?");
         }
 
-        ShipNavFlightMode bestFlightMode = travelCostCalculator.selectBestFlightMode(fuelCost);
-        logger.debug("bestFlightMode for '{}': {}", ship.getSymbol(), bestFlightMode);
+        ShipNavFlightMode bestFlightModeByFuel = travelCostCalculator.selectBestFlightModeByFuel(fuelCost);
+        logger.debug("bestFlightModeFuel for '{}': {}", ship.getSymbol(), bestFlightModeByFuel);
 
-        if (fuelCost.containsKey(bestFlightMode)) {
-            long bestFuelCostInUnits = fuelCost.get(bestFlightMode);
-            double bestTimeInSeconds = travelCostCalculator.calculateTime(origin, target, ship.getEngine().getSpeed()).get(bestFlightMode);
-            logger.info("Travelling to {} for {} will take +-{}s and will cost {} fuel units ({})", symbol, ship.getSymbol(), bestTimeInSeconds, bestFuelCostInUnits, bestFlightMode);
-        }
+        ShipNavFlightMode flightModeOptimal = fuelCost.containsKey(bestFlightModeByDuration) || bestFlightModeByDuration == bestFlightModeByFuel ? bestFlightModeByDuration : bestFlightModeByFuel;
+        Duration bestDurationCostInSeconds = durationCost.get(flightModeOptimal);
+        double bestFuelCostInUnits = fuelCost.get(flightModeOptimal);
+        logger.info("Travelling to {} for {} will take +-{}s and will cost {} fuel units ({})", symbol, ship.getSymbol(), bestDurationCostInSeconds.toSeconds(), bestFuelCostInUnits, flightModeOptimal);
 
-        fleetApi.patchShipNav(ship.getSymbol(), new PatchShipNavRequest().flightMode(bestFlightMode));
+        fleetApi.patchShipNav(ship.getSymbol(), new PatchShipNavRequest().flightMode(flightModeOptimal));
     }
 }

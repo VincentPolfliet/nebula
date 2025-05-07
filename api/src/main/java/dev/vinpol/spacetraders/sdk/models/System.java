@@ -14,9 +14,11 @@ import java.util.Objects;
 
 @Data
 public class System {
+    private String name;
     private String symbol;
     private String sectorSymbol;
     private SystemType type;
+    private String constellation;
     private Integer x;
     private Integer y;
     private List<SystemWaypoint> waypoints = new ArrayList<>();
@@ -26,7 +28,6 @@ public class System {
     }
 
     public System symbol(String symbol) {
-
         this.symbol = symbol;
         return this;
     }
@@ -43,6 +44,10 @@ public class System {
         return this;
     }
 
+    public System constellation(String constellation) {
+        this.constellation = constellation;
+        return this;
+    }
 
     public System x(Integer x) {
         this.x = x;

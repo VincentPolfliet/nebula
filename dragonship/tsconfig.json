@@ -1,0 +1,61 @@
+{
+    "compilerOptions": {
+        // Emit targets: modern browsers (ES2021+) or bundler-transpiled
+        "target": "ES2021",
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        // Language features you want—and their type defs
+        "lib": [
+            "ESNext",
+            "DOM",
+            "DOM.Iterable"
+        ],
+        // Vue single-file components
+        "allowUnreachableCode": false,
+        "allowUnusedLabels": false,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        "noEmit": true,
+        // JSX in .tsx or Vue’s TSX if you ever use it
+        "jsx": "preserve",
+        // Strictness
+        "strict": true,
+        "noImplicitAny": true,
+        "strictNullChecks": true,
+        "strictFunctionTypes": true,
+        "strictBindCallApply": true,
+        "strictPropertyInitialization": true,
+        "noImplicitThis": true,
+        // Safety / ergonomics
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "forceConsistentCasingInFileNames": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true,
+        "noFallthroughCasesInSwitch": true,
+        // Path aliases (adjust to your src dir)
+        "baseUrl": ".",
+        "paths": {
+            "@/*": [
+                "src/main/frontend/*"
+            ]
+        },
+        // Include Vite’s client types (remove if not using Vite)
+        "types": [
+            "vite/client"
+        ]
+    },
+    // Files to include in the compilation
+    "include": [
+        "src/**/*.ts",
+        "src/**/*.d.ts",
+        "src/**/*.tsx",
+        "src/**/*.vue"
+    ],
+    // Exclude build/artifacts
+    "exclude": [
+        "node_modules",
+        "dist"
+    ]
+}

@@ -1,6 +1,6 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.OrbitShip200Response;
@@ -30,7 +30,7 @@ public final class OrbitBehaviourFactory implements ShipBehaviourFactory {
             }
 
             @Override
-            public ShipBehaviourResult update(Ship ship) {
+            public ShipBehaviorResult update(Ship ship) {
                 logger.info("OrbitBehaviour is running");
 
                 // orbit can always be called, even when ship is not docked
@@ -38,7 +38,7 @@ public final class OrbitBehaviourFactory implements ShipBehaviourFactory {
                 ship.setNav(orbit.getData().getNav());
                 eventNotifier.setOrbited(ship.getSymbol());
 
-                return ShipBehaviourResult.done();
+                return ShipBehaviorResult.done();
             }
         };
     }

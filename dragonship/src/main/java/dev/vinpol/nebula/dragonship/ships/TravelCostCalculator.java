@@ -1,10 +1,13 @@
 package dev.vinpol.nebula.dragonship.ships;
 
 import dev.vinpol.nebula.dragonship.geo.GridXY;
-import dev.vinpol.spacetraders.sdk.models.*;
+import dev.vinpol.spacetraders.sdk.models.ShipNavFlightMode;
+import dev.vinpol.spacetraders.sdk.models.Waypoint;
 import org.springframework.stereotype.Component;
 
+import java.time.Duration;
 import java.util.*;
+import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
 
 import static dev.vinpol.nebula.dragonship.geo.GridXY.toCoordinate;
@@ -17,8 +20,8 @@ public class TravelCostCalculator {
 
     static {
         FUEL_TRANSFORMERS.put(ShipNavFlightMode.CRUISE, Math::round);
-        FUEL_TRANSFORMERS.put(ShipNavFlightMode.DRIFT, _ -> 1);
-        FUEL_TRANSFORMERS.put(ShipNavFlightMode.BURN, input -> 2 * Math.round(input));
+        FUEL_TRANSFORMERS.put(ShipNavFlightMode.DRIFT, _ -> 1L);
+        FUEL_TRANSFORMERS.put(ShipNavFlightMode.BURN, input -> 2L * Math.round(input));
         FUEL_TRANSFORMERS.put(ShipNavFlightMode.STEALTH, Math::round);
 
         TIME_MULTIPLIER.put(ShipNavFlightMode.CRUISE, 25d);
@@ -30,7 +33,7 @@ public class TravelCostCalculator {
     public TravelCostCalculator() {
     }
 
-    public ShipNavFlightMode selectBestFlightMode(Map<ShipNavFlightMode, Long> fuelCostPerFlightMode) {
+    public ShipNavFlightMode selectBestFlightModeByFuel(Map<ShipNavFlightMode, Long> fuelCostPerFlightMode) {
         // Find min and max values for normalization
         long minFuelCost = !fuelCostPerFlightMode.isEmpty() ? Collections.min(fuelCostPerFlightMode.values()) : 0;
         long maxFuelCost = !fuelCostPerFlightMode.isEmpty() ? Collections.max(fuelCostPerFlightMode.values()) : 0;
@@ -46,7 +49,42 @@ public class TravelCostCalculator {
         }
 
         // Find the flight mode with the lowest score, else default to DRIFT, because that uses 1 fuel
-        return scores.entrySet().stream().min(Map.Entry.comparingByValue()).map(Map.Entry::getKey).orElse(ShipNavFlightMode.DRIFT);
+        return scores.entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByKey())
+            .min(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse(ShipNavFlightMode.DRIFT);
+    }
+
+
+    public ShipNavFlightMode selectBestFlightModeByDuration(Map<ShipNavFlightMode, Duration> durationsPerFlightMode) {
+        // Find min and max values for normalization
+        Duration minDurationCost = !durationsPerFlightMode.isEmpty() ? Collections.min(durationsPerFlightMode.values()) : Duration.ZERO;
+        Duration maxDurationCost = !durationsPerFlightMode.isEmpty() ? Collections.max(durationsPerFlightMode.values()) : Duration.ZERO;
+
+        Map<ShipNavFlightMode, Duration> scores = new HashMap<>();
+
+        // Calculate normalized scores
+        for (ShipNavFlightMode mode : ShipNavFlightMode.values()) {
+            if (durationsPerFlightMode.containsKey(mode)) {
+                Duration duration = durationsPerFlightMode.get(mode);
+
+                Duration normalizedDuration = duration.minus(minDurationCost);
+                Duration minus = maxDurationCost.minus(minDurationCost);
+
+                Duration normalizedDurationScore = (maxDurationCost == minDurationCost) ? Duration.ZERO : normalizedDuration.dividedBy(minus.toSeconds());
+                scores.put(mode, normalizedDurationScore);
+            }
+        }
+
+        // Find the flight mode with the lowest score, else default to DRIFT, because that uses 1 fuel
+        return scores.entrySet()
+            .stream()
+            .sorted(Map.Entry.comparingByKey())
+            .min(Map.Entry.comparingByValue())
+            .map(Map.Entry::getKey)
+            .orElse(ShipNavFlightMode.DRIFT);
     }
 
     public ShipNavFlightMode selectBestFlightMode(Waypoint originWaypoint, Waypoint targetWaypoint) {
@@ -54,7 +92,7 @@ public class TravelCostCalculator {
         GridXY target = toCoordinate(targetWaypoint);
 
         Map<ShipNavFlightMode, Long> fuelCost = calculateFuel(origin, target);
-        return selectBestFlightMode(fuelCost);
+        return selectBestFlightModeByFuel(fuelCost);
     }
 
     public Map<ShipNavFlightMode, Long> calculateFuel(GridXY origin, GridXY destination) {
@@ -68,14 +106,14 @@ public class TravelCostCalculator {
     }
 
 
-    public Map<ShipNavFlightMode, Double> calculateTime(GridXY origin, GridXY destination, long engineSpeed) {
-        Map<ShipNavFlightMode, Double> cost = new HashMap<>();
+    public Map<ShipNavFlightMode, Duration> calculateTime(GridXY origin, GridXY destination, long engineSpeed) {
+        Map<ShipNavFlightMode, Duration> cost = new HashMap<>();
 
         for (ShipNavFlightMode mode : ShipNavFlightMode.values()) {
             Double multiplier = TIME_MULTIPLIER.get(mode);
 
             double time = Math.round(Math.round(Math.max(1, calculateDistance(origin, destination))) * (multiplier / engineSpeed) + 15);
-            cost.put(mode, time);
+            cost.put(mode, Duration.ofSeconds(Math.round(time)));
         }
 
         return cost;
@@ -85,8 +123,8 @@ public class TravelCostCalculator {
         Objects.requireNonNull(origin);
         Objects.requireNonNull(destination);
 
-        double distance = calculateDistance(origin, destination);
-        return calculateFuel(distance, flightMode);
+        double calculateDistance = calculateDistance(origin, destination);
+        return calculateFuel(calculateDistance != 0 ? calculateDistance : 1, flightMode);
     }
 
     public double calculateDistance(GridXY origin, GridXY destination) {
@@ -100,43 +138,7 @@ public class TravelCostCalculator {
         return FUEL_TRANSFORMERS.get(flightMode).applyAsLong(distance);
     }
 
-    public double calculateTime(GridXY originCoord, GridXY targetCoord, int engineSpeed, ShipNavFlightMode mode) {
+    public Duration calculateTime(GridXY originCoord, GridXY targetCoord, int engineSpeed, ShipNavFlightMode mode) {
         return calculateTime(originCoord, targetCoord, engineSpeed).get(mode);
-    }
-
-    public static double approximationDistance(long fuel, double time, int engineSpeed, ShipNavFlightMode flightMode) {
-        Double timeMultiplier = TIME_MULTIPLIER.get(flightMode);
-
-        if (timeMultiplier == null) {
-            throw new IllegalArgumentException("Invalid flight mode provided.");
-        }
-
-        // Calculate the approximate distance using the time formula: time = distance * (timeMultiplier / engineSpeed) + 15
-        double distanceFromTime = (time - 15) * engineSpeed / timeMultiplier;
-
-        // Calculate the distance using the fuel formula: fuel = FUEL_TRANSFORMERS.get(flightMode).applyAsLong(distance)
-        ToLongFunction<Double> fuelTransformer = FUEL_TRANSFORMERS.get(flightMode);
-        if (fuelTransformer == null) {
-            throw new IllegalArgumentException("Invalid flight mode provided.");
-        }
-
-        // Here we assume the reverse of the fuel transformer as linear approximation
-        // For more complex transformers, a more sophisticated approach may be needed
-        double distanceFromFuel = getDistanceFromFuel(fuel, flightMode);
-
-        // Average the two distances as a simple method to estimate the actual distance
-        return (distanceFromTime + distanceFromFuel) / 2.0;
-    }
-
-    private static double getDistanceFromFuel(long fuel, ShipNavFlightMode flightMode) {
-        double distanceFromFuel = 0;
-        if (flightMode == ShipNavFlightMode.DRIFT) {
-            distanceFromFuel = fuel;
-        } else if (flightMode == ShipNavFlightMode.BURN) {
-            distanceFromFuel = fuel / 2.0;
-        } else {
-            distanceFromFuel = fuel; // This is an approximation since Math.round() is not easily reversible
-        }
-        return distanceFromFuel;
     }
 }

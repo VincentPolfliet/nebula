@@ -5,53 +5,51 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.*;
 import java.util.stream.Collectors;
 
-public class MapData {
-
-    private final static Map<String, Integer> PRIORITY_MAP = new HashMap<>();
-
-    static {
-        PRIORITY_MAP.put("SHIP", 100);
-    }
-
+public record MapData(
     @JsonProperty("target")
-    private String target;
-
+    String target,
     @JsonProperty("waypoints")
-    private List<WayPoint> waypoints = new ArrayList<>();
-
-    public void addWayPoint(WayPoint wayPoint) {
-        Objects.requireNonNull(wayPoint);
-
-        waypoints.add(wayPoint);
-    }
-
-    public void setWaypoints(List<WayPoint> waypoints) {
-        this.waypoints.clear();
-        this.waypoints.addAll(waypoints);
-    }
-
-    public List<WayPoint> getWaypoints() {
-        return waypoints;
-    }
-
-    public String getTarget() {
-        return target;
-    }
-
-    public void setTarget(String target) {
-        this.target = target;
-    }
-
+    List<MapWaypoint> waypoints,
+    @JsonProperty("seed")
+    String seed
+) {
     @JsonProperty("types")
-    public Set<MapItemType> getTypes() {
+    public Set<MapItemType> types() {
         return waypoints.stream()
+            .sorted(Comparator.comparing(MapWaypoint::priority))
             .map(w -> new MapItemType(w.type(), w.type()))
-            .sorted((o1, o2) -> {
-                Integer leftPriority = PRIORITY_MAP.getOrDefault(o1.type(), 0);
-                Integer rightPriority = PRIORITY_MAP.getOrDefault(o2.type(), 0);
-
-                return Integer.compare(rightPriority, leftPriority);
-            })
             .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public static MapDataBuilder builder() {
+        return new MapDataBuilder();
+    }
+
+    public static final class MapDataBuilder {
+        private String target;
+        private String seed;
+        private List<MapWaypoint> waypoints;
+
+        private MapDataBuilder() {
+        }
+
+        public MapDataBuilder target(String target) {
+            this.target = target;
+            return this;
+        }
+
+        public MapDataBuilder waypoints(List<MapWaypoint> waypoints) {
+            this.waypoints = waypoints;
+            return this;
+        }
+
+        public MapDataBuilder seed(String seed) {
+            this.seed = seed;
+            return this;
+        }
+
+        public MapData build() {
+            return new MapData(target, waypoints, seed);
+        }
     }
 }

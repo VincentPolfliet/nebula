@@ -6,8 +6,10 @@ logging.level.dev.vinpol.nebula.dragonship.web.support.vite: DEBUG
 
 nebula:
     st:
+        auto-register: true
         ext:
             on-boot: true
+
 
 vite:
     baseUrl: http://localhost:5173/
@@ -16,7 +18,7 @@ vite:
 gg:
     jte:
         developmentMode: true
-        templateLocation: src/main/jte
+        templateLocation: src/main/frontend
         classLocation: target/jte-classes
 
 management:

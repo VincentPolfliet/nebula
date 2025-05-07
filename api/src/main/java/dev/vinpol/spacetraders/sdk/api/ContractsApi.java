@@ -77,7 +77,7 @@ public interface ContractsApi {
 
             return new Page<>(
                 response.getData(),
-                response.getMeta().getTotal()
+                response.getMeta().total()
             );
         });
     }

@@ -1,10 +1,7 @@
 package dev.vinpol.nebula.dragonship.bigbrain;
 
 import dev.vinpol.spacetraders.sdk.ApiClient;
-import dev.vinpol.spacetraders.sdk.api.AgentsApi;
-import dev.vinpol.spacetraders.sdk.api.ContractsApi;
-import dev.vinpol.spacetraders.sdk.api.FleetApi;
-import dev.vinpol.spacetraders.sdk.api.SystemsApi;
+import dev.vinpol.spacetraders.sdk.api.*;
 import org.dizitart.no2.Nitrite;
 import org.springframework.scheduling.TaskScheduler;
 
@@ -22,6 +19,11 @@ public final class ThiccTank implements ApiClient {
         this.nitrite = nitrite;
         this.clock = clock;
         this.taskExecutor = taskExecutor;
+    }
+
+    @Override
+    public DefaultApi defaults() {
+        return inner.defaults();
     }
 
     @Override

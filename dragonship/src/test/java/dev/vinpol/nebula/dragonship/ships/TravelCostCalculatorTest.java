@@ -21,7 +21,7 @@ class TravelCostCalculatorTest {
         fuelCost.put(ShipNavFlightMode.CRUISE, 50L);
         fuelCost.put(ShipNavFlightMode.BURN, 20L);
 
-        ShipNavFlightMode bestMode = calculator.selectBestFlightMode(fuelCost);
+        ShipNavFlightMode bestMode = calculator.selectBestFlightModeByFuel(fuelCost);
         assertThat(bestMode).isEqualTo(ShipNavFlightMode.BURN);
     }
 
@@ -33,33 +33,20 @@ class TravelCostCalculatorTest {
         fuelCost.put(ShipNavFlightMode.CRUISE, 100L);
         fuelCost.put(ShipNavFlightMode.BURN, 100L);
 
-        ShipNavFlightMode bestMode = calculator.selectBestFlightMode(fuelCost);
-        assertThat(bestMode).isNotNull();
-    }
-
-    @Test
-    public void testSelectBestFlightModeFuelCostMoreImportant() {
-        Map<ShipNavFlightMode, Long> fuelCost = new HashMap<>();
-        fuelCost.put(ShipNavFlightMode.DRIFT, 100L);
-        fuelCost.put(ShipNavFlightMode.STEALTH, 50L);
-        fuelCost.put(ShipNavFlightMode.CRUISE, 20L);
-        fuelCost.put(ShipNavFlightMode.BURN, 10L);
-
-        ShipNavFlightMode bestMode = calculator.selectBestFlightMode(fuelCost);
-
+        ShipNavFlightMode bestMode = calculator.selectBestFlightModeByFuel(fuelCost);
         assertThat(bestMode).isEqualTo(ShipNavFlightMode.BURN);
     }
 
     @Test
     public void testSelectBestFlightModeExtremeValues() {
         Map<ShipNavFlightMode, Long> fuelCost = new HashMap<>();
-        fuelCost.put(ShipNavFlightMode.DRIFT, 10L);
-        fuelCost.put(ShipNavFlightMode.STEALTH, 10L);
-        fuelCost.put(ShipNavFlightMode.CRUISE, 10L);
-        fuelCost.put(ShipNavFlightMode.BURN, 10L);
+        fuelCost.put(ShipNavFlightMode.DRIFT, 1L);
+        fuelCost.put(ShipNavFlightMode.STEALTH, 1L);
+        fuelCost.put(ShipNavFlightMode.CRUISE, 1L);
+        fuelCost.put(ShipNavFlightMode.BURN, 1L);
 
-        ShipNavFlightMode bestMode = calculator.selectBestFlightMode(fuelCost);
+        ShipNavFlightMode bestMode = calculator.selectBestFlightModeByFuel(fuelCost);
 
-        assertThat(bestMode).isEqualTo(ShipNavFlightMode.STEALTH);
+        assertThat(bestMode).isEqualTo(ShipNavFlightMode.DRIFT);
     }
 }

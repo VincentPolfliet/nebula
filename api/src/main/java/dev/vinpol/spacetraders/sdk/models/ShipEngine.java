@@ -56,6 +56,7 @@ public class ShipEngine {
     private double condition;
     private Integer speed;
     private double integrity;
+    private int quality;
     private ShipRequirements requirements;
 
     public ShipEngine() {

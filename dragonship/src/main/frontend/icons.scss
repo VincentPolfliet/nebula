@@ -1,0 +1,47 @@
+
+
+.gg-icon {
+    width: 24px;
+    height: 24px;
+    color: white;
+}
+
+.gg-more-vertical-alt {
+    @extend .gg-icon;
+    background: url("css.gg/icons/svg/more-vertical-alt.svg?url");
+}
+
+.gg-arrow-right {
+    @extend .gg-icon;
+    background: url("css.gg/icons/svg/arrow-right.svg?url");
+}
+
+.gg-home {
+    @extend .gg-icon;
+    background: url('css.gg/icons/svg/home.svg?url');
+}
+
+.gg-user {
+    @extend .gg-icon;
+    background: url('css.gg/icons/svg/user.svg?url');
+}
+
+.gg-bot {
+    @extend .gg-icon;
+    background: url('css.gg/icons/svg/bot.svg?url');
+}
+
+.gg-play-button-o {
+    @extend .gg-icon;
+    background: url('css.gg/icons/svg/play-button-o.svg?url');
+}
+
+.gg-play-pause-o {
+    @extend .gg-icon;
+    background: url('css.gg/icons/svg/play-pause-o.svg?url');
+}
+
+.gg-play-stop-o {
+    @extend .gg-icon;
+    background: url('css.gg/icons/svg/play-stop-o.svg?url');
+}

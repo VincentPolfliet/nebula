@@ -4,6 +4,7 @@ import dev.vinpol.spacetraders.sdk.models.*;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+@RateLimited
 public interface SystemsApi {
     /**
      * Get System

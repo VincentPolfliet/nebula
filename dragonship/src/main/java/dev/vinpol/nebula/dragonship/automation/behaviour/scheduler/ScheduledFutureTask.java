@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.scheduler;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
 
 import java.time.OffsetDateTime;
@@ -11,9 +11,9 @@ final class ScheduledFutureTask implements ShipBehaviourTask {
 
     private final String shipSymbol;
     private final OffsetDateTime scheduledAt;
-    private final CompletableFuture<ShipBehaviourResult> future;
+    private final CompletableFuture<ShipBehaviorResult> future;
 
-    public ScheduledFutureTask(String shipSymbol, OffsetDateTime scheduledAt, CompletableFuture<ShipBehaviourResult> future) {
+    public ScheduledFutureTask(String shipSymbol, OffsetDateTime scheduledAt, CompletableFuture<ShipBehaviorResult> future) {
         this.shipSymbol = shipSymbol;
         this.scheduledAt = scheduledAt;
         this.future = future;
@@ -30,7 +30,7 @@ final class ScheduledFutureTask implements ShipBehaviourTask {
     }
 
     @Override
-    public CompletableFuture<ShipBehaviourResult> future() {
+    public CompletableFuture<ShipBehaviorResult> future() {
         return future;
     }
 

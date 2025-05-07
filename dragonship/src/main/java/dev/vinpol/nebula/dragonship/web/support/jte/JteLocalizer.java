@@ -1,6 +1,7 @@
 package dev.vinpol.nebula.dragonship.web.support.jte;
 
 import gg.jte.Content;
+import gg.jte.support.LocalizationSupport;
 import jakarta.annotation.PostConstruct;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -8,7 +9,7 @@ import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.stereotype.Component;
 
 @Component
-public class JteLocalizer implements gg.jte.support.LocalizationSupport {
+public class JteLocalizer implements LocalizationSupport {
     private static JteLocalizer LOCALIZER;
     private final MessageSource messageSource;
 

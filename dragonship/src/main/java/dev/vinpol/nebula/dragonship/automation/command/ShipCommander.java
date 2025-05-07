@@ -24,7 +24,7 @@ public class ShipCommander {
 
     private final Logger logger = LoggerFactory.getLogger(ShipCommander.class);
 
-    private final Map<String, ShipBehaviourResult> lastResults = new ConcurrentHashMap<>();
+    private final Map<String, ShipBehaviorResult> lastResults = new ConcurrentHashMap<>();
     private final Map<String, Integer> lastResultIsSameCount = new ConcurrentHashMap<>();
 
     private final FleetApi fleetApi;
@@ -71,16 +71,16 @@ public class ShipCommander {
 
 
     public CompletableFuture<?> commandWithFunction(Ship ship, Function<Ship, ShipBehaviour> nextBehaviour) {
-        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTick(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), nextBehaviour);
+        CompletableFuture<ShipBehaviorResult> future = scheduler.scheduleTick(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), nextBehaviour);
         return handlerFuture(ship, future, nextBehaviour);
     }
 
     private CompletableFuture<?> internalScheduleAtAndHandle(Ship ship, OffsetDateTime at) {
-        CompletableFuture<ShipBehaviourResult> future = scheduler.scheduleTickAt(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), _ -> ShipBehaviour.finished(), at);
+        CompletableFuture<ShipBehaviorResult> future = scheduler.scheduleTickAt(ship.getSymbol(), shipSymbol -> fleetApi.getMyShip(shipSymbol).getData(), _ -> ShipBehaviour.finished(), at);
         return handlerFuture(ship, future, _ -> ShipBehaviour.finished());
     }
 
-    private CompletableFuture<?> handlerFuture(Ship ship, CompletableFuture<ShipBehaviourResult> future, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
+    private CompletableFuture<?> handlerFuture(Ship ship, CompletableFuture<ShipBehaviorResult> future, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
         return future
             .thenCompose(result -> handleResult(ship, result, shipBehaviourResolver))
             .handle((BiFunction<Object, Throwable, Object>) (o, throwable) -> {
@@ -93,9 +93,9 @@ public class ShipCommander {
             });
     }
 
-    private CompletionStage<?> handleResult(Ship ship, ShipBehaviourResult result, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
+    private CompletionStage<?> handleResult(Ship ship, ShipBehaviorResult result, Function<Ship, ShipBehaviour> shipBehaviourResolver) {
         String shipSymbol = ship.getSymbol();
-        ShipBehaviourResult lastResult = lastResults.get(shipSymbol);
+        ShipBehaviorResult lastResult = lastResults.get(shipSymbol);
 
         if (lastResult != null && Objects.equals(lastResult, result)) {
             int currentSameResultCount = lastResultIsSameCount.merge(shipSymbol, 1, Integer::sum);

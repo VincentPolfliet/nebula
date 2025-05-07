@@ -1,0 +1,17 @@
+@use "bulma/sass";
+
+.navbar-center {
+    @extend .navbar-start;
+    /*
+    How to center a navbar in bulma 0.7.1 but it still works in 1.0
+    https://github.com/jgthms/bulma/issues/1604#issuecomment-422407761
+     */
+    flex-grow: 1;
+    justify-content: center;
+}
+
+
+.modal-card-head {
+    @extend .is-shadowless;
+    background: var(--bulma-modal-card-foot-background-color)
+}

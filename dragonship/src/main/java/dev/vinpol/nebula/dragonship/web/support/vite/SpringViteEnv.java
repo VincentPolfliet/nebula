@@ -5,7 +5,7 @@ import gg.jte.springframework.boot.autoconfigure.JteProperties;
 import org.springframework.stereotype.Component;
 
 @Component
-public record SpringViteEnv(JteProperties jteProperties, ViteProperties viteProperties) implements ViteEnv {
+public record SpringViteEnv(JteProperties jteProperties, ViteSupportProperties viteSupportProperties) implements ViteEnv {
     @Override
     public boolean isProd() {
         return !jteProperties.isDevelopmentMode();
@@ -13,6 +13,6 @@ public record SpringViteEnv(JteProperties jteProperties, ViteProperties viteProp
 
     @Override
     public String getBaseUrl() {
-        return viteProperties.baseUrl();
+        return viteSupportProperties.baseUrl();
     }
 }

@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.executor.ShipBehaviourTree;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.executor.ShipBehaviourTreeFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.executor.fbt.ShipFBTFactory;
@@ -31,7 +31,7 @@ public class ShipTreeBehaviour implements ShipBehaviour {
     }
 
     @Override
-    public ShipBehaviourResult update(Ship ship) {
+    public ShipBehaviorResult update(Ship ship) {
         Objects.requireNonNull(ship);
 
         return tree.update(ship);

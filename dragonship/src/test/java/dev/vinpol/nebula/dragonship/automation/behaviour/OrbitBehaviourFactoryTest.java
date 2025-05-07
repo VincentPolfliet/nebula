@@ -1,13 +1,11 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,7 +39,7 @@ class OrbitBehaviourFactoryTest {
                 );
 
             ShipBehaviour behaviour = sut.create();
-            ShipBehaviourResult result = behaviour.update(ship);
+            ShipBehaviorResult result = behaviour.update(ship);
 
             assertThat(result.isDone()).isTrue();
             assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.IN_ORBIT);

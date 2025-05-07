@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.Done;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
 import dev.vinpol.spacetraders.sdk.models.MotherShip;
 import dev.vinpol.spacetraders.sdk.models.Ship;
@@ -37,7 +37,7 @@ class ShipTreeBehaviourTest {
         ShipTreeBehaviour sut = new ShipTreeBehaviour(Collections.emptyList());
 
         Ship ship = new Ship();
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result).isInstanceOf(Done.class);
         assertThat(result.isDone()).isTrue();
@@ -48,10 +48,10 @@ class ShipTreeBehaviourTest {
         ShipTreeBehaviour sut = new ShipTreeBehaviour(ShipBehaviour.succeed());
 
         Ship ship = new Ship();
-        ShipBehaviourResult tick = sut.update(ship);
+        ShipBehaviorResult tick = sut.update(ship);
         assertThat(tick.isSuccess()).isTrue();
 
-        ShipBehaviourResult secondTick = sut.update(ship);
+        ShipBehaviorResult secondTick = sut.update(ship);
         assertThat(secondTick.isDone()).isTrue();
     }
 
@@ -77,13 +77,13 @@ class ShipTreeBehaviourTest {
             ShipBehaviour.succeed()
         );
 
-        ShipBehaviourResult firstTick = sut.update(ship);
+        ShipBehaviorResult firstTick = sut.update(ship);
         assertThat(firstTick.isSuccess()).isTrue();
 
-        ShipBehaviourResult secondTick = sut.update(ship);
+        ShipBehaviorResult secondTick = sut.update(ship);
         assertThat(secondTick.isSuccess()).isTrue();
 
-        ShipBehaviourResult thirdTick = sut.update(ship);
+        ShipBehaviorResult thirdTick = sut.update(ship);
         assertThat(thirdTick.isDone()).isTrue();
     }
 
@@ -108,9 +108,9 @@ class ShipTreeBehaviourTest {
         Ship ship = MotherShip.excavator();
         OffsetDateTime timestamp = OffsetDateTime.now();
 
-        ShipTreeBehaviour sut = new ShipTreeBehaviour(ShipBehaviour.ofResult(ShipBehaviourResult.waitUntil(timestamp)));
+        ShipTreeBehaviour sut = new ShipTreeBehaviour(ShipBehaviour.ofResult(ShipBehaviorResult.waitUntil(timestamp)));
 
-        ShipBehaviourResult tick = sut.update(ship);
+        ShipBehaviorResult tick = sut.update(ship);
         assertThat(tick.isWaitUntil()).isTrue();
         assertThat(tick).isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
             assertThat(waitUntil.timestamp()).isEqualTo(timestamp);

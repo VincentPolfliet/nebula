@@ -5,10 +5,7 @@ import dev.vinpol.nebula.javaGOAP.GoapAction;
 import dev.vinpol.nebula.javaGOAP.GoapState;
 import dev.vinpol.nebula.javaGOAP.IGoapUnit;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
-import dev.vinpol.spacetraders.sdk.models.GetMyShips200Response;
 import dev.vinpol.spacetraders.sdk.models.Ship;
-import dev.vinpol.spacetraders.sdk.utils.page.Page;
-import dev.vinpol.spacetraders.sdk.utils.page.PageIterator;
 
 public class CommandShipsAction extends GoapAction<AgentAI> {
     private final FleetApi fleetApi;
@@ -31,16 +28,7 @@ public class CommandShipsAction extends GoapAction<AgentAI> {
 
     @Override
     protected boolean performAction(IGoapUnit goapUnit) {
-        Iterable<Ship> shipIterable = PageIterator.iterate(req -> {
-            GetMyShips200Response response = fleetApi.getMyShips(req.page(), req.size());
-
-            return new Page<>(
-                    response.getData(),
-                    response.getMeta().getTotal()
-            );
-        });
-
-        for (Ship ship : shipIterable) {
+        for (Ship ship : fleetApi.getMyShips()) {
             shipCommander.command(ship);
         }
 

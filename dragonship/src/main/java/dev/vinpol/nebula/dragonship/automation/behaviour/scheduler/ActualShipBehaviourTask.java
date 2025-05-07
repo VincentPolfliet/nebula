@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.scheduler;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +15,7 @@ class ActualShipBehaviourTask implements ShipBehaviourTask {
 
     private final String shipSymbol;
     private final Function<String, Ship> shipResolver;
-    private final CompletableFuture<ShipBehaviourResult> future = new CompletableFuture<>();
+    private final CompletableFuture<ShipBehaviorResult> future = new CompletableFuture<>();
 
     private final Function<Ship, ShipBehaviour> behaviourResolver;
 
@@ -37,7 +37,7 @@ class ActualShipBehaviourTask implements ShipBehaviourTask {
     }
 
     @Override
-    public CompletableFuture<ShipBehaviourResult> future() {
+    public CompletableFuture<ShipBehaviorResult> future() {
         return future;
     }
 
@@ -51,7 +51,7 @@ class ActualShipBehaviourTask implements ShipBehaviourTask {
 
         try {
             if (runnerThread.isInterrupted()) {
-                future.complete(ShipBehaviourResult.failure(FailureReason.FAILURE));
+                future.complete(ShipBehaviorResult.failure(FailureReason.FAILURE));
                 return;
             }
 
@@ -63,7 +63,7 @@ class ActualShipBehaviourTask implements ShipBehaviourTask {
                 logger.debug("currentBehaviour for {}: {}", shipSymbol, currentBehaviour.getName());
             }
 
-            ShipBehaviourResult result = currentBehaviour.update(ship);
+            ShipBehaviorResult result = currentBehaviour.update(ship);
             future.complete(result);
         } catch (Exception e) {
             future.completeExceptionally(e);

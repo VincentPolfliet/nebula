@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResultAssert;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
 import dev.vinpol.nebula.dragonship.sdk.*;
@@ -64,7 +64,7 @@ class MiningBehaviourFactoryTest {
 
         MiningBehaviourFactory factory = registry.miningAutomation(symbol, waypointType);
         ShipBehaviour behaviour = factory.create();
-        ShipBehaviourResult result = behaviour.update(ship);
+        ShipBehaviorResult result = behaviour.update(ship);
 
         assertThat(result.isDone()).isTrue();
     }
@@ -115,12 +115,12 @@ class MiningBehaviourFactoryTest {
         });
 
         afterNavigationShip.withFuel(fuel -> {
-            fuel.setCurrent(69);
+            fuel.current(69);
         });
 
         enqueue(new GetWaypoint200Response().data(currentLocation));
         enqueue(new GetWaypoint200Response().data(asteroidWaypoint));
-        enqueue(new GetShipNav200Response().data(afterNavigationShip.getNav()));
+        enqueue(new GetShipNav200Response().data(new GetShipNav200ResponseData().nav(afterNavigationShip.getNav())));
 
         enqueue(new NavigateShip200Response()
             .data(
@@ -129,7 +129,7 @@ class MiningBehaviourFactoryTest {
                     .fuel(afterNavigationShip.getFuel())
             ));
 
-        ShipBehaviourResult navigateResult = behaviour.update(ship);
+        ShipBehaviorResult navigateResult = behaviour.update(ship);
         assertThat(navigateResult.isWaitUntil()).isTrue();
         assertThat(((WaitUntil) navigateResult).timestamp()).isEqualTo(afterNavigationShip.getNav().getRoute().getArrival());
 
@@ -144,7 +144,7 @@ class MiningBehaviourFactoryTest {
 
         enqueue(new DockShip200Response().data(new ShipNavModifiedResponseData().nav(afterDockingShip.getNav())));
 
-        ShipBehaviourResult dockResult = behaviour.update(ship);
+        ShipBehaviorResult dockResult = behaviour.update(ship);
         assertThat(dockResult.isSuccess()).isTrue();
         assertThat(ship.getNav().getStatus()).isEqualTo(ShipNavStatus.DOCKED);
 
@@ -195,7 +195,7 @@ class MiningBehaviourFactoryTest {
             201
         );
 
-        ShipBehaviourResult extractionResult = behaviour.update(ship);
+        ShipBehaviorResult extractionResult = behaviour.update(ship);
         assertThat(extractionResult.isWaitUntil()).isTrue();
     }
 
@@ -248,7 +248,7 @@ class MiningBehaviourFactoryTest {
             201
         );
 
-        ShipBehaviourResult extractionResult = behaviour.update(ship);
+        ShipBehaviorResult extractionResult = behaviour.update(ship);
         ShipBehaviourResultAssert.assertThat(extractionResult).isWaitUntil();
     }
 
@@ -301,7 +301,7 @@ class MiningBehaviourFactoryTest {
             201
         );
 
-        ShipBehaviourResult extractionResult = behaviour.update(ship);
+        ShipBehaviorResult extractionResult = behaviour.update(ship);
         assertThat(extractionResult.isWaitUntil()).isTrue();
     }
 

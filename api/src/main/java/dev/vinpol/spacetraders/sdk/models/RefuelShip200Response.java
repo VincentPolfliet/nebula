@@ -26,7 +26,7 @@ import java.util.function.Consumer;
  *
  */
 
-public class RefuelShip200Response implements Consumer<Ship> {
+public class RefuelShip200Response {
     public static final String SERIALIZED_NAME_DATA = "data";
 
     private RefuelShip200ResponseData data;
@@ -91,11 +91,6 @@ public class RefuelShip200Response implements Consumer<Ship> {
             return "null";
         }
         return o.toString().replace("\n", "\n    ");
-    }
-
-    @Override
-    public void accept(Ship ship) {
-        ship.setFuel(this.getData().getFuel());
     }
 }
 

@@ -3,7 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.AutomationFactory;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 
 import java.util.Objects;
@@ -40,7 +40,7 @@ public final class ShipBehaviourRefLeaf implements ShipBehaviour {
     }
 
     @Override
-    public ShipBehaviourResult update(Ship ship) {
+    public ShipBehaviorResult update(Ship ship) {
         if (inner == null) {
             ShipBehaviourFactory factory = ref.apply(behaviourFactory);
             inner = factory.create();

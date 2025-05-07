@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.navigation;
 
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.WaitUntil;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.sdk.WaypointGenerator;
@@ -90,7 +90,7 @@ class NavigateBehaviourFactoryTest {
                 ));
 
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result).isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
@@ -147,7 +147,7 @@ class NavigateBehaviourFactoryTest {
                     .nav(expected.getNav())
                 ));
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result).isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
@@ -169,7 +169,7 @@ class NavigateBehaviourFactoryTest {
                     .capacity(100)
             );
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
         assertThat(result.hasFailedWithReason(FailureReason.FUEL_IS_EMPTY)).isTrue();
     }
 
@@ -206,7 +206,7 @@ class NavigateBehaviourFactoryTest {
                     .nav(ShipCloner.clone(ship).withNav(nav -> nav.withRoute(route -> route.arrival(arrival))).getNav())
                 ));
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.isWaitUntil()).isTrue();
         assertThat(result).isInstanceOfSatisfying(WaitUntil.class, waitUntil -> {
@@ -227,7 +227,7 @@ class NavigateBehaviourFactoryTest {
                         .status(ShipNavStatus.DOCKED)
             );
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.hasFailedWithReason(FailureReason.NOT_IN_ORBIT)).isTrue();
 
@@ -243,7 +243,7 @@ class NavigateBehaviourFactoryTest {
                         .status(ShipNavStatus.IN_ORBIT)
             );
 
-        ShipBehaviourResult result = sut.update(ship);
+        ShipBehaviorResult result = sut.update(ship);
 
         assertThat(result.hasFailedWithReason(FailureReason.ALREADY_AT_LOCATION)).isTrue();
 

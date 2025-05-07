@@ -2,14 +2,14 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.state;
 
 import org.assertj.core.api.AbstractAssert;
 
-public class ShipBehaviourResultAssert extends AbstractAssert<ShipBehaviourResultAssert, ShipBehaviourResult> {
+public class ShipBehaviourResultAssert extends AbstractAssert<ShipBehaviourResultAssert, ShipBehaviorResult> {
 
 
-    protected ShipBehaviourResultAssert(ShipBehaviourResult actual) {
+    protected ShipBehaviourResultAssert(ShipBehaviorResult actual) {
         super(actual, ShipBehaviourResultAssert.class);
     }
 
-    public static ShipBehaviourResultAssert assertThat(ShipBehaviourResult actual) {
+    public static ShipBehaviourResultAssert assertThat(ShipBehaviorResult actual) {
         return new ShipBehaviourResultAssert(actual);
     }
 
@@ -17,7 +17,7 @@ public class ShipBehaviourResultAssert extends AbstractAssert<ShipBehaviourResul
         isNotNull();
 
         if (!actual.isDone()) {
-            failWithMessage("Expected state <%s> but was <%s>", ShipBehaviourResult.done(), actual);
+            failWithMessage("Expected state <%s> but was <%s>", ShipBehaviorResult.done(), actual);
         }
 
         return this;
@@ -37,7 +37,7 @@ public class ShipBehaviourResultAssert extends AbstractAssert<ShipBehaviourResul
         isNotNull();
 
         if (!actual.isSuccess()) {
-            failWithMessage("Expected state <%s> but was <%s>", ShipBehaviourResult.success(), actual);
+            failWithMessage("Expected state <%s> but was <%s>", ShipBehaviorResult.success(), actual);
         }
 
         return this;

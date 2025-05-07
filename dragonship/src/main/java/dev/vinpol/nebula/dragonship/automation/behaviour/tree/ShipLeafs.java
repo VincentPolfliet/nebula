@@ -1,7 +1,7 @@
 package dev.vinpol.nebula.dragonship.automation.behaviour.tree;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.spacetraders.sdk.models.Ship;
 import dev.vinpol.spacetraders.sdk.models.Waypoint;
@@ -30,8 +30,8 @@ public class ShipLeafs {
             }
 
             @Override
-            public ShipBehaviourResult update(Ship ship) {
-                return innerPredicate.test(ship) ? ShipBehaviourResult.success() : ShipBehaviourResult.failure("check '%s' returned false".formatted(description));
+            public ShipBehaviorResult update(Ship ship) {
+                return innerPredicate.test(ship) ? ShipBehaviorResult.success() : ShipBehaviorResult.failure("check '%s' returned false".formatted(description));
             }
         };
     }

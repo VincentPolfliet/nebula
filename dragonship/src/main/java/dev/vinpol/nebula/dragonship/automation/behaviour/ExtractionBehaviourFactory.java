@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.ExtractResources201ResponseData;
 import dev.vinpol.spacetraders.sdk.models.ExtractResourcesRequest;
@@ -34,17 +34,17 @@ public class ExtractionBehaviourFactory implements ShipBehaviourFactory {
             }
 
             @Override
-            public ShipBehaviourResult update(Ship ship) {
+            public ShipBehaviorResult update(Ship ship) {
                 if (ship.isCargoFull()) {
-                    return ShipBehaviourResult.failure(FailureReason.CARGO_IS_FULL);
+                    return ShipBehaviorResult.failure(FailureReason.CARGO_IS_FULL);
                 }
 
                 if (ship.isNotInOrbit()) {
-                    return ShipBehaviourResult.failure(FailureReason.NOT_IN_ORBIT);
+                    return ShipBehaviorResult.failure(FailureReason.NOT_IN_ORBIT);
                 }
 
                 if (ship.hasActiveCooldown()) {
-                    return ShipBehaviourResult.failure(FailureReason.ACTIVE_COOLDOWN);
+                    return ShipBehaviorResult.failure(FailureReason.ACTIVE_COOLDOWN);
                 }
 
                 ExtractResources201ResponseData extractionResponse = fleetApi.extractResources(ship.getSymbol(), new ExtractResourcesRequest()).getData();
@@ -62,7 +62,7 @@ public class ExtractionBehaviourFactory implements ShipBehaviourFactory {
                 shipEventNotifier.setWaitUntilCooldown(ship.getSymbol(), expiration);
 
                 logger.info("Ship COOLDOWN until '{}' after EXTRACTION", expiration);
-                return ShipBehaviourResult.waitUntil(expiration);
+                return ShipBehaviorResult.waitUntil(expiration);
             }
         };
     }

@@ -24,11 +24,13 @@ public class TestHttpServer implements AutoCloseable {
 
     public void enqueue(Object object, int responseCode) {
         try {
+            String json = objectMapper.writeValueAsString(object);
+
             server.enqueue(
                 new MockResponse()
                     .setResponseCode(responseCode)
                     .setHeader("content-type", "application/json; charset=utf-8")
-                    .setBody(objectMapper.writeValueAsString(object))
+                    .setBody(json)
             );
         } catch (JsonProcessingException e) {
             throw new UncheckedIOException(e);

@@ -40,7 +40,7 @@ public class SynchronousCallAdapterFactory extends CallAdapter.Factory {
                     assert response.body() != null;
                     return response.body();
                 } else {
-                    throw new RuntimeException("Response not successful: " + response.code() + response.errorBody().string());
+                    throw new RuntimeException("Response not successful: " + response.code());
                 }
             } catch (IOException e) {
                 Request request = call.request();

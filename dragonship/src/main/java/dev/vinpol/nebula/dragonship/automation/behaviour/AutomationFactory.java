@@ -3,7 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.market.FindMarketAndSellBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.navigation.NavigateBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.sell.SellCargoBehaviourFactory;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourRefLeaf;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipBehaviourSequence;
 import dev.vinpol.nebula.dragonship.automation.behaviour.tree.ShipTreeBehaviour;
@@ -33,13 +33,13 @@ public interface AutomationFactory {
     default ShipBehaviour cooldownActive(OffsetDateTime expiration) {
         Objects.requireNonNull(expiration, "expiration");
 
-        return ShipBehaviour.ofResult(ShipBehaviourResult.waitUntil(expiration));
+        return ShipBehaviour.ofResult(ShipBehaviorResult.waitUntil(expiration));
     }
 
     default ShipBehaviour inTransit(OffsetDateTime arrival) {
         Objects.requireNonNull(arrival, "arrival");
 
-        return ShipBehaviour.ofResult(ShipBehaviourResult.waitUntil(arrival));
+        return ShipBehaviour.ofResult(ShipBehaviorResult.waitUntil(arrival));
     }
 
     default ShipTreeBehaviour treeOf(ShipBehaviour... leaves) {

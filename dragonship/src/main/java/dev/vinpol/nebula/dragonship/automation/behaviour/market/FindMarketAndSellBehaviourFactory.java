@@ -4,7 +4,7 @@ import dev.vinpol.nebula.dragonship.automation.behaviour.AutomationFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviourFactory;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.geo.GridXY;
 import dev.vinpol.nebula.dragonship.sdk.SystemSymbol;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
@@ -45,7 +45,7 @@ public class FindMarketAndSellBehaviourFactory implements ShipBehaviourFactory {
     public ShipBehaviour create() {
         return ShipBehaviour.ofFunction((ship) -> {
             if (ship.getCargo().isEmpty()) {
-                return ShipBehaviour.ofResult(ShipBehaviourResult.failure(FailureReason.NO_CARGO_TO_SELL));
+                return ShipBehaviour.ofResult(ShipBehaviorResult.failure(FailureReason.NO_CARGO_TO_SELL));
             }
 
             Waypoint currentLocation = systemsApi.getWaypoint(ship.getNav().getSystemSymbol(), ship.getNav().getWaypointSymbol()).getData();
@@ -80,7 +80,7 @@ public class FindMarketAndSellBehaviourFactory implements ShipBehaviourFactory {
                 );
 
             if (bestMarketOptional.isEmpty()) {
-                return ShipBehaviour.ofResult(ShipBehaviourResult.failure(FailureReason.NO_WAYPOINTS_FOUND_IN_CURRENT_SYSTEM));
+                return ShipBehaviour.ofResult(ShipBehaviorResult.failure(FailureReason.NO_WAYPOINTS_FOUND_IN_CURRENT_SYSTEM));
             }
 
             WaypointMarketScore bestMarket = bestMarketOptional.get();
@@ -119,7 +119,7 @@ public class FindMarketAndSellBehaviourFactory implements ShipBehaviourFactory {
     private @NotNull StreamEx<Waypoint> streamMarketsInSystem(SystemSymbol currentLocation) {
         var innerStream = PageIterator.stream(PageIterator.INITIAL_PAGE, PageIterator.MAX_SIZE, (req -> {
             GetSystemWaypoints200Response response = systemsApi.getSystemWaypoints(currentLocation.system(), req.page(), req.size(), null, WaypointTraitSymbol.MARKETPLACE);
-            return new Page<>(response.getData(), response.getMeta().getTotal());
+            return new Page<>(response.getData(), response.getMeta().total());
         }));
 
         return StreamEx.of(innerStream);

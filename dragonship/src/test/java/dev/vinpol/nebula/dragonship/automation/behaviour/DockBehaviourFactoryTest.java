@@ -3,7 +3,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour;
 import dev.vinpol.nebula.dragonship.automation.ShipCloner;
 import dev.vinpol.nebula.dragonship.automation.behaviour.docking.DockShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
 import dev.vinpol.spacetraders.sdk.models.*;
@@ -31,7 +31,7 @@ class DockBehaviourFactoryTest {
         ShipNav nav = dockedShip.getNav();
         nav.status(ShipNavStatus.DOCKED);
 
-        ShipBehaviourResult result = sut.update(dockedShip);
+        ShipBehaviorResult result = sut.update(dockedShip);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.DOCKED)).isTrue();
@@ -44,7 +44,7 @@ class DockBehaviourFactoryTest {
         ShipNav nav = transitShip.getNav();
         nav.status(ShipNavStatus.IN_TRANSIT);
 
-        ShipBehaviourResult result = sut.update(transitShip);
+        ShipBehaviorResult result = sut.update(transitShip);
 
         assertThat(result.isFailure()).isTrue();
         assertThat(result.hasFailedWithReason(FailureReason.IN_TRANSIT)).isTrue();
@@ -65,7 +65,7 @@ class DockBehaviourFactoryTest {
                 .data(new ShipNavModifiedResponseData().nav(dockedNav))
         );
 
-        ShipBehaviourResult result = sut.update(inOrbitShip);
+        ShipBehaviorResult result = sut.update(inOrbitShip);
 
         assertThat(result.isDone()).isTrue();
         assertThat(inOrbitShip.getNav()).isEqualTo(dockedNav);

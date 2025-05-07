@@ -20,7 +20,7 @@ public class ManifestLoaderImpl implements ManifestLoader {
     @Override
     public Manifest load() {
         if (env.isDev()) {
-            return new DevManifest(env.getBaseUrl());
+            return new RemoteManifest(env.getBaseUrl());
         }
 
         if (manifestPath == null) {

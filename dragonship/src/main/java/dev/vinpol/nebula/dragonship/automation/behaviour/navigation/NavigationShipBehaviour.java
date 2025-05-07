@@ -2,7 +2,7 @@ package dev.vinpol.nebula.dragonship.automation.behaviour.navigation;
 
 import dev.vinpol.nebula.dragonship.automation.behaviour.ShipBehaviour;
 import dev.vinpol.nebula.dragonship.automation.behaviour.state.FailureReason;
-import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviourResult;
+import dev.vinpol.nebula.dragonship.automation.behaviour.state.ShipBehaviorResult;
 import dev.vinpol.nebula.dragonship.automation.events.ShipEventNotifier;
 import dev.vinpol.nebula.dragonship.sdk.WaypointSymbol;
 import dev.vinpol.spacetraders.sdk.api.FleetApi;
@@ -39,21 +39,21 @@ class NavigationShipBehaviour implements ShipBehaviour {
     }
 
     @Override
-    public ShipBehaviourResult update(Ship ship) {
+    public ShipBehaviorResult update(Ship ship) {
         if (ship.isFuelEmpty() && ship.getFuel().isNotInfinite()) {
             logger.trace("fuel is empty");
-            return ShipBehaviourResult.failure(FailureReason.FUEL_IS_EMPTY);
+            return ShipBehaviorResult.failure(FailureReason.FUEL_IS_EMPTY);
         }
 
         if (ship.isNotInOrbit()) {
             logger.trace("ship is not in orbit");
-            return ShipBehaviourResult.failure(FailureReason.NOT_IN_ORBIT);
+            return ShipBehaviorResult.failure(FailureReason.NOT_IN_ORBIT);
         }
 
         String waypointSymbolString = waypointSymbol.waypoint();
         if (ship.isAtLocation(waypointSymbolString)) {
             logger.trace("ship is already at location");
-            return ShipBehaviourResult.failure(FailureReason.ALREADY_AT_LOCATION);
+            return ShipBehaviorResult.failure(FailureReason.ALREADY_AT_LOCATION);
         }
 
         WaypointSymbol currentLocationWaypointSymbol = WaypointSymbol.tryParse(ship.getNav().getWaypointSymbol());
@@ -76,7 +76,7 @@ class NavigationShipBehaviour implements ShipBehaviour {
         ship.setFuel(navigationResponse.getFuel());
         ship.setNav(navigationResponse.getNav());
 
-        if (ship.isFuelEmpty() || ship.considerFuelEmpty(0.2)) {
+        if (ship.isFuelNotInfinite() && (ship.isFuelEmpty() || ship.considerFuelEmpty(0.2))) {
             shipEventNotifier.setFuelIsAlmostEmpty(ship.getSymbol());
         }
 
@@ -84,6 +84,6 @@ class NavigationShipBehaviour implements ShipBehaviour {
 
         OffsetDateTime arrival = currentRoute.getArrival();
         shipEventNotifier.setNavigatingTo(ship.getSymbol(), waypointSymbol, currentRoute.getArrival());
-        return ShipBehaviourResult.waitUntil(arrival);
+        return ShipBehaviorResult.waitUntil(arrival);
     }
 }
